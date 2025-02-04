@@ -1,7 +1,8 @@
 # The Placement Plus 
 
 <br>
-#The Placement Plus is the app which helps students to get connected with there aluminis , with the companies for internship and placement related info and get to know about the packages, previous interview questions and topics, get useful insight from the experience aluminis.
+
+## The Placement Plus is the app which helps students to get connected with there aluminis , with the companies for internship and placement related info and get to know about the packages, previous interview questions and topics, get useful insight from the experience aluminis.
 
 <br>
 
