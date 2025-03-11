@@ -16,6 +16,37 @@ const alumniSchema = new Schema(
         password: {
             type: String,
             required: true
+        },
+        linkedInId: {
+            type: String,
+            required: true,
+            unique: true
+        },
+        previousCompany: [{
+            name: {
+                Type: String,
+                trim: true
+            },
+            Position: {
+                Type: String
+            },
+            Duration: {
+                Type: Number
+            },
+            Experience: {
+                Type: String
+            }
+        }],
+        currentCompany: {
+            name: {
+                Type: String,
+                trim: true,
+                required: true
+            },
+            Position: {
+                Type: String,
+                required: true
+            }
         }
     }
 )
