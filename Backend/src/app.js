@@ -20,6 +20,8 @@ import upcominCompanyRouter from './Routes/upcomingCompany.routes.js'
 import placementRouter from './Routes/placement.routes.js'
 import placementStatisticsRouter from './Routes/placementStatistics.routes.js'
 import questionRouter from './Routes/question.routes.js'
+import alumniRouter from './Routes/alumni.routes.js'
+import commentRouter from './Routes/comment.routes.js'
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/admins", adminRouter)
@@ -27,6 +29,9 @@ app.use("/api/v1/companies", upcominCompanyRouter)
 app.use("/api/v1/placements", placementRouter)
 app.use("/api/v1/placement-statistics", placementStatisticsRouter)
 app.use("/api/v1/questions", questionRouter)
+app.use("/api/v1/alumnis", alumniRouter)
+app.use("/api/v1/comments", commentRouter)
+
 
 
 export { app }
