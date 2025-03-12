@@ -4,6 +4,7 @@ import { uploadPdfOnCloudinary } from '../Utils/cloudinary.js'
 import { User } from '../Models/user.model.js'
 import asyncHandler from '../Utils/AsyncHandler.js'
 import bcrypt from 'bcrypt'
+import { uploadResumeOnAppwrite, getResumeFromAppwrite } from '../Utils/appwrite.js'
 
 const generateAccesandRefreshToken = async (userId) => {
     try {
@@ -48,7 +49,7 @@ const registerUser = asyncHandler(async (req, res) => {
     if (!resumeLocalPath)
         throw new ApiError(400, "Resume is required")
 
-    const resume = await uploadPdfOnCloudinary(resumeLocalPath)
+    const resume = await uploadResumeOnAppwrite(resumeLocalPath)
     if (!resume)
         throw new ApiError(500, "Something went wrong while uploading resume")
 
@@ -61,7 +62,7 @@ const registerUser = asyncHandler(async (req, res) => {
         CGPA,
         semester,
         branch,
-        resumeLink: resume.secure_url,
+        resumeLink: resume.$id,
         batch
     })
 
@@ -168,13 +169,13 @@ const uploadResume = asyncHandler(async (req, res) => {
     if (!resumeLocalPath)
         throw new ApiError(400, "Resume is required")
 
-    const resume = await uploadPdfOnCloudinary(resumeLocalPath)
+    const resume = await uploadResumeOnAppwrite(resumeLocalPath, req.user.name)
     if (!resume)
         throw new ApiError(500, "Something went wrong while uploading resume")
 
     const user = await User.findByIdAndUpdate(req.user._id,
         {
-            resumeLink: resume.secure_url
+            resumeLink: resume.$id
         },
         { new: true }
     ).select(" -password -refreshToken")
@@ -220,6 +221,20 @@ const updateDeatils = asyncHandler(async (req, res) => {
     )
 })
 
+const viewResume = asyncHandler(async (req, res) => {
+    const resume = await getResumeFromAppwrite(req.user.resumeLink)
+    if (!resume)
+        throw new ApiError(500, "Something went wrong while fetching resume")
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            resume,
+            "resume fetched successfully"
+        )
+    )
+})
+
 export {
     registerUser,
     loginUser,
@@ -227,5 +242,6 @@ export {
     getCurrentUser,
     changePassword,
     uploadResume,
-    updateDeatils
+    updateDeatils,
+    viewResume
 }
