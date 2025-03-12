@@ -22,6 +22,9 @@ import placementStatisticsRouter from './Routes/placementStatistics.routes.js'
 import questionRouter from './Routes/question.routes.js'
 import alumniRouter from './Routes/alumni.routes.js'
 import commentRouter from './Routes/comment.routes.js'
+import companyReviewRouter from './Routes/companyReview.routes.js'
+import resumeRouter from './Routes/resume.routes.js'
+
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/admins", adminRouter)
@@ -31,6 +34,8 @@ app.use("/api/v1/placement-statistics", placementStatisticsRouter)
 app.use("/api/v1/questions", questionRouter)
 app.use("/api/v1/alumnis", alumniRouter)
 app.use("/api/v1/comments", commentRouter)
+app.use("/api/v1/company-review", companyReviewRouter)
+app.use("/api/v1/resume", resumeRouter)
 
 
 
