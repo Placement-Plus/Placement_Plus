@@ -24,27 +24,26 @@ const alumniSchema = new Schema(
         },
         previousCompany: [{
             name: {
-                Type: String,
+                type: String,
                 trim: true
             },
             Position: {
-                Type: String
+                type: String
             },
             Duration: {
-                Type: Number
+                type: Number
             },
             Experience: {
-                Type: String
+                type: String
             }
         }],
         currentCompany: {
             name: {
-                Type: String,
-                trim: true,
+                type: String,
                 required: true
             },
             Position: {
-                Type: String,
+                type: String,
                 required: true
             }
         }
