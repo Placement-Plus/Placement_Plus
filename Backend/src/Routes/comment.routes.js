@@ -4,9 +4,10 @@ import { addComment, deleteComment, updateComment } from "../Controllers/comment
 
 const router = Router()
 
+router.use(verifyAlumni)
 router.route("/add-comment").post(addComment)
-router.route("/update-comment/c/:commentId").patch(verifyAlumni, updateComment)
-router.route("/delete-comment/c/:commentId").delete(verifyAdmin, deleteComment)
+router.route("/update-comment/c/:commentId").patch(updateComment)
+router.route("/delete-comment/c/:commentId").delete(deleteComment)
 
 
 export default router
