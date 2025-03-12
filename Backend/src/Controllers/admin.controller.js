@@ -1,7 +1,15 @@
 import { Admin } from "../Models/admin.model.js";
+import { PlacementStatistics } from "../Models/placementStatistics.model.js"
 import ApiError from "../Utils/ApiError.js";
 import ApiResponse from "../Utils/ApiResponse.js";
 import asyncHandler from "../Utils/AsyncHandler.js";
+import PDFDocument from 'pdfkit';
+import fs from 'fs';
+import path from 'path';
+import { dirname } from 'path';
+import { fileURLToPath } from 'url';
+import ExcelJS from 'exceljs';
+
 
 const generateAccessandRefreshToken = async (adminId) => {
     const admin = await Admin.findById(adminId)
@@ -93,8 +101,60 @@ const logoutAdmin = asyncHandler(async (req, res) => {
 
 })
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
+const exportToPDF = asyncHandler(async (req, res) => {
+    const data = await PlacementStatistics.find();
+
+    const doc = new PDFDocument();
+    const filePath = path.join(__dirname, `placement_stats_${Date.now()}.pdf`);
+    const writeStream = fs.createWriteStream(filePath);
+
+    doc.pipe(writeStream);
+    doc.fontSize(16).text("Placement Statistics Report", { align: 'center' });
+    doc.moveDown();
+
+    data.forEach((item, index) => {
+        doc.fontSize(12).text(
+            `Branch: ${item.branch}, Placed Students: ${item.placedStudents}, Avg Package: ${item.avgPackage} LPA`
+        );
+        doc.moveDown();
+    });
+
+    doc.end();
+
+    writeStream.on('finish', () => {
+        res.download(filePath, () => fs.unlinkSync(filePath));
+    });
+});
+
+const exportToExcel = asyncHandler(async (req, res) => {
+    const data = await PlacementStatistics.find();
+
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet("Placement Statistics");
+
+    worksheet.columns = [
+        { header: "Branch", key: "branch", width: 15 },
+        { header: "Placed Students", key: "placedStudents", width: 20 },
+        { header: "Average Package", key: "avgPackage", width: 20 },
+        { header: "Median Package", key: "medianPackage", width: 20 },
+        { header: "Max Package", key: "maxPackage", width: 20 },
+        { header: "Total Students", key: "totalStudents", width: 15 }
+    ];
+
+    data.forEach((item) => worksheet.addRow(item));
+
+    const filePath = path.join(__dirname, `placement_stats_${Date.now()}.xlsx`);
+    await workbook.xlsx.writeFile(filePath);
+
+    res.download(filePath, () => fs.unlinkSync(filePath));
+});
+
 export {
     registerAdmin,
     loginAdmin,
     logoutAdmin,
+    exportToPDF,
+    exportToExcel
 }
