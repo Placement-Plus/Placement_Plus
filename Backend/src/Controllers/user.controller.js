@@ -1,6 +1,5 @@
 import ApiError from '../Utils/ApiError.js'
 import ApiResponse from '../Utils/ApiResponse.js'
-import { uploadPdfOnCloudinary } from '../Utils/cloudinary.js'
 import { User } from '../Models/user.model.js'
 import asyncHandler from '../Utils/AsyncHandler.js'
 import bcrypt from 'bcrypt'
@@ -24,9 +23,9 @@ const generateAccesandRefreshToken = async (userId) => {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, rollNo, password, mobileNo, branch, semester, CGPA, batch } = req.body
+    const { name, email, rollNo, password, mobileNo, branch, semester, CGPA, batch, course } = req.body
 
-    if ([name, email, rollNo, password, mobileNo, branch, semester, CGPA, batch].some((field) => !field))
+    if ([name, email, rollNo, password, mobileNo, branch, semester, CGPA, batch, course].some((field) => !field))
         throw new ApiError(400, "All fields are required")
 
     if (!email?.includes('@nitdelhi.ac.in'))
@@ -46,6 +45,7 @@ const registerUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "User with same email or roll number already exists")
 
     const resumeLocalPath = req.files?.resume[0]?.path
+    // console.log("Files:", req.files);
     if (!resumeLocalPath)
         throw new ApiError(400, "Resume is required")
 
@@ -63,7 +63,8 @@ const registerUser = asyncHandler(async (req, res) => {
         semester,
         branch,
         resumeLink: resume.$id,
-        batch
+        batch,
+        course
     })
 
     const { refreshToken, accessToken } = await generateAccesandRefreshToken(user._id)
