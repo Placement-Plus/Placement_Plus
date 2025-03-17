@@ -77,6 +77,11 @@ const userSchema = new Schema(
             required: true,
             unique: true
         },
+        course: {
+            type: String,
+            enum: ["B.Tech", "M.Tech"],
+            required: true
+        },
         refreshToken: {
             type: String
         },
