@@ -7,6 +7,7 @@ const router = Router()
 
 router.route("/register").post(
     upload.fields([{ name: "resume", maxCount: 1 }]),
+    // upload.none(),
     registerUser
 );
 
@@ -14,7 +15,7 @@ router.route("/login").post(loginUser)
 router.route("/logout").post(verifyJWT, logoutUser)
 router.route("/get-user").get(verifyJWT, getCurrentUser)
 router.route("/change-password").patch(verifyJWT, changePassword)
-router.route("/upload-resume").patch(verifyJWT, upload.fields([{ name: "resume", maxCount: 1 }]), uploadResume)
+router.route("/upload-resume").patch(upload.fields([{ name: "resume", maxCount: 1 }]), uploadResume)
 router.route("/update-details").patch(verifyJWT, updateDeatils)
 router.route("/view-resume").get(verifyJWT, viewResume)
 
