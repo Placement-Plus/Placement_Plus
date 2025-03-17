@@ -473,6 +473,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 15,
   },
   dropdownList: {
+    position: "absolute",
     backgroundColor: "#1C1235",
     borderWidth: 1,
     borderColor: "#2E2257",

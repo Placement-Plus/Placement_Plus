@@ -9,4 +9,4 @@ const Tabslayout = () => {
   )
 }
 
-export default Tabslayout
+export default Tabslayout``
