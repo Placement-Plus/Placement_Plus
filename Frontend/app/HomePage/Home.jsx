@@ -1,84 +1,29 @@
-import React, { useState, useRef } from "react";
-import { View, Text, TextInput, Pressable, Image, Dimensions, Animated } from "react-native";
-import { FontAwesome, Entypo, Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
-import pastYearCompany from "@/assets/images/pastyearcompany.png";
-import placementStat from "@/assets/images/placementstat.png";
-import alumni from "@/assets/images/alumni.png";
-import questionAskByCompany from "@/assets/images/questionaskbycompany.png";
-import upcomingCompany from "@/assets/images/upcomingcompany.png";
-import branchStat from "@/assets/images/branchstat.png";
-import placementPolicies from "@/assets/images/placementpolicies.png";
-import uploadResume from "@/assets/images/uploadresume.png";
-import chatbot from "@/assets/images/chatbot.png";
+import React from "react";
+import { View, Text, StyleSheet, ScrollView, Image } from "react-native";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 
-const images = [
-  pastYearCompany,
-  placementStat,
-  alumni,
-  questionAskByCompany,
-  upcomingCompany,
-  branchStat,
-  placementPolicies,
-  uploadResume,
-  chatbot,
+// Import company logos
+import microsoftLogo from "@/assets/images/microsoft.png";
+import appleLogo from "@/assets/images/apple.png";
+import googleLogo from "@/assets/images/google.png";
+import amazonLogo from "@/assets/images/amazon.png";
+import netflixLogo from "@/assets/images/netflix.png";
+import metaLogo from "@/assets/images/meta.png";
+import uberLogo from "@/assets/images/uber.png";
+import nvidiaLogo from "@/assets/images/nvidia.png";
+
+const companies = [
+  { name: "Microsoft", logo: microsoftLogo },
+  { name: "Apple", logo: appleLogo },
+  { name: "Google", logo: googleLogo },
+  { name: "Amazon", logo: amazonLogo },
+  { name: "Netflix", logo: netflixLogo },
+  { name: "Meta", logo: metaLogo },
+  { name: "Uber", logo: uberLogo },
+  { name: "Nvidia", logo: nvidiaLogo },
 ];
 
-const { width, height } = Dimensions.get("window");
-
-const PlacementPlus = () => {
-  const scaleAnims = useRef(images.map(() => new Animated.Value(1))).current; // Array of Animated values
-
-  const handlePressIn = (index) => {
-    Animated.spring(scaleAnims[index], {
-      toValue: 1.2, 
-      friction: 3, 
-      useNativeDriver: true, 
-    }).start();
-  };
-
-  const handlePressOut = (index) => {
-    Animated.spring(scaleAnims[index], {
-      toValue: 1,
-      friction: 3, 
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const handlePress = (index) => {
-    switch (index) {
-      case 0:
-        router.push("/screens/PastYearCompanies");
-        break;
-      case 1:
-        router.push("/screens/CurrentYearPlacement");
-        break;
-      case 2:
-        router.push("/screens/ConnectWithAlumni");
-        break;
-      case 3:
-        router.push("/screens/QuestionAskByCompanies");
-        break;
-      case 4:
-        router.push("/screens/UpcomingCompanies");
-        break;
-      case 5:
-        router.push("/screens/BranchWisePlacement");
-        break;
-      case 6:
-        router.push("/screens/PlacementPolicies");
-        break;
-      case 7:
-        router.push("/screens/UploadResume");
-        break;
-      case 8:
-        router.push("/screens/ChatBot");
-        break;
-      default:
-        break;
-    }
-  };
-
+const PastYearCompanies = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
@@ -90,71 +35,35 @@ const PlacementPlus = () => {
         <Ionicons name="person-circle" size={35} color="#fff" />
       </View>
 
-      {/* Search Bar */}
-      <View style={styles.searchBar}>
-        <FontAwesome name="search" size={20} color="#a100f2" style={styles.searchIcon} />
-        <TextInput
-          placeholder="Search..."
-          style={styles.searchInput}
-          placeholderTextColor="#a100f2" 
-        />
-      </View>
-
-      {/* Grid Layout */}
-      <View style={styles.gridContainer}>
-        {[
-          "Past Year Companies",
-          "Current year Placement",
-          "Connect with Alumni",
-          "Question Ask by Companies",
-          "Upcoming Companies",
-          "Branch Wise Placement",
-          "Placement Policies",
-          "Upload Resume",
-          "Chat Bot",
-        ].map((item, index) => (
-          <Pressable
-            key={index}
-            onPressIn={() => handlePressIn(index)} 
-            onPressOut={() => handlePressOut(index)}
-            onPress={() => handlePress(index)}
-          >
-            <Animated.View
-              style={[
-                styles.gridItem,
-                { transform: [{ scale: scaleAnims[index] }] }, 
-              ]}
-            >
-              <View style={styles.gridIconContainer}>
-                <Image
-                  source={images[index]}
-                  style={styles.gridIcon}
-                />
-              </View>
-              <Text style={styles.gridText}>{item}</Text>
-            </Animated.View>
-          </Pressable>
-        ))}
-      </View>
-
-      {/* Social Media Icons */}
-      <View style={styles.socialIconsContainer}>
-        <FontAwesome name="envelope" size={24} color="#a100f2" style={styles.socialIcon} />
-        <Entypo name="phone" size={24} color="#a100f2" style={styles.socialIcon} />
-        <FontAwesome name="instagram" size={24} color="#a100f2" style={styles.socialIcon} />
-      </View>
+      {/* Content */}
+      <ScrollView contentContainerStyle={styles.content}>
+        <Text style={styles.title}>Past Year Companies</Text>
+        <View style={styles.companyList}>
+          {companies.map((company, index) => (
+            <View key={index} style={styles.companyItem}>
+              <Image source={company.logo} style={styles.companyLogo} />
+              <Text style={styles.companyText}>{company.name}</Text>
+            </View>
+          ))}
+        </View>
+      </ScrollView>
     </View>
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1a012c",
-    padding: 10,
+    padding: 4,
+  },
+  header: {
+    flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-  
+    width: "90%",
+    marginTop: 20,
+    marginBottom: 25,
   },
   logoContainer: {
     flexDirection: "row",
@@ -172,79 +81,47 @@ const styles = {
     fontWeight: "bold",
     fontFamily: "sans-serif",
   },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  content: {
+    flexGrow: 1,
     alignItems: "center",
-    width: "90%",
-    marginTop: 20,
-    marginBottom: 25,
+    paddingTop: 20,
+    fontStyle: "italic",
+    fontFamily: "sans-serif",
+    color: "#fff",          
+
   },
-  searchBar: {
+  title: {
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "bold",
+    marginBottom: 20,
+  },
+  companyList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    width: "90%",
+  },
+  companyItem: {
+    width: "48%", 
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
-    borderRadius: 20,
-    padding: 10,
-    width: "90%",
-    marginTop: 20,
-    marginBottom: 20,
+    borderRadius: 10,
+    padding: 15,
+    marginBottom: 10,
   },
-  searchIcon: {
-    marginRight: 7,
+  companyLogo: {
+    width: 40,
+    height: 40,
+    resizeMode: "contain",
+    marginRight: 15,
   },
-  searchInput: {
-    flex: 1,
-    color: "#a100f2",
-    fontWeight: "bold",
+  companyText: {
+    color: "#1a012c",
     fontSize: 16,
-    borderWidth: 0, 
-    outlineStyle: "none", 
+    fontWeight: "bold",
   },
-  gridContainer: {
-    flex: 1,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    alignItems: "center",
-    width: "100%",
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  gridItem: {
-    width: 100, 
-    alignItems: "center",
-    marginBottom: 20,
-    marginHorizontal: 6,
-  },
-  gridIconContainer: {
-    width: 83,
-    height: 83,
-    backgroundColor: "white",
-    borderRadius: 7,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  gridIcon: {
-    width: 75,
-    height: 75,
-  },
-  gridText: {
-    color: "#fff",
-    textAlign: "center",
-    fontFamily: "sans-serif",
-    marginTop: 5,
-  },
-  socialIconsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    width: "100%",
-    marginBottom: 5,
-  },
-  socialIcon: {
-    marginHorizontal: 10,
-    color: "#fff",
-  },
-};
+});
 
-export default PlacementPlus;
+export default PastYearCompanies;

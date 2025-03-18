@@ -139,6 +139,7 @@ const LoginScreen = () => {
             <Text style={styles.title}>
               Welcome <Text style={styles.highlight}>Back!</Text>
             </Text>
+
             <View style={[
               styles.inputContainer,
               touchedFields.email && errors.email ? styles.inputError : null
@@ -162,10 +163,6 @@ const LoginScreen = () => {
             {touchedFields.email && errors.email && (
               <Text style={styles.errorText}>{errors.email}</Text>
             )}
-        {/* Log In Button
-        <Pressable style={styles.button} onPress={() => router.push("/HomePage/Home")}>
-          <Text style={styles.buttonText}></Text>
-        </Pressable> */}
 
             <View style={[
               styles.inputContainer,
@@ -231,10 +228,6 @@ const LoginScreen = () => {
                 <Text style={styles.highlight}> Sign up</Text>
               </Link>
             </Text>
-             {/* Log In Button */}
-        <Pressable style={styles.button} onPress={() => router.push("/HomePage/Home")}>
-          <Text style={styles.buttonText}>Home</Text>
-        </Pressable>
           </View>
         </KeyboardAvoidingView>
       </LinearGradient>

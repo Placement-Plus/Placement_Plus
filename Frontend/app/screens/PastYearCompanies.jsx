@@ -21,27 +21,6 @@ const companies = [
   { name: "Meta", logo: metaLogo },
   { name: "Uber", logo: uberLogo },
   { name: "Nvidia", logo: nvidiaLogo },
-  { name: "Apple", logo: appleLogo },
-  { name: "Google", logo: googleLogo },
-  { name: "Amazon", logo: amazonLogo },
-  { name: "Netflix", logo: netflixLogo },
-  { name: "Meta", logo: metaLogo },
-  { name: "Uber", logo: uberLogo },
-  { name: "Nvidia", logo: nvidiaLogo },
-  { name: "Apple", logo: appleLogo },
-  { name: "Google", logo: googleLogo },
-  { name: "Amazon", logo: amazonLogo },
-  { name: "Netflix", logo: netflixLogo },
-  { name: "Meta", logo: metaLogo },
-  { name: "Uber", logo: uberLogo },
-  { name: "Nvidia", logo: nvidiaLogo },
-  { name: "Apple", logo: appleLogo },
-  { name: "Google", logo: googleLogo },
-  { name: "Amazon", logo: amazonLogo },
-  { name: "Netflix", logo: netflixLogo },
-  { name: "Meta", logo: metaLogo },
-  { name: "Uber", logo: uberLogo },
-  { name: "Nvidia", logo: nvidiaLogo },
 ];
 
 const PastYearCompanies = () => {
@@ -82,10 +61,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    width: "100%",
+    width: "90%",
     marginTop: 20,
     marginBottom: 25,
-    paddingHorizontal: 15,
   },
   logoContainer: {
     flexDirection: "row",
@@ -106,26 +84,18 @@ const styles = StyleSheet.create({
   content: {
     flexGrow: 1,
     alignItems: "center",
-    paddingTop: 10,
-    marginBottom: 20,
+    paddingTop: 20,
   },
   title: {
     color: "#C92EFF",
-    fontSize: 30,
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 35,
-    fontFamily: "sans-serif",
-
-
+    marginBottom: 20,
   },
   companyList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
     width: "90%",
   },
   companyItem: {
-    width: "48%", 
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#fff",
@@ -134,10 +104,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   companyLogo: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
     resizeMode: "contain",
-    marginRight: 10,
+    marginRight: 15,
   },
   companyText: {
     color: "#1a012c",

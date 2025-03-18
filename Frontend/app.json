@@ -17,10 +17,6 @@
         "backgroundColor": "#ffffff"
       }
     },
-    "extra": {
-      "EXPO_PUBLIC_IP_ADDRESS": "192.168.1.100",
-      "EXPO_PUBLIC_API_URL": "http://192.168.1.100:5000/api/v1"
-    },
     "web": {
       "bundler": "metro",
       "output": "static",
