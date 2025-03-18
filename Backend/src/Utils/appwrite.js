@@ -33,9 +33,42 @@ const uploadResumeOnAppwrite = async (filePath, username) => {
     }
 };
 
+const uploadFileOnAppwrite = async (filePath, subjectName) => {
+    try {
+        if (!fs.existsSync(filePath)) {
+            throw new ApiError(404, "Resume does not exist");
+        }
+
+        const response = await storage.createFile(
+            process.env.APPWRITE_STUDY_MATERIAL_BUCKET_ID,
+            ID.unique(),
+            InputFile.fromPath(filePath, `${subjectName}.pdf`),
+        );
+
+        console.log("Upload Success:", response);
+        return response;
+    } catch (error) {
+        console.error("Appwrite Upload Error:", error.message);
+        return null;
+    } finally {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    }
+};
+
 const getResumeFromAppwrite = async (fileId) => {
     try {
         return storage.getFileView(process.env.APPWRITE_BUCKET_ID, fileId);
+    } catch (error) {
+        console.error("Appwrite Error:", error);
+        return null;
+    }
+};
+
+const getFileFromAppwrite = async (fileId) => {
+    try {
+        return storage.getFileView(process.env.APPWRITE_STUDY_MATERIAL_BUCKET_ID, fileId);
     } catch (error) {
         console.error("Appwrite Error:", error);
         return null;
@@ -51,4 +84,4 @@ const downloadResume = async (fileId) => {
     }
 }
 
-export { uploadResumeOnAppwrite, getResumeFromAppwrite, downloadResume };
+export { uploadResumeOnAppwrite, getFileFromAppwrite, downloadResume, uploadFileOnAppwrite, getResumeFromAppwrite };
