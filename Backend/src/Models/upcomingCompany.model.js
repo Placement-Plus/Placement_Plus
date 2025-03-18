@@ -61,6 +61,18 @@ const upcomingCompanySchema = new mongoose.Schema({
     extraDetails: {
         type: String
     },
+    pocDetails: {
+        name: {
+            type: String,
+            required: true
+        },
+        contactNo: {
+            type: Number,
+            required: true,
+            maxLength: 10,
+            minLength: 10
+        }
+    },
     appliedStudents: [{
         studentId: {
             type: mongoose.Schema.Types.ObjectId,
