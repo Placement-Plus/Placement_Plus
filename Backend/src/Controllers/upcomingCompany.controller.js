@@ -20,7 +20,7 @@ const getSlab = (lpa) => {
 
 const checkEligibility = async (companyId, user) => {
     const company = await UpcomingCompany.findById(companyId)
-    
+
     if (!company) throw new ApiError(404, "Company not found")
 
     if ((company.opportunityType === "Internship" || company.opportunityType === "Internship + Full Time") && !user.internshipEligible)
@@ -41,10 +41,19 @@ const checkEligibility = async (companyId, user) => {
 }
 
 const addCompany = asyncHandler(async (req, res) => {
-    const { companyName, eligibleBranches, eligibleBatch, ctc, stipend, role, hiringProcess, cgpaCriteria, jobLocation, schedule, mode, opportunityType, extraDetails } = req.body
+    const { companyName, eligibleBranches, eligibleBatch, ctc, stipend, role, hiringProcess, cgpaCriteria, jobLocation, schedule, mode, opportunityType, extraDetails, pocName, pocContactNo } = req.body
 
-    if (!companyName || !eligibleBranches || !eligibleBatch || !(ctc || stipend) || !role || !hiringProcess || !cgpaCriteria || !jobLocation || !schedule || !mode || !opportunityType)
+    if (!companyName || !eligibleBranches || !eligibleBatch || !(ctc || stipend) || !role || !hiringProcess || !cgpaCriteria || !jobLocation || !schedule || !mode || !opportunityType || !pocContactNo || !pocName)
         throw new ApiError(400, "All details are required")
+
+    if (String(pocContactNo).trim().length !== 10) {
+        throw new ApiError(400, "Contact No must be of 10 digits");
+    }
+
+    const pocDetails = {
+        name: pocName,
+        contactNo: pocContactNo
+    }
 
     const company = await UpcomingCompany.create(
         {
@@ -60,7 +69,8 @@ const addCompany = asyncHandler(async (req, res) => {
             schedule,
             mode,
             extraDetails,
-            opportunityType
+            opportunityType,
+            pocDetails
         }
     )
 
