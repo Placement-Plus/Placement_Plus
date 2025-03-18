@@ -105,6 +105,8 @@ const LoginScreen = () => {
 
       console.log('Login successful:', result);
 
+      router.replace("/HomePage/Home")
+
     } catch (error) {
       Alert.alert(
         "Login Failed",
