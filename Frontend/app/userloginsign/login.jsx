@@ -22,7 +22,6 @@ const LoginScreen = () => {
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState({});
 
@@ -194,25 +193,6 @@ const LoginScreen = () => {
             {touchedFields.password && errors.password && (
               <Text style={styles.errorText}>{errors.password}</Text>
             )}
-
-            <Pressable
-              style={styles.rememberContainer}
-              onPress={() => setRememberMe(!rememberMe)}
-            >
-              <View style={styles.checkbox}>
-                {rememberMe ? (
-                  <LinearGradient
-                    colors={['#C92EFF', '#8E24F8']}
-                    style={styles.checkedBox}
-                  >
-                    <Feather name="check" size={14} color="white" />
-                  </LinearGradient>
-                ) : (
-                  <View style={styles.uncheckedBox} />
-                )}
-              </View>
-              <Text style={styles.rememberText}>Remember for 30 days</Text>
-            </Pressable>
 
             <Pressable
               style={({ pressed }) => [
