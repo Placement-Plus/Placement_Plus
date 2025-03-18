@@ -1,14 +1,27 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Pressable, StyleSheet, ImageBackground } from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { Link, useRouter } from "expo-router";
-import { SimpleLineIcons, Feather } from "@expo/vector-icons";
+import { SimpleLineIcons, Feather, MaterialIcons } from "@expo/vector-icons";
+import * as Yup from "yup";
+import { LinearGradient } from "expo-linear-gradient";
+
+const LoginSchema = Yup.object().shape({
+  email: Yup.string()
+    .email("Please enter a valid email")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(8, "Password must be at least 8 characters")
+    .required("Password is required"),
+});
 
 const LoginScreen = () => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
-<<<<<<< HEAD
   const [isLoading, setIsLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState({});
 
@@ -126,6 +139,7 @@ const LoginScreen = () => {
             <Text style={styles.title}>
               Welcome <Text style={styles.highlight}>Back!</Text>
             </Text>
+
             <View style={[
               styles.inputContainer,
               touchedFields.email && errors.email ? styles.inputError : null
@@ -149,10 +163,6 @@ const LoginScreen = () => {
             {touchedFields.email && errors.email && (
               <Text style={styles.errorText}>{errors.email}</Text>
             )}
-        {/* Log In Button
-        <Pressable style={styles.button} onPress={() => router.push("/HomePage/Home")}>
-          <Text style={styles.buttonText}></Text>
-        </Pressable> */}
 
             <View style={[
               styles.inputContainer,
@@ -218,74 +228,10 @@ const LoginScreen = () => {
                 <Text style={styles.highlight}> Sign up</Text>
               </Link>
             </Text>
-             {/* Log In Button */}
-        <Pressable style={styles.button} onPress={() => router.push("/HomePage/Home")}>
-          <Text style={styles.buttonText}>Home</Text>
-=======
-  const [rememberMe, setRememberMe] = useState(false);
-
-  return (
-      <View style={styles.container}>
-        {/* Back Button */}
-        <Pressable style={styles.backButton} onPress={() => router.push("index")}> 
-          <Feather name="arrow-left" size={24} color="white" />
->>>>>>> a3d4c5c (Change in frontend directory)
-        </Pressable>
-        
-        {/* Title */}
-        <Text style={styles.title}>Welcome <Text style={styles.highlight}>Back!</Text></Text>
-
-        {/* Email Input */}
-        <View style={styles.inputContainer}>
-          <SimpleLineIcons name="envelope" size={20} color="white" style={styles.inputIcon} />
-          <TextInput 
-            style={styles.input}
-            placeholder="Email Address"
-            placeholderTextColor="#aaa"
-            value={email}
-            onChangeText={setEmail}
-          />
-        </View>
-
-        {/* Password Input */}
-        <View style={styles.inputContainer}>
-          <SimpleLineIcons name="lock" size={20} color="white" style={styles.inputIcon} />
-          <TextInput 
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor="#aaa"
-            secureTextEntry={!showPassword}
-            value={password}
-            onChangeText={setPassword}
-          />
-          <Pressable onPress={() => setShowPassword(!showPassword)}>
-            <Feather name={showPassword ? "eye-off" : "eye"} size={20} color="white" />
-          </Pressable>
-        </View>
-
-        {/* Remember Me Checkbox */}
-        <Pressable style={styles.rememberContainer} onPress={() => setRememberMe(!rememberMe)}>
-          <Feather name={rememberMe ? "check-square" : "square"} size={20} color="white" />
-          <Text style={styles.rememberText}> Remember for 30 days</Text>
-        </Pressable>
-
-        {/* Log In Button */}
-        <Pressable style={styles.button} onPress={() => router.push("HomePage/Home")}>
-          <Text style={styles.buttonText}>LOG IN</Text>
-        </Pressable>
-
-        {/* Forgot Password & Sign Up Links */}
-        <Link href="/forgot-password" asChild>
-          <Pressable>
-            <Text style={styles.forgotText}>Forgot Password?</Text>
-          </Pressable>
-        </Link>
-
-        <Text style={styles.signupText}>Don’t have an account? 
-          <Link href="userloginsign/Signup"><Text style={styles.highlight}> Sign up</Text></Link>
-        </Text>
-        
-      </View>
+          </View>
+        </KeyboardAvoidingView>
+      </LinearGradient>
+    </TouchableWithoutFeedback>
   );
 };
 
@@ -294,75 +240,150 @@ export default LoginScreen;
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  keyboardView: {
+    flex: 1,
+  },
+  contentContainer: {
+    flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0D021F",
     padding: 20,
   },
   backButton: {
     position: "absolute",
-    top: 40,
+    top: 50,
     left: 20,
+    zIndex: 10,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "rgba(28, 18, 53, 0.7)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   title: {
-    fontSize: 50,
+    fontSize: 42,
     fontWeight: "bold",
     color: "white",
     textAlign: "center",
-    marginBottom: 80,
-    fontStyle: "italic",
-    textDecorationStyle: "solid",
+    marginBottom: 50,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   highlight: {
     color: "#C92EFF",
+    fontWeight: "bold",
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1C1235",
+    backgroundColor: "rgba(28, 18, 53, 0.7)",
     paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderRadius: 10,
-    width: "90%",
-    marginBottom: 15,
+    paddingVertical: 16,
+    borderRadius: 12,
+    width: "100%",
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(201, 46, 255, 0.1)",
+  },
+  inputError: {
+    borderColor: "#FF6B6B",
+    borderWidth: 1,
   },
   inputIcon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   input: {
     flex: 1,
     color: "white",
+    fontSize: 16,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
+  },
+  errorText: {
+    color: "#FF6B6B",
+    fontSize: 12,
+    marginBottom: 12,
+    marginTop: -8,
+    alignSelf: "flex-start",
+    marginLeft: 4,
   },
   rememberContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
+    marginBottom: 30,
+    marginTop: 8,
+    alignSelf: "flex-start",
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  uncheckedBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: "#9D8ACE",
+  },
+  checkedBox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   rememberText: {
-    color: "white",
+    color: "#FFFFFF",
     marginLeft: 10,
+    fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
+  },
+  buttonContainer: {
+    width: "100%",
+    marginTop: 10,
+    borderRadius: 12,
+    overflow: "hidden",
+    elevation: 5,
+    shadowColor: "#C92EFF",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  buttonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
   button: {
-    backgroundColor: "#C92EFF",
-    paddingVertical: 15,
-    borderRadius: 10,
-    width: "90%",
+    paddingVertical: 16,
+    borderRadius: 12,
     alignItems: "center",
-    marginTop: 10,
+    justifyContent: "center",
   },
   buttonText: {
     color: "white",
     fontSize: 16,
     fontWeight: "bold",
+    letterSpacing: 1,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
+  },
+  forgotContainer: {
+    marginVertical: 20,
   },
   forgotText: {
     color: "#C92EFF",
-    marginVertical: 10,
-    marginBottom: 50,
+    fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
   signupText: {
     color: "white",
     marginTop: 10,
     textAlign: "center",
+    fontSize: 14,
+    fontFamily: Platform.OS === 'ios' ? 'Avenir' : 'sans-serif',
   },
 });
