@@ -29,12 +29,12 @@ const WelcomeScreen = () => {
         <Text style={styles.buttonText}>SIGN UP</Text>
       </Pressable>
 
-      {/* OR Sign In With
+      {/* OR Sign In With */}
       <Text style={styles.orText}>OR SIGN IN WITH</Text>
       <View style={styles.socialIcons}>
         <SimpleLineIcons name="envelope" size={24} color="white" style={styles.icon} />
         <SimpleLineIcons name="phone" size={24} color="white" style={styles.icon} />
-      </View> */}
+      </View>
     </View>
   );
 };

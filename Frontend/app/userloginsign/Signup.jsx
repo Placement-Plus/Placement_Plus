@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -6,398 +6,154 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  ActivityIndicator,
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
 } from "react-native";
 import { router } from "expo-router";
 import { Feather, FontAwesome } from "@expo/vector-icons";
 import * as DocumentPicker from "expo-document-picker";
 import { SelectList } from "react-native-dropdown-select-list";
-import * as Yup from 'yup';
-import * as FileSystem from "expo-file-system";
 
-const SignupSchema = Yup.object().shape({
-  name: Yup.string().required('Name is required'),
-  email: Yup.string().email('Invalid email').required('Email is required'),
-  password: Yup.string().min(8, 'Password must be at least 8 characters').required('Password is required'),
-  rollNo: Yup.string().required('Roll number is required'),
-  mobileNo: Yup.string().matches(/^\d{10}$/, 'Mobile number must be 10 digits').required('Mobile number is required'),
-  CGPA: Yup.number().min(0, 'CGPA must be positive').max(10, 'CGPA cannot exceed 10').required('CGPA is required'),
-  batch: Yup.string().matches(/^\d{4}$/, 'Enter a valid year').required('Batch year is required'),
-});
-
-const InputField = ({
-  icon,
-  placeholder,
-  value,
-  onChangeText,
-  keyboardType,
-  secureTextEntry,
-  error,
-  onBlur
-}) => (
-  <View style={styles.inputWrapper}>
-    <View style={[styles.inputContainer, error ? styles.inputError : null]}>
-      <FontAwesome name={icon} size={20} color="#999" style={styles.inputIcon} />
-      <TextInput
-        style={styles.input}
-        placeholder={placeholder}
-        placeholderTextColor="#aaa"
-        secureTextEntry={secureTextEntry}
-        keyboardType={keyboardType}
-        value={value}
-        onChangeText={onChangeText}
-        onBlur={onBlur}
-        autoCapitalize={keyboardType === "email-address" ? "none" : "words"}
-      />
-    </View>
-    {error && <Text style={styles.errorText}>{error}</Text>}
+// Reusable Input Field Component
+const InputField = ({ icon, placeholder, value, onChangeText, keyboardType, secureTextEntry }) => (
+  <View style={styles.inputContainer}>
+    <FontAwesome name={icon} size={20} color="#999" style={styles.inputIcon} />
+    <TextInput
+      style={styles.input}
+      placeholder={placeholder}
+      placeholderTextColor="#aaa"
+      secureTextEntry={secureTextEntry}
+      keyboardType={keyboardType}
+      value={value}
+      onChangeText={onChangeText}
+    />
   </View>
 );
 
-const SignupScreen = () => {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    rollNo: "",
-    mobileNo: "",
-    CGPA: "",
-    batch: "",
-    branch: "",
-    semester: "",
-    course: "",
-  });
-
+const SignupScreen = ({ setScreen }) => {
+  const [rollNumber, setRollNumber] = useState("");
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [branch, setBranch] = useState("Computer Science");
+  const [semester, setSemester] = useState("1");
+  const [cgpa, setCgpa] = useState("");
+  const [batchYear, setBatchYear] = useState("");
+  const [course, setCourse] = useState("BTech");
+  const [email, setEmail] = useState("");
   const [resume, setResume] = useState(null);
-  const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
-  const [activeDropdown, setActiveDropdown] = useState(null);
 
-  const scrollViewRef = useRef(null);
+  const [activeDropdown, setActiveDropdown] = useState(null); // Track active dropdown
 
-  const branches = [
-    "CSE",
-    "ME",
-    "CE",
-    "EE",
-    "ECE",
-    "VLSI",
-    "CAD/CAM"
-  ];
+  const branches = ["Computer Science", "Mechanical", "Civil", "Electrical", "ECE", "AIDS", "VLSI"];
   const semesters = Array.from({ length: 8 }, (_, i) => `${i + 1}`);
-  const courses = ["B.Tech", "M.Tech"];
-
-  const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: null }));
-    }
-  };
-
-  const validateField = async (field) => {
-    try {
-      await SignupSchema.validateAt(field, formData);
-      setErrors(prev => ({ ...prev, [field]: null }));
-    } catch (error) {
-      setErrors(prev => ({ ...prev, [field]: error.message }));
-    }
-  };
+  const courses = ["BTech", "MTech"];
 
   const handleResumeUpload = async () => {
-    try {
-      const result = await DocumentPicker.getDocumentAsync({
-        type: 'application/pdf',
-        copyToCacheDirectory: true,
-      });
-      console.log(result);
-
-
-      if (result.type === 'cancel') {
-        console.log("User cancelled file picking");
-        return;
-      }
-
-      const { uri, name, mimeType } = result?.assets[0];
-
-      setResume({
-        uri,
-        name,
-        type: mimeType || 'application/pdf',
-      });
-
-      setErrors(prev => ({ ...prev, resume: null }));
-    } catch (error) {
-      console.error("Error picking document:", error);
-      setErrors(prev => ({ ...prev, resume: "Failed to upload resume" }));
+    const result = await DocumentPicker.getDocumentAsync({ type: "application/pdf" });
+    if (result.type !== "cancel") {
+      setResume(result.uri);
     }
   };
-
-
-  const handleRegister = async () => {
-    setLoading(true);
-
-    try {
-      await SignupSchema.validate(formData, { abortEarly: false });
-
-      if (!resume) {
-        setErrors(prev => ({ ...prev, resume: "Resume is required" }));
-        scrollViewRef.current?.scrollToEnd();
-        setLoading(false);
-        return;
-      }
-
-      const userData = new FormData();
-
-      Object.entries(formData).forEach(([key, value]) => {
-        userData.append(key, value);
-      });
-
-      // console.log("Resume before processing:", resume);
-
-      let resumeFile = resume;
-      if (resume.uri.startsWith("data:application/pdf;base64,")) {
-        const fileUri = `${FileSystem.cacheDirectory}${resume.name}`;
-
-        await FileSystem.writeAsStringAsync(fileUri, resume.uri.split(",")[1], {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        resumeFile = {
-          uri: fileUri,
-          name: resume.name,
-          type: "application/pdf",
-        };
-      }
-
-      userData.append("resume", resumeFile);
-
-      // for (let pair of userData.entries()) {
-      //   console.log(pair[0], pair[1]);
-      // }
-
-      const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/register`, {
-        method: 'POST',
-        body: userData,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Registration failed');
-      }
-
-      Alert.alert(
-        "Registration Successful",
-        "Your account has been created successfully!"
-      );
-
-    } catch (error) {
-      if (error instanceof Yup.ValidationError) {
-        const validationErrors = {};
-        error.inner.forEach(err => {
-          validationErrors[err.path] = err.message;
-        });
-        setErrors(validationErrors);
-
-        scrollViewRef.current?.scrollTo({ y: 0, animated: true });
-      } else {
-        console.error("Registration Error:", error);
-        Alert.alert("Registration Failed", error.message || "An unexpected error occurred");
-      }
-    } finally {
-      setLoading(false);
-    }
-  };
-
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={{ flex: 1 }}
-    >
-      <ScrollView
-        ref={scrollViewRef}
-        contentContainerStyle={styles.scrollContainer}
-        keyboardShouldPersistTaps="handled"
-      >
-        <TouchableOpacity
-          onPress={() => router.push("userloginsign/login")}
-          style={styles.backButton}
-        >
-          <Feather name="arrow-left" size={24} color="white" />
-        </TouchableOpacity>
+    <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+      <TouchableOpacity onPress={() => router.push("userloginsign/login")} style={styles.backButton}>
+        <Feather name="arrow-left" size={24} color="white" />
+      </TouchableOpacity>
+      <Text style={styles.welcomeTitle}>Create an <Text style={styles.purpleText}>Account!</Text></Text>
 
-        <Text style={styles.welcomeTitle}>
-          Create an <Text style={styles.purpleText}>Account!</Text>
-        </Text>
+      {/* Input Fields */}
+      <InputField icon="user" placeholder="Full Name" />
+      <InputField
+        icon="envelope"
+        placeholder="Email Address"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+      />
+      <InputField
+        icon="id-card"
+        placeholder="Roll Number"
+        value={rollNumber}
+        onChangeText={setRollNumber}
+        keyboardType="numeric"
+      />
+      <InputField
+        icon="mobile"
+        placeholder="Mobile Number"
+        value={mobileNumber}
+        onChangeText={setMobileNumber}
+        keyboardType="numeric"
+      />
+      <InputField
+        icon="book"
+        placeholder="CGPA"
+        value={cgpa}
+        onChangeText={setCgpa}
+        keyboardType="decimal-pad"
+      />
+      <InputField
+        icon="calendar"
+        placeholder="Batch Year"
+        value={batchYear}
+        onChangeText={setBatchYear}
+        keyboardType="numeric"
+      />
 
-        <InputField
-          icon="user"
-          placeholder="Full Name"
-          value={formData.name}
-          onChangeText={(value) => handleChange("name", value)}
-          onBlur={() => validateField("name")}
-          error={errors.name}
+      {/* Dropdowns with Correct zIndex Management */}
+      <View style={[styles.dropdownContainer, { zIndex: activeDropdown === "branch" ? 3 : 1 }]}>
+        <SelectList
+          setSelected={setBranch}
+          data={branches.map((b) => ({ key: b, value: b }))}
+          boxStyles={styles.dropdownBox}
+          dropdownStyles={styles.dropdownList}
+          dropdownTextStyles={styles.dropdownText}
+          placeholder="Select Branch"
+          onFocus={() => setActiveDropdown("branch")} 
+          onBlur={() => setActiveDropdown(null)} 
         />
-
-        <InputField
-          icon="envelope"
-          placeholder="Email Address"
-          value={formData.email}
-          onChangeText={(value) => handleChange("email", value)}
-          keyboardType="email-address"
-          onBlur={() => validateField("email")}
-          error={errors.email}
+      </View>
+      <View style={[styles.dropdownContainer, { zIndex: activeDropdown === "semester" ? 2 : 1 }]}>
+        <SelectList
+          setSelected={setSemester}
+          data={semesters.map((s) => ({ key: s, value: s }))}
+          boxStyles={styles.dropdownBox}
+          dropdownStyles={styles.dropdownList}
+          dropdownTextStyles={styles.dropdownText}
+          placeholder="Select Semester"
+          onFocus={() => setActiveDropdown("semester")} 
+          onBlur={() => setActiveDropdown(null)} 
         />
-
-        <InputField
-          icon="lock"
-          placeholder="Password"
-          value={formData.password}
-          onChangeText={(value) => handleChange("password", value)}
-          secureTextEntry={true}
-          onBlur={() => validateField("password")}
-          error={errors.password}
+      </View>
+      <View style={[styles.dropdownContainer, { zIndex: activeDropdown === "course" ? 2 : 1 }]}>
+        <SelectList
+          setSelected={setCourse}
+          data={courses.map((c) => ({ key: c, value: c }))}
+          boxStyles={styles.dropdownBox}
+          dropdownStyles={styles.dropdownList}
+          dropdownTextStyles={styles.dropdownText}
+          placeholder="Select Course"
+          onFocus={() => setActiveDropdown("course")} 
+          onBlur={() => setActiveDropdown(null)} 
         />
+      </View>
 
-        <InputField
-          icon="id-card"
-          placeholder="Roll Number"
-          value={formData.rollNo}
-          onChangeText={(value) => handleChange("rollNo", value)}
-          onBlur={() => validateField("rollNo")}
-          error={errors.rollNo}
-        />
+      {/* Upload Resume Button */}
+      <TouchableOpacity style={styles.button} onPress={handleResumeUpload}>
+        <Text style={styles.buttonText}>{resume ? "Resume Uploaded" : "Upload Resume"}</Text>
+      </TouchableOpacity>
 
-        <InputField
-          icon="mobile"
-          placeholder="Mobile Number"
-          value={formData.mobileNo}
-          onChangeText={(value) => handleChange("mobileNo", value)}
-          keyboardType="numeric"
-          onBlur={() => validateField("mobileNo")}
-          error={errors.mobileNo}
-        />
+      {/* Create Account Button */}
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>CREATE ACCOUNT</Text>
+      </TouchableOpacity>
 
-        <InputField
-          icon="book"
-          placeholder="CGPA"
-          value={formData.CGPA}
-          onChangeText={(value) => handleChange("CGPA", value)}
-          keyboardType="decimal-pad"
-          onBlur={() => validateField("CGPA")}
-          error={errors.CGPA}
-        />
-
-        <InputField
-          icon="calendar"
-          placeholder="Batch Year"
-          value={formData.batch}
-          onChangeText={(value) => handleChange("batch", value)}
-          keyboardType="numeric"
-          onBlur={() => validateField("batch")}
-          error={errors.batch}
-        />
-
-        <View style={[styles.dropdownContainer, { zIndex: 30 }]}>
-          <Text style={styles.dropdownLabel}>Branch</Text>
-          <SelectList
-            setSelected={(value) => handleChange("branch", value)}
-            data={branches.map((b) => ({ key: b, value: b }))}
-            defaultOption={{ key: formData.branch, value: formData.branch }}
-            boxStyles={styles.dropdownBox}
-            dropdownStyles={styles.dropdownList}
-            dropdownTextStyles={styles.dropdownText}
-            inputStyles={styles.dropdownInputText}
-            search={false}
-            onFocus={() => setActiveDropdown("branch")}
-            onBlur={() => setActiveDropdown(null)}
-          />
-        </View>
-
-        <View style={[styles.dropdownContainer, { zIndex: 20 }]}>
-          <Text style={styles.dropdownLabel}>Semester</Text>
-          <SelectList
-            setSelected={(value) => handleChange("semester", value)}
-            data={semesters.map((s) => ({ key: s, value: s }))}
-            defaultOption={{ key: formData.semester, value: formData.semester }}
-            boxStyles={styles.dropdownBox}
-            dropdownStyles={styles.dropdownList}
-            dropdownTextStyles={styles.dropdownText}
-            inputStyles={styles.dropdownInputText}
-            search={false}
-            onFocus={() => setActiveDropdown("semester")}
-            onBlur={() => setActiveDropdown(null)}
-          />
-        </View>
-
-        <View style={[styles.dropdownContainer, { zIndex: 10 }]}>
-          <Text style={styles.dropdownLabel}>Course</Text>
-          <SelectList
-            setSelected={(value) => handleChange("course", value)}
-            data={courses.map((c) => ({ key: c, value: c }))}
-            defaultOption={{ key: formData.course, value: formData.course }}
-            boxStyles={styles.dropdownBox}
-            dropdownStyles={styles.dropdownList}
-            dropdownTextStyles={styles.dropdownText}
-            inputStyles={styles.dropdownInputText}
-            search={false}
-            onFocus={() => setActiveDropdown("course")}
-            onBlur={() => setActiveDropdown(null)}
-          />
-        </View>
-
-        <View style={styles.resumeContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.uploadButton]}
-            onPress={handleResumeUpload}
-          >
-            <FontAwesome name="file-pdf-o" size={20} color="white" style={styles.buttonIcon} />
-            <Text style={styles.buttonText}>
-              {resume ? "Change Resume" : "Upload Resume"}
-            </Text>
-          </TouchableOpacity>
-
-          {resume && (
-            <View style={styles.resumeInfo}>
-              <FontAwesome name="check-circle" size={20} color="#4CAF50" />
-              <Text style={styles.resumeName} numberOfLines={1} ellipsizeMode="middle">
-                {resume.name}
-              </Text>
-            </View>
-          )}
-
-          {errors.resume && <Text style={styles.errorText}>{errors.resume}</Text>}
-        </View>
-
-        <TouchableOpacity
-          style={[styles.button, styles.submitButton, loading ? styles.disabledButton : null]}
-          onPress={handleRegister}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color="white" size="small" />
-          ) : (
-            <Text style={styles.buttonText}>CREATE ACCOUNT</Text>
-          )}
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => router.push("userloginsign/login")}>
-          <Text style={styles.bottomText}>
-            Already have an account? <Text style={styles.purpleText}>Sign in</Text>
-          </Text>
-        </TouchableOpacity>
-      </ScrollView>
-    </KeyboardAvoidingView>
+      {/* Footer Link */}
+      <TouchableOpacity onPress={() =>router.push("userloginsign/login")}>
+        <Text style={styles.bottomText}>Already have an account? <Text style={styles.purpleText}>Sign in</Text></Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 
+// Styles
 const styles = StyleSheet.create({
   scrollContainer: {
     flexGrow: 1,
@@ -409,133 +165,69 @@ const styles = StyleSheet.create({
   backButton: {
     alignSelf: "flex-start",
     marginBottom: 20,
-    padding: 8,
   },
   welcomeTitle: {
     fontSize: 28,
     fontWeight: "bold",
     color: "white",
-    marginBottom: 30,
-    textAlign: "center",
+    marginBottom: 20,
   },
   purpleText: {
     color: "#C92EFF",
-  },
-  inputWrapper: {
-    width: "100%",
-    marginBottom: 16,
   },
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: "#1C1235",
     paddingHorizontal: 15,
-    paddingVertical: 14,
-    borderRadius: 12,
+    paddingVertical: 12,
+    borderRadius: 10,
     width: "100%",
-    borderWidth: 1,
-    borderColor: "#2E2257",
-  },
-  inputError: {
-    borderColor: "#FF4D4F",
-    borderWidth: 1,
+    marginBottom: 15,
   },
   inputIcon: {
-    marginRight: 12,
+    marginRight: 10,
   },
   input: {
     flex: 1,
     color: "white",
-    fontSize: 16,
-  },
-  errorText: {
-    color: "#FF4D4F",
-    fontSize: 12,
-    marginTop: 4,
-    marginLeft: 4,
   },
   dropdownContainer: {
     width: "100%",
-    marginBottom: 16,
-  },
-  dropdownLabel: {
-    color: "#aaa",
-    marginBottom: 6,
-    fontSize: 14,
-    marginLeft: 4,
+    marginBottom: 15,
   },
   dropdownBox: {
     backgroundColor: "#1C1235",
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: "#2E2257",
-    paddingVertical: 14,
-    paddingHorizontal: 15,
+    borderRadius: 10,
+    borderWidth: 0,
   },
   dropdownList: {
     backgroundColor: "#1C1235",
-    borderWidth: 1,
-    borderColor: "#2E2257",
+    borderWidth: 0,
     marginTop: 5,
-    borderRadius: 8,
-    paddingVertical: 8,
+    position: "absolute",
+    backgroundColor: "#1C1235",
+    width: "100%",
   },
   dropdownText: {
     color: "white",
-    fontSize: 16,
-  },
-  dropdownInputText: {
-    color: "white",
-    fontSize: 16,
-  },
-  resumeContainer: {
-    width: "100%",
-    marginBottom: 16,
-  },
-  resumeInfo: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 8,
-    paddingHorizontal: 8,
-  },
-  resumeName: {
-    color: "white",
-    marginLeft: 8,
-    maxWidth: '90%',
   },
   button: {
-    flexDirection: "row",
-    justifyContent: "center",
-    paddingVertical: 16,
-    borderRadius: 12,
+    backgroundColor: "#C92EFF",
+    paddingVertical: 15,
+    borderRadius: 10,
     width: "100%",
     alignItems: "center",
-    marginBottom: 16,
-  },
-  uploadButton: {
-    backgroundColor: "#2E2257",
-    borderWidth: 1,
-    borderColor: "#C92EFF",
-  },
-  submitButton: {
-    backgroundColor: "#C92EFF",
-    marginTop: 8,
-  },
-  disabledButton: {
-    opacity: 0.7,
-  },
-  buttonIcon: {
-    marginRight: 10,
+    marginBottom: 15,
   },
   buttonText: {
     color: "white",
     fontSize: 16,
-    fontWeight: "600",
+    fontWeight: "bold",
   },
   bottomText: {
     color: "white",
-    marginTop: 16,
-    fontSize: 15,
+    marginTop: 10,
   },
 });
 
