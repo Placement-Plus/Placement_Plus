@@ -28,8 +28,6 @@ const SignupSchema = Yup.object().shape({
   batch: Yup.string().matches(/^\d{4}$/, 'Enter a valid year').required('Batch year is required'),
 });
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://192.168.31.122:5000';
-
 const InputField = ({
   icon,
   placeholder,
@@ -174,7 +172,7 @@ const SignupScreen = () => {
         };
       }
 
-      // userData.append("resume", resumeFile);
+      userData.append("resume", resumeFile);
 
       // for (let pair of userData.entries()) {
       //   console.log(pair[0], pair[1]);
