@@ -54,4 +54,18 @@ const getPdf = asyncHandler(async (req, res) => {
     )
 })
 
-export { addPdf, getPdf }
+const getAllPdf = asyncHandler(async (req, res) => {
+    const allPdfs = await CSFundamentals.find()
+    if (allPdfs.length === 0)
+        throw new ApiError(404, "No Study material found")
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            allPdfs,
+            "All study materials fetch successfully"
+        )
+    )
+})
+
+export { addPdf, getPdf, getAllPdf }
