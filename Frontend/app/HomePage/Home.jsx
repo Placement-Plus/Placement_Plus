@@ -1,21 +1,23 @@
-import React, { useState, useRef, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  Image,
-  Dimensions,
-  Animated,
-  FlatList,
-  StatusBar,
+import React, { useState, useRef } from "react";
+import { 
+  View, 
+  Text, 
+  TextInput, 
+  Pressable, 
+  Image, 
+  Dimensions, 
+  Animated, 
+  StyleSheet, 
+  StatusBar, 
+  ScrollView,
   SafeAreaView,
-  TouchableOpacity
+  Platform
 } from "react-native";
 import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
-import { BlurView } from "expo-blur";
 import { LinearGradient } from "expo-linear-gradient";
+
+// Import your images
 import pastYearCompany from "@/assets/images/pastyearcompany.png";
 import placementStat from "@/assets/images/placementstat.png";
 import alumni from "@/assets/images/alumni.png";
@@ -27,505 +29,501 @@ import uploadResume from "@/assets/images/uploadresume.png";
 import chatbot from "@/assets/images/chatbot.png";
 
 const { width, height } = Dimensions.get("window");
+const CARD_WIDTH = width * 0.28;
 
-const MENU_ITEMS = [
+// Menu items data
+const menuItems = [
   {
     id: 0,
     title: "Past Year Companies",
     icon: pastYearCompany,
     route: "/screens/PastYearCompanies",
-    description: "View companies that recruited in previous years"
+    color: "#4F46E5",
   },
   {
     id: 1,
     title: "Current Year Placement",
     icon: placementStat,
     route: "/screens/CurrentYearPlacement",
-    description: "Track ongoing placement statistics"
+    color: "#EC4899",
   },
   {
     id: 2,
     title: "Connect with Alumni",
     icon: alumni,
     route: "/screens/ConnectWithAlumni",
-    description: "Network with graduates from your college"
+    color: "#10B981",
   },
   {
     id: 3,
-    title: "Questions by Companies",
+    title: "Interview Questions",
     icon: questionAskByCompany,
     route: "/screens/QuestionAskByCompanies",
-    description: "Practice interview questions from companies"
+    color: "#F59E0B",
   },
   {
     id: 4,
     title: "Upcoming Companies",
     icon: upcomingCompany,
     route: "/screens/UpcomingCompanies",
-    description: "See which companies are visiting soon"
+    color: "#8B5CF6",
   },
   {
     id: 5,
-    title: "Branch-wise Stats",
+    title: "Branch Stats",
     icon: branchStat,
     route: "/screens/BranchWisePlacement",
-    description: "View placements categorized by branch"
+    color: "#EF4444",
   },
   {
     id: 6,
     title: "Placement Policies",
     icon: placementPolicies,
     route: "/screens/PlacementPolicies",
-    description: "Understand the rules and guidelines"
+    color: "#06B6D4",
   },
   {
     id: 7,
     title: "Upload Resume",
     icon: uploadResume,
     route: "/screens/UploadResume",
-    description: "Submit and manage your resume"
+    color: "#F97316",
   },
   {
     id: 8,
     title: "AI Assistant",
     icon: chatbot,
     route: "/screens/ChatBot",
-    description: "Get immediate answers to your questions"
+    color: "#C92EFF",
   },
 ];
 
 const PlacementPlus = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [filteredItems, setFilteredItems] = useState(MENU_ITEMS);
-  const [isProfileModalVisible, setIsProfileModalVisible] = useState(false);
-  const [currentTheme, setCurrentTheme] = useState('dark');
+  const scrollViewRef = useRef(null);
+  const scaleAnims = useRef(menuItems.map(() => new Animated.Value(1))).current;
+  const [searchQuery, setSearchQuery] = useState("");
+  const [filteredItems, setFilteredItems] = useState(menuItems);
 
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const headerOpacity = scrollY.interpolate({
-    inputRange: [0, 50],
-    outputRange: [1, 0.9],
-    extrapolate: 'clamp'
-  });
-
-  const headerHeight = scrollY.interpolate({
-    inputRange: [0, 100],
-    outputRange: [180, 120],
-    extrapolate: 'clamp'
-  });
-
-  // Filter menu items based on search query
-  useEffect(() => {
-    if (searchQuery.trim() === '') {
-      setFilteredItems(MENU_ITEMS);
-    } else {
-      const lowercasedQuery = searchQuery.toLowerCase();
-      const filtered = MENU_ITEMS.filter(item =>
-        item.title.toLowerCase().includes(lowercasedQuery) ||
-        item.description.toLowerCase().includes(lowercasedQuery)
-      );
-      setFilteredItems(filtered);
+  // Handle search
+  const handleSearch = (text) => {
+    setSearchQuery(text);
+    
+    if (text.trim() === "") {
+      setFilteredItems(menuItems);
+      return;
     }
-  }, [searchQuery]);
-
-  const handleItemPress = (item) => {
-    router.push(item.route);
-  };
-
-  const toggleTheme = () => {
-    setCurrentTheme(currentTheme === 'dark' ? 'light' : 'dark');
-  };
-
-  // Calculate styles based on the current theme
-  const themeStyles = {
-    backgroundColor: currentTheme === 'dark' ? '#0f0a20' : '#f5f5f5',
-    textColor: currentTheme === 'dark' ? '#ffffff' : '#333333',
-    cardBackground: currentTheme === 'dark' ? '#1a1132' : '#ffffff',
-    accentColor: '#a100f2',
-    headerGradient: currentTheme === 'dark'
-      ? ['#2d0066', '#1a012c']
-      : ['#a100f2', '#7000c8'],
-  };
-
-  const renderMenuItem = ({ item }) => {
-    return (
-      <TouchableOpacity
-        onPress={() => handleItemPress(item)}
-        activeOpacity={0.7}
-      >
-        <Animated.View style={[
-          styles.menuItem,
-          { backgroundColor: themeStyles.cardBackground }
-        ]}>
-          <View style={styles.menuIconContainer}>
-            <Image source={item.icon} style={styles.menuIcon} />
-          </View>
-          <View style={styles.menuTextContainer}>
-            <Text style={[styles.menuTitle, { color: themeStyles.textColor }]}>
-              {item.title}
-            </Text>
-            <Text style={styles.menuDescription}>{item.description}</Text>
-          </View>
-          <MaterialIcons name="arrow-forward-ios" size={16} color={themeStyles.accentColor} />
-        </Animated.View>
-      </TouchableOpacity>
+    
+    const filtered = menuItems.filter(item => 
+      item.title.toLowerCase().includes(text.toLowerCase())
     );
+    
+    setFilteredItems(filtered);
   };
 
-  const renderHeader = () => {
-    return (
-      <View style={styles.gridHeaderContainer}>
-        <Text style={[styles.gridHeaderTitle, { color: themeStyles.textColor }]}>
-          Placement Resources
-        </Text>
-        <Text style={styles.gridHeaderSubtitle}>
-          Explore tools to help with your placement journey
-        </Text>
-      </View>
-    );
+  const handlePressIn = (index) => {
+    Animated.spring(scaleAnims[index], {
+      toValue: 0.95,
+      friction: 4,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
   };
 
-  const renderEmptyList = () => {
-    return (
-      <View style={styles.emptyListContainer}>
-        <MaterialIcons name="search-off" size={50} color={themeStyles.accentColor} />
-        <Text style={[styles.emptyListText, { color: themeStyles.textColor }]}>
-          No matches found for "{searchQuery}"
-        </Text>
-        <TouchableOpacity onPress={() => setSearchQuery('')}>
-          <Text style={styles.clearSearchButton}>Clear Search</Text>
-        </TouchableOpacity>
-      </View>
-    );
+  const handlePressOut = (index) => {
+    Animated.spring(scaleAnims[index], {
+      toValue: 1,
+      friction: 4,
+      tension: 40,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const handlePress = (route) => {
+    router.push(route);
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: themeStyles.backgroundColor }]}>
-      <StatusBar barStyle={currentTheme === 'dark' ? 'light-content' : 'dark-content'} />
-
-      {/* Animated Header */}
-      <Animated.View style={[
-        styles.header,
-        {
-          height: headerHeight,
-          opacity: headerOpacity,
-        }
-      ]}>
-        <LinearGradient
-          colors={themeStyles.headerGradient}
-          style={styles.headerGradient}
-        >
-          <View style={styles.headerContent}>
-            <View style={styles.logoContainer}>
-              <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
-              <Text style={styles.logoText}>Placement Plus</Text>
-            </View>
-
-            <View style={styles.headerRightContainer}>
-              <TouchableOpacity onPress={toggleTheme} style={styles.themeToggle}>
-                <Ionicons
-                  name={currentTheme === 'dark' ? 'sunny' : 'moon'}
-                  size={24}
-                  color="#fff"
-                />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={() => setIsProfileModalVisible(true)}>
-                <Ionicons name="person-circle" size={35} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          </View>
-
-          {/* Search Bar */}
-          <View style={styles.searchBarContainer}>
-            <View style={styles.searchBar}>
-              <FontAwesome name="search" size={18} color={themeStyles.accentColor} />
-              <TextInput
-                placeholder="Search resources..."
-                placeholderTextColor="#a89cb1"
-                style={styles.searchInput}
-                value={searchQuery}
-                onChangeText={setSearchQuery}
-              />
-              {searchQuery.length > 0 && (
-                <TouchableOpacity onPress={() => setSearchQuery('')}>
-                  <Ionicons name="close-circle" size={18} color={themeStyles.accentColor} />
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
-        </LinearGradient>
-      </Animated.View>
-
-      {/* Main Content */}
-      <FlatList
-        data={filteredItems}
-        renderItem={renderMenuItem}
-        keyExtractor={item => item.id.toString()}
-        ListHeaderComponent={renderHeader}
-        ListEmptyComponent={renderEmptyList}
-        contentContainerStyle={styles.flatListContent}
-        showsVerticalScrollIndicator={false}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-          { useNativeDriver: false }
-        )}
-        scrollEventThrottle={16}
+    <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" backgroundColor="#14011F" />
+      
+      {/* Background gradient */}
+      <LinearGradient
+        colors={['#1D0A3F', '#14011F']}
+        style={styles.backgroundGradient}
       />
-
-      {/* Footer */}
-      <BlurView intensity={80} tint={currentTheme === 'dark' ? 'dark' : 'light'} style={styles.footer}>
-        <View style={styles.socialIconsContainer}>
-          <TouchableOpacity style={styles.socialIconButton}>
-            <FontAwesome name="envelope" size={22} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialIconButton}>
-            <Entypo name="phone" size={22} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialIconButton}>
-            <FontAwesome name="instagram" size={22} color="#fff" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.socialIconButton}>
-            <FontAwesome name="linkedin" size={22} color="#fff" />
-          </TouchableOpacity>
+      
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.logoContainer}>
+          <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
+          <Text style={styles.logoText}>Placement Plus</Text>
         </View>
-      </BlurView>
+        <View style={styles.headerRight}>
+          <Pressable style={styles.notificationButton}>
+            <Ionicons name="notifications-outline" size={24} color="#fff" />
+            <View style={styles.notificationBadge}>
+              <Text style={styles.badgeText}>3</Text>
+            </View>
+          </Pressable>
+          <Pressable style={styles.profileButton}>
+            <Ionicons name="person-circle" size={34} color="#C92EFF" />
+          </Pressable>
+        </View>
+      </View>
 
-      {/* Profile Modal (simplified) */}
-      {isProfileModalVisible && (
-        <TouchableOpacity
-          style={styles.modalOverlay}
-          activeOpacity={1}
-          onPress={() => setIsProfileModalVisible(false)}
-        >
-          <BlurView intensity={90} tint="dark" style={styles.blurContainer}>
-            <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-              <Text style={styles.modalTitle}>Profile</Text>
-              {/* Profile content would go here */}
-              <TouchableOpacity
-                style={styles.closeButton}
-                onPress={() => setIsProfileModalVisible(false)}
-              >
-                <Text style={styles.closeButtonText}>Close</Text>
-              </TouchableOpacity>
+      {/* Welcome Message */}
+      <View style={styles.welcomeSection}>
+        <Text style={styles.welcomeText}>Hello, Student!</Text>
+        <Text style={styles.welcomeSubtext}>What would you like to explore today?</Text>
+      </View>
+
+      {/* Search Bar */}
+      <View style={styles.searchContainer}>
+        <View style={styles.searchBar}>
+          <Ionicons name="search" size={20} color="#9D9DB5" style={styles.searchIcon} />
+          <TextInput
+            placeholder="Search for resources..."
+            style={styles.searchInput}
+            placeholderTextColor="#9D9DB5"
+            value={searchQuery}
+            onChangeText={handleSearch}
+          />
+          {searchQuery.length > 0 && (
+            <Pressable onPress={() => handleSearch("")}>
+              <Ionicons name="close-circle" size={20} color="#9D9DB5" />
             </Pressable>
-          </BlurView>
-        </TouchableOpacity>
-      )}
+          )}
+        </View>
+      </View>
+
+      {/* Grid Layout */}
+      <ScrollView
+        ref={scrollViewRef}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {filteredItems.length > 0 ? (
+          <View style={styles.gridContainer}>
+            {filteredItems.map((item, index) => (
+              <Pressable
+                key={item.id}
+                onPressIn={() => handlePressIn(index)}
+                onPressOut={() => handlePressOut(index)}
+                onPress={() => handlePress(item.route)}
+                style={styles.gridItemWrapper}
+              >
+                <Animated.View
+                  style={[
+                    styles.gridItem,
+                    { transform: [{ scale: scaleAnims[index] }] },
+                  ]}
+                >
+                  <LinearGradient
+                    colors={[`${item.color}40`, `${item.color}15`]}
+                    style={styles.iconContainer}
+                    start={{ x: 0, y: 0 }}
+                    end={{ x: 1, y: 1 }}
+                  >
+                    <Image source={item.icon} style={styles.gridIcon} />
+                  </LinearGradient>
+                  <Text style={styles.gridText} numberOfLines={2}>
+                    {item.title}
+                  </Text>
+                </Animated.View>
+              </Pressable>
+            ))}
+          </View>
+        ) : (
+          <View style={styles.noResults}>
+            <Ionicons name="search-outline" size={50} color="#3A3A5A" />
+            <Text style={styles.noResultsText}>No matching resources found</Text>
+            <Text style={styles.noResultsSubText}>Try searching with different keywords</Text>
+          </View>
+        )}
+      </ScrollView>
+
+      {/* Social Media Footer */}
+      <View style={styles.footerContainer}>
+        <LinearGradient
+          colors={['rgba(20, 1, 31, 0)', 'rgba(29, 10, 63, 0.95)']}
+          style={styles.footerGradient}
+        />
+        <View style={styles.footer}>
+          <Pressable style={styles.socialButton}>
+            <LinearGradient
+              colors={['#3b5998', '#324e8d']}
+              style={styles.socialIconContainer}
+            >
+              <FontAwesome name="facebook" size={18} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+          
+          <Pressable style={styles.socialButton}>
+            <LinearGradient
+              colors={['#d62976', '#962fbf']}
+              style={styles.socialIconContainer}
+            >
+              <FontAwesome name="instagram" size={18} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+          
+          <Pressable style={styles.homeButton}>
+            <LinearGradient
+              colors={['#C92EFF', '#9332FF']}
+              style={styles.homeButtonGradient}
+            >
+              <MaterialIcons name="home" size={30} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+          
+          <Pressable style={styles.socialButton}>
+            <LinearGradient
+              colors={['#1DA1F2', '#0d8ad6']}
+              style={styles.socialIconContainer}
+            >
+              <FontAwesome name="twitter" size={18} color="#fff" />
+            </LinearGradient>
+          </Pressable>
+          
+          <Pressable style={styles.socialButton}>
+            <LinearGradient
+              colors={['#FF0000', '#cc0000']}
+              style={styles.socialIconContainer}
+            >
+              {/* <FontAwesome name="youtube-play" size={18} color="#fff" /> */}
+            </LinearGradient>
+          </Pressable>
+        </View>
+      </View>
     </SafeAreaView>
   );
 };
 
-const styles = {
+const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#14011F",
+  },
+  backgroundGradient: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
   },
   header: {
-    width: '100%',
-    overflow: 'hidden',
-  },
-  headerGradient: {
-    flex: 1,
-    paddingTop: 10,
-    paddingHorizontal: 16,
-  },
-  headerContent: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingTop: 10,
-  },
-  headerRightContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  themeToggle: {
-    marginRight: 15,
+    paddingHorizontal: 16,
+    paddingTop: Platform.OS === 'android' ? 50 : 10,
+    paddingBottom: 16,
   },
   logoContainer: {
     flexDirection: "row",
     alignItems: "center",
   },
   logo: {
-    width: 32,
-    height: 32,
+    width: 28,
+    height: 28,
     resizeMode: "contain",
-    marginRight: 10,
+    marginRight: 8,
   },
   logoText: {
     color: "white",
-    fontSize: 22,
-    fontWeight: "700",
-    fontFamily: "System",
+    fontSize: 20,
+    fontWeight: "bold",
   },
-  searchBarContainer: {
-    paddingHorizontal: 5,
-    marginTop: 20,
-    marginBottom: 10,
+  headerRight: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  notificationButton: {
+    padding: 8,
+    marginRight: 8,
+    position: "relative",
+  },
+  notificationBadge: {
+    position: "absolute",
+    top: 6,
+    right: 6,
+    backgroundColor: "#FF4747",
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  badgeText: {
+    color: "white",
+    fontSize: 10,
+    fontWeight: "bold",
+  },
+  profileButton: {
+    padding: 4,
+  },
+  welcomeSection: {
+    paddingHorizontal: 16,
+    marginBottom: 20,
+  },
+  welcomeText: {
+    color: "white",
+    fontSize: 28,
+    fontWeight: "bold",
+    letterSpacing: 0.5,
+  },
+  welcomeSubtext: {
+    color: "#BBB",
+    fontSize: 16,
+    marginTop: 4,
+  },
+  searchContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 24,
   },
   searchBar: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.5,
-    elevation: 2,
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
   },
   searchIcon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   searchInput: {
     flex: 1,
-    color: "#333",
+    color: "white",
     fontSize: 16,
-    marginLeft: 10,
-    marginRight: 10,
     padding: 0,
   },
-  flatListContent: {
-    paddingHorizontal: 16,
-    paddingBottom: 100,
-  },
-  gridHeaderContainer: {
-    marginTop: 20,
-    marginBottom: 15,
-  },
-  gridHeaderTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    marginBottom: 5,
-  },
-  gridHeaderSubtitle: {
-    fontSize: 14,
-    color: "#a89cb1",
-    marginBottom: 10,
-  },
-  menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    borderRadius: 12,
-    padding: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 2,
-  },
-  menuIconContainer: {
-    width: 50,
-    height: 50,
-    backgroundColor: 'rgba(161, 0, 242, 0.1)',
-    borderRadius: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 16,
-  },
-  menuIcon: {
-    width: 32,
-    height: 32,
-    resizeMode: 'contain',
-  },
-  menuTextContainer: {
+  scrollView: {
     flex: 1,
   },
-  menuTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 4,
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingBottom: 100, 
   },
-  menuDescription: {
-    fontSize: 12,
-    color: '#a89cb1',
+  gridContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
-  emptyListContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 40,
-  },
-  emptyListText: {
-    fontSize: 16,
-    textAlign: 'center',
-    marginTop: 20,
-    marginBottom: 10,
-  },
-  clearSearchButton: {
-    color: '#a100f2',
-    fontSize: 16,
-    fontWeight: '600',
-    padding: 10,
-  },
-  footer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: 70,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingBottom: 10,
-  },
-  socialIconsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  socialIconButton: {
-    width: 40,
-    height: 40,
-    backgroundColor: 'rgba(161, 0, 242, 0.9)',
-    borderRadius: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginHorizontal: 10,
-  },
-  modalOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1000,
-  },
-  blurContainer: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    width: width * 0.85,
-    backgroundColor: 'rgba(26, 1, 44, 0.95)',
-    borderRadius: 16,
-    padding: 20,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#fff',
+  gridItemWrapper: {
+    width: "33%",
+    paddingHorizontal: 4,
     marginBottom: 20,
   },
-  closeButton: {
-    backgroundColor: '#a100f2',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-    marginTop: 20,
+  gridItem: {
+    alignItems: "center",
   },
-  closeButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
+  iconContainer: {
+    width: CARD_WIDTH,
+    height: CARD_WIDTH,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 5,
   },
-};
+  gridIcon: {
+    width: CARD_WIDTH * 0.6,
+    height: CARD_WIDTH * 0.6,
+    resizeMode: "contain",
+  },
+  gridText: {
+    color: "white",
+    fontSize: 13,
+    fontWeight: "500",
+    textAlign: "center",
+    width: CARD_WIDTH + 8,
+    lineHeight: 18,
+  },
+  noResults: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 60,
+  },
+  noResultsText: {
+    color: "white",
+    fontSize: 18,
+    fontWeight: "600",
+    marginTop: 16,
+  },
+  noResultsSubText: {
+    color: "#9D9DB5",
+    fontSize: 14,
+    marginTop: 8,
+  },
+  footerContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    overflow: "hidden",
+  },
+  footerGradient: {
+    position: "absolute",
+    height: 100,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    backgroundColor: "rgba(29, 10, 63, 0.6)",
+    paddingVertical: 16,
+    paddingBottom: Platform.OS === 'ios' ? 36 : 16,
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
+    borderTopWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.05)",
+  },
+  socialButton: {
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  socialIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  homeButton: {
+    marginTop: -20,
+    shadowColor: "#C92EFF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  homeButtonGradient: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    justifyContent: "center",
+    alignItems: "center",
+    borderWidth: 4,
+    borderColor: "#14011F",
+  },
+});
 
 export default PlacementPlus;

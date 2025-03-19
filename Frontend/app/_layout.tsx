@@ -42,6 +42,14 @@ export default function RootLayout() {
         <Stack.Screen name="screens/PlacementPolicies" options={{headerShown: false}}  />
         <Stack.Screen name="screens/UploadResume" options={{headerShown: false}}  />
         <Stack.Screen name="screens/ChatBot" options={{headerShown: false}}  />
+        <Stack.Screen name="company/google" options={{headerShown: false}}  />
+        <Stack.Screen name="company/microsoft" options={{headerShown: false}}  />
+        <Stack.Screen name="company/amazon" options={{headerShown: false}}  />
+        <Stack.Screen name="company/meta" options={{headerShown: false}}  /> 
+        <Stack.Screen name="company/apple" options={{headerShown: false}}  />
+        <Stack.Screen name="company/uber" options={{headerShown: false}}  />  
+        <Stack.Screen name="company/netflix" options={{headerShown: false}}  />
+        <Stack.Screen name="company/nvidia" options={{headerShown: false}}  />     
         <Stack.Screen name="+not-found" />
       </Stack>
       <StatusBar style="auto" />
