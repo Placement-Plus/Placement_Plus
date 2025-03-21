@@ -1,46 +1,8 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-
-// Import company logo
 import companyLogo from "@/assets/images/nvidia.png";
-
-const problems = [
-  { id: "1", name: "Set Matrix Zeros", difficulty: "Easy", link: "https://leetcode.com/problems/set-matrix-zeroes/" },
-  { id: "2", name: "Pascal’s Triangle", difficulty: "Easy", link: "https://leetcode.com/problems/pascals-triangle/" },
-  { id: "3", name: "Permutation", difficulty: "Easy", link: "https://leetcode.com/problems/permutations/" },
-  { id: "4", name: "Kadane’s Algorithm", difficulty: "Easy", link: "https://leetcode.com/problems/maximum-subarray/" },
-  { id: "5", name: "Subarray Sum", difficulty: "Medium", link: "https://leetcode.com/problems/subarray-sum-equals-k/" },
-  { id: "6", name: "Stock Buy and Sell", difficulty: "Medium", link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" },
-  { id: "7", name: "Rotate Matrix", difficulty: "Medium", link: "https://leetcode.com/problems/rotate-image/" },
-  { id: "8", name: "Pow(x,n)", difficulty: "Hard", link: "https://leetcode.com/problems/powx-n/" },
-  { id: "9", name: "Set Matrix Zeros", difficulty: "Easy", link: "https://leetcode.com/problems/set-matrix-zeroes/" },
-  { id: "10", name: "Pascal’s Triangle", difficulty: "Easy", link: "https://leetcode.com/problems/pascals-triangle/" },
-  { id: "11", name: "Permutation", difficulty: "Easy", link: "https://leetcode.com/problems/permutations/" },
-  { id: "12", name: "Kadane’s Algorithm", difficulty: "Easy", link: "https://leetcode.com/problems/maximum-subarray/" },
-  { id: "13", name: "Subarray Sum", difficulty: "Medium", link: "https://leetcode.com/problems/subarray-sum-equals-k/" },
-  { id: "14", name: "Stock Buy and Sell", difficulty: "Medium", link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" },
-  { id: "15", name: "Rotate Matrix", difficulty: "Medium", link: "https://leetcode.com/problems/rotate-image/" },
-  { id: "16", name: "Pow(x,n)", difficulty: "Hard", link: "https://leetcode.com/problems/powx-n/" },
-  { id: "17", name: "Set Matrix Zeros", difficulty: "Easy", link: "https://leetcode.com/problems/set-matrix-zeroes/" },
-  { id: "18", name: "Pascal’s Triangle", difficulty: "Easy", link: "https://leetcode.com/problems/pascals-triangle/" },
-  { id: "19", name: "Permutation", difficulty: "Easy", link: "https://leetcode.com/problems/permutations/" },
-  { id: "20", name: "Kadane’s Algorithm", difficulty: "Easy", link: "https://leetcode.com/problems/maximum-subarray/" },
-  { id: "21", name: "Subarray Sum", difficulty: "Medium", link: "https://leetcode.com/problems/subarray-sum-equals-k/" },
-  { id: "22", name: "Stock Buy and Sell", difficulty: "Medium", link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" },
-  { id: "23", name: "Rotate Matrix", difficulty: "Medium", link: "https://leetcode.com/problems/rotate-image/" },
-  { id: "24", name: "Pow(x,n)", difficulty: "Hard", link: "https://leetcode.com/problems/powx-n/" },
-  { id: "25", name: "Set Matrix Zeros", difficulty: "Easy", link: "https://leetcode.com/problems/set-matrix-zeroes/" },
-  { id: "26", name: "Pascal’s Triangle", difficulty: "Easy", link: "https://leetcode.com/problems/pascals-triangle/" },
-  { id: "27", name: "Permutation", difficulty: "Easy", link: "https://leetcode.com/problems/permutations/" },
-  { id: "28", name: "Kadane’s Algorithm", difficulty: "Easy", link: "https://leetcode.com/problems/maximum-subarray/" },
-  { id: "29", name: "Subarray Sum", difficulty: "Medium", link: "https://leetcode.com/problems/subarray-sum-equals-k/" },
-  { id: "30", name: "Stock Buy and Sell", difficulty: "Medium", link: "https://leetcode.com/problems/best-time-to-buy-and-sell-stock/" },
-  { id: "31", name: "Rotate Matrix", difficulty: "Medium", link: "https://leetcode.com/problems/rotate-image/" },
-  { id: "32", name: "Pow(x,n)", difficulty: "Hard", link: "https://leetcode.com/problems/powx-n/" },
-
-
-];
+import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage";
 
 const getDifficultyStyle = (difficulty) => {
   switch (difficulty) {
@@ -60,6 +22,45 @@ const handleOpenLink = (url) => {
 };
 
 const CodingProblems = () => {
+
+  const [problems, setProblems] = useState([])
+
+  useEffect(() => {
+    getProblem()
+  }, [])
+
+  const getProblem = async () => {
+    try {
+      const accessToken = await getAccessToken()
+      const refreshToken = await getRefreshToken()
+
+      const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/questions//get-company-questions/c/Nvidia`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'x-refresh-token': `${refreshToken}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to fetch companies');
+      }
+
+      setProblems(result.data)
+      // console.log(result.data);
+
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error.message || "Something went wrong. Please try again.",
+        [{ text: "OK" }]
+      );
+      console.error('Error:', error.message);
+    }
+  }
+
   return (
     <View style={styles.container}>
       <View style={styles.headerContainer}>
@@ -124,7 +125,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#fff",
     marginHorizontal: 6,
-    flex:1,
+    flex: 1,
     // justifyContent:space-evenly,
   },
   headerText: {
@@ -175,7 +176,7 @@ const styles = StyleSheet.create({
   // Column width adjustments
   col1: { flex: 0.5, textAlign: "center" },
   col2: { flex: 2, textAlign: "left", paddingLeft: 10 },
-  col3: { flex: 0.8, textAlign: "center", paddingRight:15 },
+  col3: { flex: 0.8, textAlign: "center", paddingRight: 15 },
   col4: { flex: 1, textAlign: "center" },
 });
 

@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Animated, 
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 
-// Import company logos
 import microsoftLogo from "@/assets/images/microsoft.png";
 import appleLogo from "@/assets/images/apple.png";
 import googleLogo from "@/assets/images/google.png";

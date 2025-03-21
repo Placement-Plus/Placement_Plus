@@ -1,6 +1,10 @@
-import React, { useEffect, useState, useRef } from "react";
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, SafeAreaView, Dimensions, Animated } from "react-native";
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView, Dimensions, Animated, StatusBar } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { SharedElement } from "react-navigation-shared-element";
+import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from "@expo-google-fonts/poppins";
+import LottieView from "lottie-react-native";
 
 // Import company logos
 import microsoftLogo from "@/assets/images/microsoft.png";
@@ -12,81 +16,206 @@ import metaLogo from "@/assets/images/meta.png";
 import uberLogo from "@/assets/images/uber.png";
 import nvidiaLogo from "@/assets/images/nvidia.png";
 
-// Unique list of companies with additional data
+// Company data with enhanced properties
 const companies = [
-  { name: "Microsoft", logo: microsoftLogo, count: 23 },
-  { name: "Apple", logo: appleLogo, count: 18 },
-  { name: "Google", logo: googleLogo, count: 15 },
-  { name: "Amazon", logo: amazonLogo, count: 14 },
-  { name: "Netflix", logo: netflixLogo, count: 8 },
-  { name: "Meta", logo: metaLogo, count: 12 },
-  { name: "Uber", logo: uberLogo, count: 7 },
-  { name: "Nvidia", logo: nvidiaLogo, count: 20 },
+  {
+    id: "microsoft",
+    name: "Microsoft",
+    logo: microsoftLogo,
+    count: 23,
+    trendDirection: "up",
+    trendPercentage: 15,
+    primaryColor: "#00A4EF"
+  },
+  {
+    id: "apple",
+    name: "Apple",
+    logo: appleLogo,
+    count: 18,
+    trendDirection: "down",
+    trendPercentage: 7,
+    primaryColor: "#A2AAAD"
+  },
+  {
+    id: "google",
+    name: "Google",
+    logo: googleLogo,
+    count: 15,
+    trendDirection: "up",
+    trendPercentage: 12,
+    primaryColor: "#4285F4"
+  },
+  {
+    id: "amazon",
+    name: "Amazon",
+    logo: amazonLogo,
+    count: 14,
+    trendDirection: "up",
+    trendPercentage: 4,
+    primaryColor: "#FF9900"
+  },
+  {
+    id: "netflix",
+    name: "Netflix",
+    logo: netflixLogo,
+    count: 8,
+    trendDirection: "down",
+    trendPercentage: 10,
+    primaryColor: "#E50914"
+  },
+  {
+    id: "meta",
+    name: "Meta",
+    logo: metaLogo,
+    count: 12,
+    trendDirection: "up",
+    trendPercentage: 8,
+    primaryColor: "#0668E1"
+  },
+  {
+    id: "uber",
+    name: "Uber",
+    logo: uberLogo,
+    count: 7,
+    trendDirection: "up",
+    trendPercentage: 22,
+    primaryColor: "#000000"
+  },
+  {
+    id: "nvidia",
+    name: "Nvidia",
+    logo: nvidiaLogo,
+    count: 20,
+    trendDirection: "up",
+    trendPercentage: 45,
+    primaryColor: "#76B900"
+  },
 ];
 
 const { width, height } = Dimensions.get('window');
-const ITEM_HEIGHT = 120;
+const ITEM_HEIGHT = 110;
+const LOADER_DURATION = 2000;
 
-const PastYearCompanies = () => {
+const CompaniesScreen = ({ navigation }) => {
+  const [companies, setCompanies] = useState([])
   const [selectedFilter, setSelectedFilter] = useState("all");
+  const [searchQuery, setSearchQuery] = useState("");
   const [filteredCompanies, setFilteredCompanies] = useState([]);
   const [loopedCompanies, setLoopedCompanies] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasLoaded, setHasLoaded] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
   const flatListRef = useRef(null);
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
 
-  // Create a looped data array for infinite scroll effect
+  // Load custom fonts
+  const [fontsLoaded] = useFonts({
+    Poppins_400Regular,
+    Poppins_600SemiBold,
+    Poppins_700Bold,
+  });
+
+  // Initial loading animation
   useEffect(() => {
-    let data = [];
-    if (selectedFilter === "all") {
-      data = [...companies];
-    } else if (selectedFilter === "popular") {
-      data = [...companies.filter(company => company.count > 15)];
+    if (fontsLoaded) {
+      // Simulate API loading with a delay
+      setTimeout(() => {
+        setIsLoading(false);
+
+        // Animate in the content
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: true,
+          }),
+          Animated.timing(scaleAnim, {
+            toValue: 1,
+            duration: 600,
+            useNativeDriver: true,
+          })
+        ]).start(() => {
+          setHasLoaded(true);
+        });
+      }, LOADER_DURATION);
     }
-    
-    // Duplicate the data array multiple times to create a loop effect
-    const loop = [...data, ...data, ...data, ...data, ...data];
+  }, [fontsLoaded]);
+
+  // Filter companies based on selected filter and search query
+  useEffect(() => {
+    if (!hasLoaded) return;
+
+    let data = [...companies];
+
+    // Apply filter
+    if (selectedFilter === "popular") {
+      data = data.filter(company => company.count > 15);
+    } else if (selectedFilter === "trending") {
+      data = data.filter(company => company.trendDirection === "up" && company.trendPercentage > 10);
+    }
+
+    // Apply search
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      data = data.filter(company => company.name.toLowerCase().includes(query));
+    }
+
     setFilteredCompanies(data);
-    setLoopedCompanies(loop);
-    
-    // Initialize scroll to middle to create illusion of infinite scroll
+
+    // Create looped data for infinite scroll
+    const multipleData = [];
+    for (let i = 0; i < 5; i++) {
+      multipleData.push(...data.map(item => ({ ...item, key: `${item.id}-${i}` })));
+    }
+    setLoopedCompanies(multipleData);
+
+    // Initialize scroll position to middle for infinite loop effect
     setTimeout(() => {
       if (flatListRef.current) {
-        flatListRef.current.scrollToOffset({ 
-          offset: data.length * ITEM_HEIGHT, 
-          animated: false 
+        flatListRef.current.scrollToOffset({
+          offset: data.length * ITEM_HEIGHT * 2,
+          animated: false
         });
       }
     }, 100);
-  }, [selectedFilter]);
+  }, [selectedFilter, searchQuery, hasLoaded]);
 
-  // Handle scroll to create infinite loop effect
+  // Create smooth scroll handler with intelligent loop reset
   const handleScroll = Animated.event(
     [{ nativeEvent: { contentOffset: { y: scrollY } } }],
     { useNativeDriver: true }
   );
 
-  const handleScrollEnd = (event) => {
+  const handleScrollEnd = useCallback((event) => {
+    if (!filteredCompanies.length) return;
+
     const offsetY = event.nativeEvent.contentOffset.y;
     const contentHeight = event.nativeEvent.contentSize.height;
-    
-    // If we're near the end, jump back to the middle
-    if (offsetY > contentHeight - height - ITEM_HEIGHT * 2) {
-      flatListRef.current.scrollToOffset({ 
-        offset: filteredCompanies.length * ITEM_HEIGHT, 
-        animated: false 
-      });
-    }
-    
-    // If we're near the beginning, jump to the middle
-    if (offsetY < ITEM_HEIGHT * 2) {
-      flatListRef.current.scrollToOffset({ 
-        offset: filteredCompanies.length * ITEM_HEIGHT * 3, 
-        animated: false 
-      });
-    }
-  };
+    const singleSetHeight = filteredCompanies.length * ITEM_HEIGHT;
 
-  const renderCompanyItem = ({ item, index }) => {
+    // Reset to middle when reaching near ends for seamless looping
+    if (offsetY > contentHeight - height - singleSetHeight) {
+      flatListRef.current?.scrollToOffset({
+        offset: 2 * singleSetHeight,
+        animated: false
+      });
+    } else if (offsetY < singleSetHeight) {
+      flatListRef.current?.scrollToOffset({
+        offset: 3 * singleSetHeight,
+        animated: false
+      });
+    }
+  }, [filteredCompanies]);
+
+  const handleCompanyPress = useCallback((company) => {
+    // Navigation would occur here to a detail screen
+    console.log(`Selected ${company.name}`);
+    // Example: navigation.navigate('CompanyDetail', { company });
+  }, []);
+
+  // Render company item with enhanced animations
+  const renderCompanyItem = useCallback(({ item, index }) => {
     const inputRange = [
       (index - 2) * ITEM_HEIGHT,
       (index - 1) * ITEM_HEIGHT,
@@ -94,111 +223,266 @@ const PastYearCompanies = () => {
       (index + 1) * ITEM_HEIGHT,
       (index + 2) * ITEM_HEIGHT,
     ];
-    
-    // Scale animation
+
+    // Enhanced scale animation with smoother curve
     const scale = scrollY.interpolate({
       inputRange,
-      outputRange: [0.8, 0.9, 1, 0.9, 0.8],
+      outputRange: [0.85, 0.95, 1, 0.95, 0.85],
       extrapolate: 'clamp',
     });
-    
-    // Opacity animation
+
+    // Enhanced opacity animation with smoother curve
     const opacity = scrollY.interpolate({
       inputRange,
-      outputRange: [0.6, 0.8, 1, 0.8, 0.6],
+      outputRange: [0.5, 0.8, 1, 0.8, 0.5],
+      extrapolate: 'clamp',
+    });
+
+    // Translate animation for parallax effect
+    const translateY = scrollY.interpolate({
+      inputRange,
+      outputRange: [25, 10, 0, -10, -25],
       extrapolate: 'clamp',
     });
 
     return (
-      <Animated.View 
+      <Animated.View
         style={[
           styles.companyItemContainer,
-          { 
-            transform: [{ scale }],
-            opacity 
+          {
+            transform: [{ scale }, { translateY }],
+            opacity
           }
         ]}
       >
-        <TouchableOpacity style={styles.companyItem}>
-          <Image source={item.logo} style={styles.companyLogo} />
+        <TouchableOpacity
+          style={styles.companyItem}
+          activeOpacity={0.8}
+          onPress={() => handleCompanyPress(item)}
+        >
+          <SharedElement id={`company.${item.id}.logo`}>
+            <Image source={item.logo} style={styles.companyLogo} />
+          </SharedElement>
+
           <View style={styles.companyDetails}>
             <Text style={styles.companyText}>{item.name}</Text>
-            <Text style={styles.companyCount}>{item.count} placements</Text>
+            <View style={styles.statsContainer}>
+              <Text style={styles.companyCount}>{item.count} placements</Text>
+              <View style={styles.trendContainer}>
+                <Ionicons
+                  name={item.trendDirection === "up" ? "trending-up" : "trending-down"}
+                  size={16}
+                  color={item.trendDirection === "up" ? "#4CAF50" : "#F44336"}
+                />
+                <Text
+                  style={[
+                    styles.trendText,
+                    { color: item.trendDirection === "up" ? "#4CAF50" : "#F44336" }
+                  ]}
+                >
+                  {item.trendPercentage}%
+                </Text>
+              </View>
+            </View>
           </View>
-          <View style={styles.iconContainer}>
-            <Ionicons name="chevron-forward" size={24} color="#C92EFF" />
+
+          <View style={[styles.iconContainer, { backgroundColor: item.primaryColor + '20' }]}>
+            <Ionicons name="chevron-forward" size={24} color={item.primaryColor} />
           </View>
         </TouchableOpacity>
       </Animated.View>
     );
-  };
+  }, [scrollY]);
+
+  // If fonts are still loading or initial animation is running
+  if (isLoading || !fontsLoaded) {
+    return (
+      <SafeAreaView style={styles.loaderContainer}>
+        <StatusBar barStyle="light-content" />
+        <LottieView
+          source={require('@/assets/animations/placement-loader.json')}
+          autoPlay
+          loop
+          style={styles.lottieLoader}
+        />
+        <Text style={styles.loaderText}>Placement Plus</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
-          <Text style={styles.logoText}>Placement Plus</Text>
-        </View>
-        <TouchableOpacity style={styles.profileButton}>
-          <Ionicons name="person-circle" size={35} color="#fff" />
-        </TouchableOpacity>
-      </View>
+      <StatusBar barStyle="light-content" />
 
-      {/* Content */}
-      <View style={styles.content}>
-        
-        {/* Filters */}
-        <View style={styles.filterContainer}>
-          <TouchableOpacity 
-            style={[styles.filterButton, selectedFilter === "all" && styles.filterButtonActive]} 
-            onPress={() => setSelectedFilter("all")}
-          >
-            <Text style={[styles.filterText, selectedFilter === "all" && styles.filterTextActive]}>All</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={[styles.filterButton, selectedFilter === "popular" && styles.filterButtonActive]} 
-            onPress={() => setSelectedFilter("popular")}
-          >
-            <Text style={[styles.filterText, selectedFilter === "popular" && styles.filterTextActive]}>Popular</Text>
-          </TouchableOpacity>
+      {/* Animated header with blur effect */}
+      <Animated.View
+        style={[
+          styles.header,
+          {
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }]
+          }
+        ]}
+      >
+        <BlurView intensity={20} style={styles.blurContainer}>
+          <View style={styles.headerContent}>
+            <View style={styles.logoContainer}>
+              <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
+              <Text style={styles.logoText}>Placement Plus</Text>
+            </View>
+            <TouchableOpacity style={styles.profileButton}>
+              <Ionicons name="person-circle" size={35} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </BlurView>
+      </Animated.View>
+
+      {/* Animated Content */}
+      <Animated.View
+        style={[
+          styles.content,
+          {
+            opacity: fadeAnim,
+            transform: [{ scale: scaleAnim }]
+          }
+        ]}
+      >
+        {/* Search bar */}
+        <View style={styles.searchContainer}>
+          <Ionicons name="search" size={20} color="#FFFFFF" style={styles.searchIcon} />
+          <TextInput
+            style={styles.searchInput}
+            placeholder="Search companies..."
+            placeholderTextColor="rgba(255, 255, 255, 0.6)"
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+          />
+          {searchQuery ? (
+            <TouchableOpacity onPress={() => setSearchQuery("")}>
+              <Ionicons name="close-circle" size={20} color="#FFFFFF" />
+            </TouchableOpacity>
+          ) : null}
         </View>
-        
-        {/* Cyclical Company List */}
-        <View style={styles.carouselContainer}>
-          <FlatList
-            ref={flatListRef}
-            data={loopedCompanies}
-            renderItem={renderCompanyItem}
-            keyExtractor={(item, index) => `${item.name}-${index}`}
-            showsVerticalScrollIndicator={false}
-            snapToInterval={ITEM_HEIGHT}
-            decelerationRate="fast"
-            onScroll={handleScroll}
-            onMomentumScrollEnd={handleScrollEnd}
-            contentContainerStyle={styles.listContainer}
-            snapToAlignment="center"
+
+        {/* Filter tabs with animated indicator */}
+        <View style={styles.filterContainer}>
+          <FilterTab
+            label="All"
+            isActive={selectedFilter === "all"}
+            onPress={() => setSelectedFilter("all")}
+          />
+          <FilterTab
+            label="Popular"
+            isActive={selectedFilter === "popular"}
+            onPress={() => setSelectedFilter("popular")}
+          />
+          <FilterTab
+            label="Trending"
+            isActive={selectedFilter === "trending"}
+            onPress={() => setSelectedFilter("trending")}
           />
         </View>
-      </View>
+
+        {/* Empty state if no companies match filter */}
+        {filteredCompanies.length === 0 && hasLoaded ? (
+          <View style={styles.emptyContainer}>
+            <LottieView
+              source={require('@/assets/animations/empty-state.json')}
+              autoPlay
+              loop
+              style={styles.emptyAnimation}
+            />
+            <Text style={styles.emptyText}>No companies found</Text>
+            <Text style={styles.emptySubtext}>Try adjusting your filters</Text>
+          </View>
+        ) : (
+          /* Optimized FlatList for smooth scrolling */
+          <View style={styles.carouselContainer}>
+            <Animated.FlatList
+              ref={flatListRef}
+              data={loopedCompanies}
+              renderItem={renderCompanyItem}
+              keyExtractor={(item) => item.key}
+              showsVerticalScrollIndicator={false}
+              snapToInterval={ITEM_HEIGHT}
+              decelerationRate={0.85}
+              onScroll={handleScroll}
+              onMomentumScrollEnd={handleScrollEnd}
+              contentContainerStyle={styles.listContainer}
+              snapToAlignment="center"
+              removeClippedSubviews={true}
+              maxToRenderPerBatch={5}
+              initialNumToRender={8}
+              windowSize={10}
+            />
+          </View>
+        )}
+      </Animated.View>
+
+      {/* Floating action button */}
+      {hasLoaded && (
+        <TouchableOpacity style={styles.floatingButton}>
+          <Ionicons name="add" size={24} color="#FFFFFF" />
+        </TouchableOpacity>
+      )}
     </SafeAreaView>
   );
 };
+
+// Reusable filter tab component with animation
+const FilterTab = ({ label, isActive, onPress }) => {
+  return (
+    <TouchableOpacity
+      style={[styles.filterButton, isActive && styles.filterButtonActive]}
+      onPress={onPress}
+      activeOpacity={0.7}
+    >
+      <Text style={[styles.filterText, isActive && styles.filterTextActive]}>{label}</Text>
+      {isActive && <View style={styles.filterIndicator} />}
+    </TouchableOpacity>
+  );
+};
+
+// Text input component with proper imports
+const TextInput = Animated.createAnimatedComponent(require('react-native').TextInput);
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#1a012c",
   },
+  loaderContainer: {
+    flex: 1,
+    backgroundColor: "#1a012c",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  lottieLoader: {
+    width: 200,
+    height: 200,
+  },
+  loaderText: {
+    color: "#FFFFFF",
+    fontSize: 24,
+    fontWeight: "bold",
+    marginTop: 20,
+  },
   header: {
+    width: "100%",
+    zIndex: 10,
+  },
+  blurContainer: {
+    width: "100%",
+    overflow: "hidden",
+  },
+  headerContent: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     width: "100%",
-    marginTop: 10,
-    marginBottom: 10,
+    paddingVertical: 15,
     paddingHorizontal: 20,
+    marginTop: 15
   },
   logoContainer: {
     flexDirection: "row",
@@ -213,8 +497,7 @@ const styles = StyleSheet.create({
   logoText: {
     color: "white",
     fontSize: 22,
-    fontWeight: "bold",
-    fontFamily: "sans-serif",
+    fontFamily: "Poppins_700Bold",
   },
   profileButton: {
     padding: 5,
@@ -222,28 +505,61 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.12)",
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    marginBottom: 20,
+    height: 45,
+  },
+  searchIcon: {
+    marginRight: 10,
+  },
+  searchInput: {
+    flex: 1,
+    color: "#FFFFFF",
+    fontFamily: "Poppins_400Regular",
+    height: 45,
   },
   filterContainer: {
     flexDirection: "row",
-    justifyContent: "center",
     marginBottom: 25,
   },
   filterButton: {
     paddingVertical: 8,
     paddingHorizontal: 20,
-    marginHorizontal: 8,
+    marginRight: 12,
     borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(255, 255, 255, 0.08)",
+    position: "relative",
   },
   filterButtonActive: {
-    backgroundColor: "#C92EFF",
+    backgroundColor: "rgba(201, 46, 255, 0.15)",
   },
   filterText: {
     color: "#FFFFFF",
-    fontWeight: "600",
+    opacity: 0.7,
+    fontFamily: "Poppins_400Regular",
+    fontSize: 14,
   },
   filterTextActive: {
-    color: "#FFFFFF",
+    color: "#C92EFF",
+    opacity: 1,
+    fontFamily: "Poppins_600SemiBold",
+  },
+  filterIndicator: {
+    position: "absolute",
+    bottom: -5,
+    left: "50%",
+    marginLeft: -3,
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "#C92EFF",
   },
   carouselContainer: {
     flex: 1,
@@ -251,49 +567,107 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   listContainer: {
-    paddingVertical: height / 4, // Add padding to create space above and below the list
+    paddingVertical: height / 5,
   },
   companyItemContainer: {
     height: ITEM_HEIGHT,
     justifyContent: "center",
     alignItems: "center",
-    // marginVertical: 10,
+    marginVertical: 5,
   },
   companyItem: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.95)",
-    borderRadius: 15,
-    padding: 15,
+    backgroundColor: "rgba(255, 255, 255, 0.97)",
+    borderRadius: 18,
+    padding: 16,
     width: width - 40,
     shadowColor: "#C92EFF",
-    shadowOffset: { width: 0, height: 4 },
+    shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.2,
-    shadowRadius: 5,
-    elevation: 4,
+    shadowRadius: 15,
+    elevation: 10,
   },
   companyLogo: {
-    width: 50,
-    height: 50,
+    width: 55,
+    height: 55,
     resizeMode: "contain",
     marginRight: 15,
+    borderRadius: 12,
   },
   companyDetails: {
     flex: 1,
   },
   companyText: {
     color: "#1a012c",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 17,
+    fontFamily: "Poppins_600SemiBold",
+    marginBottom: 3,
+  },
+  statsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
   },
   companyCount: {
     color: "#666",
-    fontSize: 14,
-    marginTop: 3,
+    fontSize: 13,
+    fontFamily: "Poppins_400Regular",
+  },
+  trendContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: 12,
+    backgroundColor: "rgba(0, 0, 0, 0.05)",
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  trendText: {
+    fontSize: 12,
+    fontFamily: "Poppins_600SemiBold",
+    marginLeft: 3,
   },
   iconContainer: {
-    padding: 5,
+    padding: 8,
+    borderRadius: 12,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyAnimation: {
+    width: 150,
+    height: 150,
+  },
+  emptyText: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontFamily: "Poppins_600SemiBold",
+    marginTop: 10,
+  },
+  emptySubtext: {
+    color: "rgba(255, 255, 255, 0.6)",
+    fontSize: 14,
+    fontFamily: "Poppins_400Regular",
+    marginTop: 5,
+  },
+  floatingButton: {
+    position: "absolute",
+    bottom: 30,
+    right: 30,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    backgroundColor: "#C92EFF",
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#C92EFF",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.5,
+    shadowRadius: 10,
+    elevation: 8,
   },
 });
 
-export default PastYearCompanies;
+export default CompaniesScreen;

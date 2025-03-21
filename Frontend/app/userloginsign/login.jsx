@@ -4,6 +4,8 @@ import { Link, useRouter } from "expo-router";
 import { SimpleLineIcons, Feather, MaterialIcons } from "@expo/vector-icons";
 import * as Yup from "yup";
 import { LinearGradient } from "expo-linear-gradient";
+import { storeAccessToken, storeRefreshToken } from "../../utils/tokenStorage.js";
+import { useUser } from "../../context/userContext.js"
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string()
@@ -24,6 +26,7 @@ const LoginScreen = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState({});
+  const { login } = useUser()
 
   const handleChange = (field, value) => {
     setFormData({
@@ -103,7 +106,15 @@ const LoginScreen = () => {
         throw new Error(result.message || 'Login failed');
       }
 
-      console.log('Login successful:', result);
+      await storeAccessToken(result?.data?.accessToken)
+      await storeRefreshToken(result?.data?.refreshToken)
+      login(result?.data?.user)
+
+      // console.log(await getAccessToken());
+      // console.log(await getRefreshToken());
+
+
+      // console.log('Login successful:', result);
 
       router.replace("/HomePage/Home")
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -6,23 +6,27 @@ import {
   TouchableOpacity,
   StyleSheet,
   StatusBar,
+  ScrollView,
+  SafeAreaView,
+  Alert,
 } from 'react-native';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
-import companiesData from '../companies.json';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 
-// Map image names to require statements
 const imageMap = {
   'apple.png': require('@/assets/images/apple.png'),
-  'google.png': require('@/assets/images/google.png'),
+  'Google.png': require('@/assets/images/google.png'),
   'microsoft.png': require('@/assets/images/microsoft.png'),
-  'amazon.png': require('@/assets/images/amazon.png'),
+  'Amazon.png': require('@/assets/images/amazon.png'),
   'meta.png': require('@/assets/images/meta.png'),
   'netflix.png': require('@/assets/images/netflix.png'),
   'nvidia.png': require('@/assets/images/nvidia.png'),
 };
 
 const App = () => {
-  const [companies, setCompanies] = useState(companiesData?.companies || []);
+  const [companies, setCompanies] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   const showNextCompany = () => {
@@ -41,39 +45,100 @@ const App = () => {
     const item = companies[currentIndex];
     return (
       <View style={styles.cardContainer}>
-        <View style={styles.card}>
+        <LinearGradient
+          colors={['rgba(138, 35, 135, 0.8)', 'rgba(26, 1, 44, 0.9)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.card}
+        >
           <View style={styles.companyHeader}>
             <Image
-              source={imageMap[item.photo]}
+              source={imageMap[`${item.companyName}.png`]}
               style={styles.image}
               onError={() => console.log('Image failed to load')}
             />
             <View style={styles.headerTextContainer}>
-              <Text style={styles.companyName}>{item.name}</Text>
-              <Text style={styles.poc}>POC: {item.poc}</Text>
+              <Text style={styles.companyName}>{item.companyName}</Text>
             </View>
           </View>
 
           <View style={styles.divider} />
 
-          <View style={styles.detailsContainer}>
-            <DetailItem icon="graduation-cap" label="Eligible Branches" value={item.eligibleBranches.join(', ')} />
-            <DetailItem icon="check-circle" label="Eligibility Criteria" value={item.eligibilityCriteria} />
-            <DetailItem icon="money" label="Stipend/CTC" value={item.stipendCTC} />
-            <DetailItem icon="list-ol" label="No. of Rounds" value={item.noOfRounds} />
-            <DetailItem icon="calendar" label="Assessment Dates" value={item.assessmentInterviewDates} />
-          </View>
-        </View>
+          <ScrollView style={styles.detailsScrollView} showsVerticalScrollIndicator={false}>
+            <View style={styles.detailsContainer}>
+              <DetailItem icon="graduation-cap" label="Eligible Branches" value={item?.eligibleBranches?.join(', ')} />
+              <DetailItem icon="users" label="Eligible Batches" value={item?.eligibleBatches?.join(', ')} />
+              <DetailItem icon="briefcase" label="Role" value={item?.role} />
+              <DetailItem icon="star" label="CGPA Criteria" value={item?.cgpaCriteria} />
+              <DetailItem icon="tasks" label="Hiring Process" value={item?.hiringProcess} />
+              <DetailItem icon="map-marker" label="Job Location" value={item?.jobLocation} />
+              <DetailItem icon="calendar" label="Schedule" value={item?.schedule} />
+              <DetailItem icon="laptop" label="Mode" value={item?.mode} />
+              <DetailItem icon="building" label="Opportunity Type" value={item?.opportunityType} />
+              <DetailItem icon="info-circle" label="Extra Details" value={item?.extraDetails} />
+              <DetailItem icon="user" label="Point of Contact" value={item?.pocDetails?.name} />
+              <DetailItem icon="phone" label="Contact Number" value={item?.pocDetails?.contactNo} />
+              <View style={styles.scrollPadding} />
+            </View>
+          </ScrollView>
+        </LinearGradient>
       </View>
     );
   };
 
+  const normalizeDecimalFields = (data) => {
+    return data.map((item) => ({
+      ...item,
+      cgpaCriteria: item.cgpaCriteria?.$numberDecimal || item.cgpaCriteria,
+      stipend: item.stipend?.$numberDecimal || item.stipend,
+      ctc: item.ctc?.$numberDecimal || item.ctc,
+    }));
+  };
+
+  useEffect(() => {
+    fetchAllCompanies();
+  }, []);
+
+  const fetchAllCompanies = async () => {
+    try {
+
+      const accessToken = await getAccessToken()
+      const refreshToken = await getRefreshToken()
+
+      const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/companies/list-all-company`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'x-refresh-token': `${refreshToken}`
+        }
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || 'Failed to fetch companies');
+      }
+      // console.log(result.data);
+
+      setCompanies(normalizeDecimalFields(result.data));
+    } catch (error) {
+      Alert.alert(
+        "Error",
+        error.message || "Something went wrong. Please try again.",
+        [{ text: "OK" }]
+      );
+      console.error('Error:', error.message);
+    }
+  };
+
   const DetailItem = ({ icon, label, value }) => (
     <View style={styles.detailItem}>
-      <FontAwesome name={icon} size={18} color="#f0c5f1" style={styles.detailIcon} />
+      <View style={styles.iconContainer}>
+        <FontAwesome name={icon} size={16} color="#fff" />
+      </View>
       <View style={styles.detailTextContainer}>
         <Text style={styles.detailLabel}>{label}</Text>
-        <Text style={styles.detailValue}>{value}</Text>
+        <Text style={styles.detailValue}>{value || "Not specified"}</Text>
       </View>
     </View>
   );
@@ -81,107 +146,154 @@ const App = () => {
   if (companies.length === 0) {
     return (
       <View style={styles.loadingContainer}>
-        <Text style={styles.loadingText}>Loading...</Text>
+        <LinearGradient
+          colors={['rgba(138, 35, 135, 0.8)', 'rgba(26, 1, 44, 0.9)']}
+          style={styles.loadingGradient}
+        >
+          <Text style={styles.loadingText}>Loading...</Text>
+        </LinearGradient>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a012c" />
+    <SafeAreaView style={styles.safeArea}>
+      <LinearGradient
+        colors={['#2d0e3e', '#1a012c']}
+        style={styles.container}
+      >
+        <StatusBar barStyle="light-content" backgroundColor="#2d0e3e" />
 
-      {/* Header with Logo */}
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
-          <Text style={styles.logoText}>Placement Plus</Text>
+        {/* Header with Logo */}
+        <BlurView intensity={30} tint="dark" style={styles.headerBlur}>
+          <View style={styles.header}>
+            <View style={styles.logoContainer}>
+              <Image source={require('@/assets/images/logo.png')} style={styles.logo} />
+              <Text style={styles.logoText}>Placement Plus</Text>
+            </View>
+            <TouchableOpacity style={styles.profileButton}>
+              <Ionicons name="person-circle" size={35} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </BlurView>
+
+        {/* Page Title & Indicators */}
+        <View style={styles.titleContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.indicatorScrollContent}
+          >
+            <View style={styles.indicatorContainer}>
+              {companies.map((_, i) => (
+                <TouchableOpacity
+                  key={i}
+                  onPress={() => setCurrentIndex(i)}
+                >
+                  <View
+                    style={[
+                      styles.indicator,
+                      { backgroundColor: currentIndex === i ? '#bb39bf' : 'rgba(255, 255, 255, 0.2)' },
+                    ]}
+                  />
+                </TouchableOpacity>
+              ))}
+            </View>
+          </ScrollView>
         </View>
-        <TouchableOpacity style={styles.profileButton}>
-          <Ionicons name="person-circle" size={35} color="#fff" />
-        </TouchableOpacity>
-      </View>
 
-      {/* Page Title */}
-      <View style={styles.titleContainer}>
-        {/* <Text style={styles.titleText}>Upcoming Companies</Text> */}
-        <View style={styles.indicatorContainer}>
-          {companies.map((_, i) => (
-            <View
-              key={i}
-              style={[
-                styles.indicator,
-                { backgroundColor: currentIndex === i ? '#8b0890' : '#555' },
-              ]}
-            />
-          ))}
+        {/* Company Card */}
+        {renderCompanyCard()}
+
+        {/* Navigation Buttons */}
+        <View style={styles.navigationButtons}>
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              currentIndex === 0 ? styles.navButtonDisabled : styles.navButtonEnabled
+            ]}
+            onPress={showPreviousCompany}
+            disabled={currentIndex === 0}
+          >
+            <FontAwesome name="chevron-left" size={16} color="white" />
+            <Text style={styles.navButtonText}>Previous</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[
+              styles.navButton,
+              currentIndex === companies.length - 1 ? styles.navButtonDisabled : styles.navButtonEnabled
+            ]}
+            onPress={showNextCompany}
+            disabled={currentIndex === companies.length - 1}
+          >
+            <Text style={styles.navButtonText}>Next</Text>
+            <FontAwesome name="chevron-right" size={16} color="white" />
+          </TouchableOpacity>
         </View>
-      </View>
 
-      {/* Company Card */}
-      {renderCompanyCard()}
-
-      {/* Navigation Buttons */}
-      <View style={styles.navigationButtons}>
-        <TouchableOpacity
-          style={[styles.navButton, { opacity: currentIndex > 0 ? 1 : 0.5 }]}
-          onPress={showPreviousCompany}
-          disabled={currentIndex === 0}
-        >
-          <FontAwesome name="chevron-left" size={20} color="white" />
-          <Text style={styles.navButtonText}>Previous</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[styles.navButton, { opacity: currentIndex < companies.length - 1 ? 1 : 0.5 }]}
-          onPress={showNextCompany}
-          disabled={currentIndex === companies.length - 1}
-        >
-          <Text style={styles.navButtonText}>Next</Text>
-          <FontAwesome name="chevron-right" size={20} color="white" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Footer with Social Media Icons */}
-      <View style={styles.footer}>
-        <TouchableOpacity style={styles.socialButton}>
-          <FontAwesome name="facebook" size={22} color="#3b5998" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <FontAwesome name="twitter" size={22} color="#1da1f2" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <FontAwesome name="instagram" size={22} color="#e1306c" />
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.socialButton}>
-          <FontAwesome name="linkedin" size={22} color="#0077b5" />
-        </TouchableOpacity>
-      </View>
-    </View>
+        {/* Footer with Social Media Icons */}
+        <BlurView intensity={20} tint="dark" style={styles.footerBlur}>
+          <View style={styles.footer}>
+            <TouchableOpacity style={styles.socialButton}>
+              <FontAwesome name="facebook" size={20} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialButton}>
+              <FontAwesome name="twitter" size={20} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialButton}>
+              <FontAwesome name="instagram" size={20} color="#fff" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.socialButton}>
+              <FontAwesome name="linkedin" size={20} color="#fff" />
+            </TouchableOpacity>
+          </View>
+        </BlurView>
+      </LinearGradient>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#2d0e3e',
+  },
   container: {
     flex: 1,
-    backgroundColor: '#1a012c',
-    paddingHorizontal: 20,
+    paddingHorizontal: 15,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#1a012c',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  loadingGradient: {
+    width: '80%',
+    height: 100,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
   loadingText: {
     color: 'white',
     fontSize: 18,
+    fontWeight: '600',
+  },
+  headerBlur: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: 15,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '100%',
-    paddingTop: 10,
-    paddingBottom: 2,
+    paddingTop: 15,
+    paddingBottom: 15,
+    paddingHorizontal: 5,
+    marginTop: 15
   },
   logoContainer: {
     flexDirection: 'row',
@@ -197,146 +309,156 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 22,
     fontWeight: 'bold',
+    fontFamily: 'System',
   },
   profileButton: {
     padding: 5,
   },
   titleContainer: {
     alignItems: 'center',
-    marginVertical: 15,
+    marginBottom: 20,
   },
-  titleText: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: 'white',
-    marginBottom: 10,
+  indicatorScrollContent: {
+    paddingHorizontal: 10,
   },
   indicatorContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginBottom: 1,
   },
   indicator: {
-    height: 8,
-    width: 8,
-    borderRadius: 4,
-    marginHorizontal: 4,
+    height: 6,
+    width: 30,
+    borderRadius: 3,
+    marginHorizontal: 5,
   },
   cardContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 20,
   },
   card: {
-    backgroundColor: '#1a012c',
-    borderRadius: 16,
-    padding: 20,
-    shadowColor: 'rgb(247, 3, 255)',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.7,
-    shadowRadius: 15,
-    elevation: 5,
-    width: '90%',
+    borderRadius: 24,
+    padding: 24,
+    width: '100%',
+    height: '100%',
+    shadowColor: '#bb39bf',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.5,
+    shadowRadius: 24,
+    elevation: 8,
   },
   companyHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 20,
   },
   image: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: 'white',
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    borderWidth: 3,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
   },
   headerTextContainer: {
     marginLeft: 15,
     flex: 1,
   },
   companyName: {
-    fontSize: 29,
+    fontSize: 26,
     fontWeight: 'bold',
     color: 'white',
-    fontFamily: 'smonospace',
-  },
-  poc: {
-    fontSize: 14,
-    color: '#f0c5f1',
-    marginTop: 5,
-    fontWeight: 'bold',
-    fontFamily: 'smonospace',
+    fontFamily: 'System',
+    letterSpacing: 0.5,
   },
   divider: {
     height: 1,
-    backgroundColor: 'rgba(254, 254, 254, 0.2)',
-    marginVertical: 15,
+    backgroundColor: 'rgba(255, 255, 255, 0.15)',
+    marginVertical: 20,
+  },
+  detailsScrollView: {
+    flex: 1,
   },
   detailsContainer: {
     width: '100%',
   },
   detailItem: {
     flexDirection: 'row',
-    marginBottom: 12,
+    marginBottom: 16,
     alignItems: 'flex-start',
   },
-  detailIcon: {
-    marginRight: 10,
-    marginTop: 3,
+  iconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(187, 57, 191, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
   },
   detailTextContainer: {
     flex: 1,
   },
   detailLabel: {
     fontSize: 14,
-    color: '#f0c5f1',
-    marginBottom: 3,
-    fontFamily: 'smonospace',
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginBottom: 4,
+    fontFamily: 'System',
+    fontWeight: '500',
   },
   detailValue: {
     fontSize: 16,
     color: 'white',
-    fontFamily: 'smonospace',
+    fontFamily: 'System',
+    fontWeight: '600',
   },
   navigationButtons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginVertical: 15,
+    marginBottom: 20,
   },
   navButton: {
-    backgroundColor: '#8b0890',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 15,
-    borderRadius: 10,
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 12,
     justifyContent: 'center',
-    width: '45%',
+    width: '47%',
+  },
+  navButtonEnabled: {
+    backgroundColor: 'rgba(187, 57, 191, 0.8)',
+  },
+  navButtonDisabled: {
+    backgroundColor: 'rgba(187, 57, 191, 0.3)',
   },
   navButtonText: {
     color: 'white',
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginHorizontal: 5,
+    fontSize: 15,
+    fontWeight: '600',
+    marginHorizontal: 8,
+  },
+  footerBlur: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 'auto',
-    marginBottom: 10,
-    paddingTop: 15,
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.1)',
+    paddingVertical: 15,
   },
   socialButton: {
-    width: 30,
-    height: 30,
+    width: 40,
+    height: 40,
     borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: 'rgba(187, 57, 191, 0.3)',
     justifyContent: 'center',
     alignItems: 'center',
-    marginHorizontal: 10,
+    marginHorizontal: 12,
+  },
+  scrollPadding: {
+    height: 20,
   },
 });
 

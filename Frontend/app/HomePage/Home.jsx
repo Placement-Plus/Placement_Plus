@@ -1,14 +1,14 @@
 import React, { useState, useRef } from "react";
-import { 
-  View, 
-  Text, 
-  TextInput, 
-  Pressable, 
-  Image, 
-  Dimensions, 
-  Animated, 
-  StyleSheet, 
-  StatusBar, 
+import {
+  View,
+  Text,
+  TextInput,
+  Pressable,
+  Image,
+  Dimensions,
+  Animated,
+  StyleSheet,
+  StatusBar,
   ScrollView,
   SafeAreaView,
   Platform
@@ -16,6 +16,7 @@ import {
 import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
+import { useUser } from "../../context/userContext.js";
 
 // Import your images
 import pastYearCompany from "@/assets/images/pastyearcompany.png";
@@ -103,20 +104,21 @@ const PlacementPlus = () => {
   const scaleAnims = useRef(menuItems.map(() => new Animated.Value(1))).current;
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredItems, setFilteredItems] = useState(menuItems);
+  const { user, isLoggedIn } = useUser()
 
   // Handle search
   const handleSearch = (text) => {
     setSearchQuery(text);
-    
+
     if (text.trim() === "") {
       setFilteredItems(menuItems);
       return;
     }
-    
-    const filtered = menuItems.filter(item => 
+
+    const filtered = menuItems.filter(item =>
       item.title.toLowerCase().includes(text.toLowerCase())
     );
-    
+
     setFilteredItems(filtered);
   };
 
@@ -145,13 +147,13 @@ const PlacementPlus = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#14011F" />
-      
+
       {/* Background gradient */}
       <LinearGradient
         colors={['#1D0A3F', '#14011F']}
         style={styles.backgroundGradient}
       />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
@@ -173,7 +175,7 @@ const PlacementPlus = () => {
 
       {/* Welcome Message */}
       <View style={styles.welcomeSection}>
-        <Text style={styles.welcomeText}>Hello, Student!</Text>
+        <Text style={styles.welcomeText}>{`Hello, ${user?.name.split(" ")[0]}`}</Text>
         <Text style={styles.welcomeSubtext}>What would you like to explore today?</Text>
       </View>
 
@@ -258,7 +260,7 @@ const PlacementPlus = () => {
               <FontAwesome name="facebook" size={18} color="#fff" />
             </LinearGradient>
           </Pressable>
-          
+
           <Pressable style={styles.socialButton}>
             <LinearGradient
               colors={['#d62976', '#962fbf']}
@@ -267,7 +269,7 @@ const PlacementPlus = () => {
               <FontAwesome name="instagram" size={18} color="#fff" />
             </LinearGradient>
           </Pressable>
-          
+
           <Pressable style={styles.homeButton}>
             <LinearGradient
               colors={['#C92EFF', '#9332FF']}
@@ -276,7 +278,7 @@ const PlacementPlus = () => {
               <MaterialIcons name="home" size={30} color="#fff" />
             </LinearGradient>
           </Pressable>
-          
+
           <Pressable style={styles.socialButton}>
             <LinearGradient
               colors={['#1DA1F2', '#0d8ad6']}
@@ -285,13 +287,13 @@ const PlacementPlus = () => {
               <FontAwesome name="twitter" size={18} color="#fff" />
             </LinearGradient>
           </Pressable>
-          
+
           <Pressable style={styles.socialButton}>
             <LinearGradient
               colors={['#FF0000', '#cc0000']}
               style={styles.socialIconContainer}
             >
-              {/* <FontAwesome name="youtube-play" size={18} color="#fff" /> */}
+              <FontAwesome name="youtube-play" size={18} color="#fff" />
             </LinearGradient>
           </Pressable>
         </View>
@@ -406,7 +408,7 @@ const styles = StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: 16,
-    paddingBottom: 100, 
+    paddingBottom: 100,
   },
   gridContainer: {
     flexDirection: "row",
