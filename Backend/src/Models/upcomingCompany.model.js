@@ -30,7 +30,7 @@ const upcomingCompanySchema = new mongoose.Schema({
         required: true
     },
     cgpaCriteria: {
-        type: mongoose.Types.Decimal128,
+        type: Number,
         required: true,
         validate: {
             validator: function (value) {
