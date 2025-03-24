@@ -38,6 +38,9 @@ export default function RootLayout() {
           <Stack.Screen name="screens/CurrentYearPlacement" options={{ headerShown: false }} />
           <Stack.Screen name="screens/ConnectWithAlumni" options={{ headerShown: false }} />
           <Stack.Screen name="screens/QuestionAskByCompanies" options={{ headerShown: false }} />
+          <Stack.Screen name="screens/InterviewPrep" options={{ headerShown: false }} />
+          <Stack.Screen name="screens/FundamentalSubject" options={{ headerShown: false }} />
+          <Stack.Screen name="screens/hrQuestions" options={{ headerShown: false }} />
           <Stack.Screen name="screens/UpcomingCompanies" options={{ headerShown: false }} />
           <Stack.Screen name="screens/BranchWisePlacement" options={{ headerShown: false }} />
           <Stack.Screen name="screens/PlacementPolicies" options={{ headerShown: false }} />
