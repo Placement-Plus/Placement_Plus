@@ -14,15 +14,14 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
-import dsaScreen from "../Preperation/dsa.jsx";
 
 const PreparationHub = () => {
   const router = useRouter();
-  const navigateTo = async (routeName) => {
+  const navigateTo = (routeName) => {
     try {
       console.log("Navigating to:", routeName);
       if (router) {
-        await router.push(routeName);
+        router.push(routeName);
       } else {
         console.error("Router is not initialized.");
       }
@@ -30,12 +29,13 @@ const PreparationHub = () => {
       console.error("Navigation error:", error);
     }
   };
+
   const preparationOptions = [
     {
       id: "dsa",
       title: "DSA Preparation",
       description: "Data Structures & Algorithms",
-      route: "/Preparation/dsa", // Route for DSA preparation
+      route: "/screens/QuestionAskByCompanies", // Route for DSA preparation
       icon: (props) => <FontAwesome5 name="code" {...props} />, // Icon for DSA
       gradient: ["#3a1c71", "#d76d77"], // Gradient colors
       topics: "100+ Algorithms & 50+ Data Structures", // Topics description
@@ -43,8 +43,8 @@ const PreparationHub = () => {
     {
       id: "cs",
       title: "Computer Fundamentals",
-      description: "OS, DBMS, CN & System Design",
-      route: "/Preparation/cf", // Route for Computer Fundamentals
+      description: "OS, DBMS, CN & OOPS",
+      route: "/screens/FundamentalSubject", // Route for Computer Fundamentals
       icon: (props) => <MaterialCommunityIcons name="laptop" {...props} />, // Icon for CS
       gradient: ["#000428", "#004e92"], // Gradient colors
       topics: "4 Subjects & 200+ Important Topics", // Topics description
@@ -53,7 +53,7 @@ const PreparationHub = () => {
       id: "hr",
       title: "HR Preparation",
       description: "Interview Skills & Communication",
-      route: "/Preparation/hr", // Route for HR preparation
+      route: "/screens/hrQuestions", // Route for HR preparation
       icon: (props) => <Ionicons name="people" {...props} />, // Icon for HR
       gradient: ["#603813", "#b29f94"], // Gradient colors
       topics: "50+ Common Questions & Mock Interviews", // Topics description
@@ -145,6 +145,7 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
     borderBottomWidth: 1,
     borderBottomColor: "rgba(255, 255, 255, 0.1)",
+    marginTop: 10
   },
   headerContent: {
     flexDirection: "row",
