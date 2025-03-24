@@ -10,7 +10,6 @@ router.route("/add-pdf").post(verifyAdmin,
     addPdf
 );
 router.route("/get-pdf/c/:fileId").get(verifyJWT, getPdf)
-router.route("get-all-pdf").get(verifyJWT, getAllPdf)
-
+router.route("/get-all-pdf").get(verifyJWT, getAllPdf)
 
 export default router

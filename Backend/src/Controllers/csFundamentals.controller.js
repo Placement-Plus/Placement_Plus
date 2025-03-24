@@ -5,9 +5,9 @@ import { CSFundamentals } from "../Models/csFundamentals.model.js";
 import { uploadFileOnAppwrite, getFileFromAppwrite } from "../Utils/appwrite.js";
 
 const addPdf = asyncHandler(async (req, res) => {
-    const { subjectName, description } = req.body
-    if (!subjectName)
-        throw new ApiError(400, "Subject name is required")
+    const { subjectName, description, fileName } = req.body
+    if (!subjectName || !fileName)
+        throw new ApiError(400, "Subject name and file name is required")
 
     const pdfLocalPath = req.files?.pdf[0]?.path
     if (!pdfLocalPath)
@@ -20,7 +20,8 @@ const addPdf = asyncHandler(async (req, res) => {
     const newMaterial = await CSFundamentals.create({
         subjectName,
         description,
-        pdfLink: uploadedPdf.$id
+        pdfLink: uploadedPdf.$id,
+        fileName
     })
 
     const addedMaterial = await CSFundamentals.findById(newMaterial._id)

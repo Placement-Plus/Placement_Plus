@@ -6,7 +6,12 @@ const csFundamentalsSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-            enum: ["OS", "DBMS", "OOPS", "Networks", "Software Engineering"]
+            enum: ["Operating System", "DBMS", "OOPS", "Computer Networks"]
+        },
+        fileName: {
+            type: String,
+            required: true,
+            trim: true
         },
         pdfLink: {
             type: String,
