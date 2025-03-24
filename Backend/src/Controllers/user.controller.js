@@ -37,6 +37,9 @@ const registerUser = asyncHandler(async (req, res) => {
     if (password.trim().length < 5)
         throw new ApiError(400, "Password must contain 6 or more characters")
 
+    if (email.trim().substring(0, 9) !== String(rollNo))
+        throw new ApiError(400, "Email should contain roll no")
+
     const existedUser = await User.findOne({
         $or: [{ email, rollNo }]
     })
@@ -170,9 +173,12 @@ const uploadResume = asyncHandler(async (req, res) => {
     if (!resumeLocalPath)
         throw new ApiError(400, "Resume is required")
 
-    const resume = await uploadResumeOnAppwrite(resumeLocalPath, req.user.name)
+    const resume = await uploadResumeOnAppwrite(resumeLocalPath, req?.user?.name)
     if (!resume)
         throw new ApiError(500, "Something went wrong while uploading resume")
+
+    console.log(req.user);
+
 
     const user = await User.findByIdAndUpdate(req.user._id,
         {

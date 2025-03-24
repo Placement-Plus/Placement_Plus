@@ -6,11 +6,9 @@ import FormData from "form-data"
 import fs from "fs"
 import natural from "natural"
 import cosineSimilarity from "cosine-similarity";
-import OpenAI from "openai"
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
-
-const openai = new OpenAI({ baseURL: 'https://api.deepseek.com', apiKey: process.env.DEEPSEEK_API_KEY });
-
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_AI_API_KEY);
 
 const parseResume = asyncHandler(async (req, res) => {
     const resumeLocalPath = req.files?.resume[0]?.path;
@@ -136,45 +134,43 @@ const getFinalResumeScore = asyncHandler((req, res) => {
 });
 
 const getResumeSuggestion = asyncHandler(async (req, res) => {
+    const { resume } = req.body;
+    if (!resume) throw new ApiError(400, "Resume data is required");
+
+    const prompt = `Analyze the given resume and suggest improvements. Provide actionable advice for each section (Skills, Experience, Education, Projects, Summary, Achievements). Keep it concise but impactful.
+
+    Resume Data: ${JSON.stringify(resume)}
+    
+    Output format:
+    {
+        "resume_score": (score out of 100),
+        "suggestions": {
+            "skills": "Suggested skill improvements...",
+            "experience": "Suggested experience improvements...",
+            "projects": "Suggested project improvements...",
+            "summary": "Suggested summary improvements...",
+            "achievements": "Suggested achievement improvements..."
+        }
+    }`;
+
     try {
-        const { resume } = req.body;
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const response = await model.generateContent({ contents: [{ role: "user", parts: [{ text: prompt }] }] });
 
-        const prompt = `Analyze the given resume and suggest improvements. Provide actionable advice for each section (Skills, Experience, Education, Projects, Summary, Achievements). Keep it concise but impactful.
+        const responseText = response?.response?.candidates[0]?.content?.parts[0]?.text;
+        if (!responseText) throw new ApiError(500, "Invalid response from Gemini AI");
 
-        Resume Data: ${JSON.stringify(resume)}
-        
-        Output format:
-        {
-            "resume_score": (score out of 100),
-            "suggestions": {
-                "skills": "Suggested skill improvements...",
-                "experience": "Suggested experience improvements...",
-                "projects": "Suggested project improvements...",
-                "summary": "Suggested summary improvements...",
-                "achievements": "Suggested achievement improvements..."
-            }
-        }`;
+        const simplifiedResponse = responseText.replace(/```json/g, "").replace(/```/g, "").trim();
+        console.log("Suggestions: ", simplifiedResponse);
 
-        const response = await openai.chat.completions.create({
-            model: "deepseek-chat",
-            messages: [{ role: "system", content: "You are a professional career coach specializing in resume analysis." },
-            { role: "user", content: prompt }],
-            max_tokens: 500,
-            temperature: 0.7
-        });
-
-        const suggestions = JSON.parse(response.choices[0].message.content);
+        const suggestions = JSON.parse(simplifiedResponse);
 
         return res.status(200).json(
-            new ApiResponse(
-                200,
-                suggestions,
-                "Suggestions fetched successfully"
-            )
-        )
+            new ApiResponse(200, suggestions, "Suggestions fetched successfully")
+        );
     } catch (error) {
-        console.error(error);
-        throw new ApiError(500, "Something went wrong while fetching suggestions :: " + error)
+        console.error("Gemini AI Error:", error);
+        throw new ApiError(500, "Something went wrong while fetching suggestions" || error);
     }
 });
 
