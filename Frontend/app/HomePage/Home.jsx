@@ -18,21 +18,19 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useUser } from "../../context/userContext.js";
 
-// Import your images
-import pastYearCompany from "@/assets/images/pastyearcompany.png";
-import placementStat from "@/assets/images/placementstat.png";
-import alumni from "@/assets/images/alumni.png";
-import questionAskByCompany from "@/assets/images/questionaskbycompany.png";
-import upcomingCompany from "@/assets/images/upcomingcompany.png";
-import branchStat from "@/assets/images/branchstat.png";
-import placementPolicies from "@/assets/images/placementpolicies.png";
-import uploadResume from "@/assets/images/uploadresume.png";
-import chatbot from "@/assets/images/chatbot.png";
+import pastYearCompany from "@/assets/homepageImages/pastyearcompany-Photoroom.png";
+import placementStat from "@/assets/homepageImages/placementstat-Photoroom.png";
+import alumni from "@/assets/homepageImages/alumni-Photoroom.png";
+import interviewPreparation from "@/assets/homepageImages/questionaskbycompany-Photoroom.png";
+import upcomingCompany from "@/assets/homepageImages/upcomingcompany-Photoroom.png";
+import branchStat from "@/assets/homepageImages/branchstat-Photoroom.png";
+import placementPolicies from "@/assets/homepageImages/placementpolicies-Photoroom.png";
+import uploadResume from "@/assets/homepageImages/uploadresume-Photoroom.png";
+import chatbot from "@/assets/homepageImages/chatbot-Photoroom.png";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.28;
 
-// Menu items data
 const menuItems = [
   {
     id: 0,
@@ -57,9 +55,9 @@ const menuItems = [
   },
   {
     id: 3,
-    title: "Interview Questions",
-    icon: questionAskByCompany,
-    route: "/screens/QuestionAskByCompanies",
+    title: "Interview Preparation",
+    icon: interviewPreparation,
+    route: "/screens/InterviewPrep",
     color: "#F59E0B",
   },
   {
@@ -106,7 +104,6 @@ const PlacementPlus = () => {
   const [filteredItems, setFilteredItems] = useState(menuItems);
   const { user, isLoggedIn } = useUser()
 
-  // Handle search
   const handleSearch = (text) => {
     setSearchQuery(text);
 
@@ -148,13 +145,11 @@ const PlacementPlus = () => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#14011F" />
 
-      {/* Background gradient */}
       <LinearGradient
         colors={['#1D0A3F', '#14011F']}
         style={styles.backgroundGradient}
       />
 
-      {/* Header */}
       <View style={styles.header}>
         <View style={styles.logoContainer}>
           <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
@@ -173,13 +168,11 @@ const PlacementPlus = () => {
         </View>
       </View>
 
-      {/* Welcome Message */}
       <View style={styles.welcomeSection}>
         <Text style={styles.welcomeText}>{`Hello, ${user?.name.split(" ")[0]}`}</Text>
         <Text style={styles.welcomeSubtext}>What would you like to explore today?</Text>
       </View>
 
-      {/* Search Bar */}
       <View style={styles.searchContainer}>
         <View style={styles.searchBar}>
           <Ionicons name="search" size={20} color="#9D9DB5" style={styles.searchIcon} />
@@ -198,7 +191,6 @@ const PlacementPlus = () => {
         </View>
       </View>
 
-      {/* Grid Layout */}
       <ScrollView
         ref={scrollViewRef}
         style={styles.scrollView}
@@ -439,8 +431,8 @@ const styles = StyleSheet.create({
     elevation: 5,
   },
   gridIcon: {
-    width: CARD_WIDTH * 0.6,
-    height: CARD_WIDTH * 0.6,
+    width: CARD_WIDTH * 0.7,
+    height: CARD_WIDTH * 0.7,
     resizeMode: "contain",
   },
   gridText: {

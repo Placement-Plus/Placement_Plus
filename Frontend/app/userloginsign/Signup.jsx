@@ -17,6 +17,8 @@ import * as DocumentPicker from "expo-document-picker";
 import { SelectList } from "react-native-dropdown-select-list";
 import * as Yup from 'yup';
 import * as FileSystem from "expo-file-system";
+import { storeAccessToken, storeRefreshToken } from "../../utils/tokenStorage.js";
+import { useUser } from "../../context/userContext.js"
 
 const SignupSchema = Yup.object().shape({
   name: Yup.string().required('Name is required'),
@@ -77,6 +79,8 @@ const SignupScreen = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
 
   const scrollViewRef = useRef(null);
+
+  const { register } = useUser()
 
   const branches = [
     "CSE",
@@ -139,44 +143,39 @@ const SignupScreen = () => {
   const handleRegister = async () => {
     setLoading(true);
 
-    try {
-      await SignupSchema.validate(formData, { abortEarly: false });
+    await SignupSchema.validate(formData, { abortEarly: false });
 
-      if (!resume) {
-        setErrors(prev => ({ ...prev, resume: "Resume is required" }));
-        scrollViewRef.current?.scrollToEnd();
-        setLoading(false);
-        return;
-      }
+    if (!resume) {
+      setErrors(prev => ({ ...prev, resume: "Resume is required" }));
+      scrollViewRef.current?.scrollToEnd();
+      setLoading(false);
+      return;
+    }
 
-      const userData = new FormData();
+    const userData = new FormData();
 
-      Object.entries(formData).forEach(([key, value]) => {
-        userData.append(key, value);
+    Object.entries(formData).forEach(([key, value]) => {
+      userData.append(key, value);
+    });
+
+    let resumeFile = resume;
+    if (resume.uri.startsWith("data:application/pdf;base64,")) {
+      const fileUri = `${FileSystem.cacheDirectory}${resume.name}`;
+
+      await FileSystem.writeAsStringAsync(fileUri, resume.uri.split(",")[1], {
+        encoding: FileSystem.EncodingType.Base64,
       });
 
-      // console.log("Resume before processing:", resume);
+      resumeFile = {
+        uri: fileUri,
+        name: resume.name,
+        type: "application/pdf",
+      };
+    }
 
-      let resumeFile = resume;
-      if (resume.uri.startsWith("data:application/pdf;base64,")) {
-        const fileUri = `${FileSystem.cacheDirectory}${resume.name}`;
+    userData.append("resume", resumeFile);
 
-        await FileSystem.writeAsStringAsync(fileUri, resume.uri.split(",")[1], {
-          encoding: FileSystem.EncodingType.Base64,
-        });
-
-        resumeFile = {
-          uri: fileUri,
-          name: resume.name,
-          type: "application/pdf",
-        };
-      }
-
-      userData.append("resume", resumeFile);
-
-      // for (let pair of userData.entries()) {
-      //   console.log(pair[0], pair[1]);
-      // }
+    try {
 
       const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/register`, {
         method: 'POST',
@@ -192,10 +191,11 @@ const SignupScreen = () => {
         throw new Error(result.message || 'Registration failed');
       }
 
-      Alert.alert(
-        "Registration Successful",
-        "Your account has been created successfully!"
-      );
+      await storeAccessToken(result?.data?.accessToken)
+      await storeRefreshToken(result?.data?.refreshToken)
+      register(result?.data?.createdUser)
+
+      router.replace("/HomePage/Home")
 
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
