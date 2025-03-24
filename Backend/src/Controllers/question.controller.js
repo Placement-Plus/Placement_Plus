@@ -56,8 +56,6 @@ const getCompanyQuestions = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Company name is required")
 
     const questions = await Question.find({ askedBy: { $in: [companyName] } })
-    if (questions.length === 0)
-        throw new ApiError(400, "Questions not found")
 
     return res.status(200).json(
         new ApiResponse(

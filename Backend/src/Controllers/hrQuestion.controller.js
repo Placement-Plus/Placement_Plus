@@ -4,8 +4,8 @@ import asyncHandler from "../Utils/AsyncHandler.js";
 import { HrQuestion } from "../Models/hrQuestions.model.js";
 
 const addQuestion = asyncHandler(async (req, res) => {
-    const { question, answer } = req.body
-    if (!question || !answer)
+    const { question, answer, category } = req.body
+    if (!question || !answer || !category)
         throw new ApiError(400, "Question and answer is required")
 
     const existedQuestion = await HrQuestion.findOne({ question })
@@ -14,7 +14,8 @@ const addQuestion = asyncHandler(async (req, res) => {
 
     const createdQuestion = await HrQuestion.create({
         question,
-        answer
+        answer,
+        category
     })
 
     const newQuestion = await HrQuestion.findById(createdQuestion._id)
@@ -81,7 +82,7 @@ const getAllQuestions = asyncHandler(async (req, res) => {
     if (questions.length === 0)
         throw new ApiError(404, "Questions not found")
 
-    return res.staus(200).json(
+    return res.status(200).json(
         new ApiResponse(
             200,
             questions,

@@ -9,6 +9,11 @@ const hrQuestionsSchema = new mongoose.Schema(
         answer: {
             type: String,
             required: true
+        },
+        category: {
+            type: String,
+            enum: ['Policies', 'Performance', 'Benefits'],
+            required: true
         }
     },
     { timestamps: true }
