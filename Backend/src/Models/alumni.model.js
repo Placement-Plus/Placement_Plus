@@ -42,7 +42,7 @@ const alumniSchema = new Schema(
                 type: String,
                 required: true
             },
-            Position: {
+            position: {
                 type: String,
                 required: true
             }
