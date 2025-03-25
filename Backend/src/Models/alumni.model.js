@@ -1,5 +1,6 @@
 import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt"
+import jwt from 'jsonwebtoken'
 
 const alumniSchema = new Schema(
     {
@@ -21,6 +22,10 @@ const alumniSchema = new Schema(
             type: String,
             required: true,
             unique: true
+        },
+        batch: {
+            type: Number,
+            required: true
         },
         previousCompany: [{
             name: {
@@ -46,6 +51,9 @@ const alumniSchema = new Schema(
                 type: String,
                 required: true
             }
+        },
+        refreshToken: {
+            type: String
         }
     }
 )

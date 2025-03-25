@@ -6,6 +6,8 @@ import asyncHandler from '../Utils/AsyncHandler.js'
 const generateAccesandRefreshToken = async (alumniId) => {
     try {
         const alumni = await Alumni.findById(alumniId)
+        if (!alumni)
+            throw new ApiError(404, "Alumni not found")
 
         const accessToken = await alumni.generateAccessToken()
         const refreshToken = await alumni.generateRefreshToken()
@@ -16,46 +18,44 @@ const generateAccesandRefreshToken = async (alumniId) => {
         return { accessToken, refreshToken }
 
     } catch (error) {
-        throw new ApiError(500, "Something went wrong while generating tokens")
+        throw new ApiError(500, "Something went wrong while generating tokens" + error)
     }
 }
 
 const registerAlumni = asyncHandler(async (req, res) => {
-    const { name, email, password, linkedInId, currentCompanyName, curreniCompanyPosition } = req.body
-    if (!name || !email || !password || !linkedInId || !curreniCompanyPosition || !currentCompanyName)
-        throw new ApiError(400, "All details are required")
+    const { name, email, password, linkedInId, previousCompany, currentCompany, batch } = req.body;
+    if (!name || !email || !password || !linkedInId || !previousCompany || !currentCompany || !batch)
+        throw new ApiError(400, "All details are required");
 
-    const existedAlumni = await Alumni.findOne({ email }).select(" -password -refreshToken")
+    if (currentCompany.length === 0)
+        throw new ApiError(400, "Current company details are required");
+
+    const existedAlumni = await Alumni.findOne({ email }).select("-password -refreshToken")
     if (existedAlumni)
-        throw new ApiError(400, "User with same email already exist")
-
-    const currentCompany = {
-        name: currentCompanyName,
-        position: curreniCompanyPosition
-    }
+        throw new ApiError(400, "Alumni with same email already exists");
 
     const alumni = await Alumni.create(
-        {
-            name,
-            email,
-            password,
-            linkedInId,
-            currentCompany
-        }
-    )
+        [{ name, email, password, linkedInId, currentCompany, previousCompany, batch }],
+    );
+    if (!alumni)
+        throw new ApiError(500, "Failed to create alumni. Please try again later");
 
-    const newAlumni = await Alumni.findById(alumni._id).select(" -password -refreshToken")
+    const { accessToken, refreshToken } = await generateAccesandRefreshToken(alumni[0]._id);
+    if (!accessToken || !refreshToken)
+        throw new ApiError(500, "Something went wrong while generating tokens");
+
+    const newAlumni = await Alumni.findById(alumni[0]._id).select("-password -refreshToken")
     if (!newAlumni)
-        throw new ApiError(500, "Something went wrong while creating new alumni")
+        throw new ApiError(500, "Something went wrong while creating new alumni");
 
     return res.status(200).json(
         new ApiResponse(
             200,
-            newAlumni,
+            { newAlumni, refreshToken, accessToken },
             "Alumni registered successfully"
         )
     )
-})
+});
 
 const loginAlumni = asyncHandler(async (req, res) => {
     const { email, password } = req.body
@@ -145,11 +145,23 @@ const changeCurrentCompanyDetails = asyncHandler(async (req, res) => {
     )
 })
 
+const getAllAlumniDetails = asyncHandler(async (req, res) => {
+    const alumni = await Alumni.find().select(" -password -refreshToken")
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            alumni,
+            "Alumni details fetched succesfully"
+        )
+    )
+})
 
 export {
     registerAlumni,
     loginAlumni,
     logoutAlumni,
     addPreviousCompany,
-    changeCurrentCompanyDetails
+    changeCurrentCompanyDetails,
+    getAllAlumniDetails
 }
