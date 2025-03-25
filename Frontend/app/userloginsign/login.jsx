@@ -114,13 +114,9 @@ const LoginScreen = () => {
       // console.log(await getRefreshToken());
 
 
-      console.log('Login successful:', result);
+      // console.log('Login successful:', result);
 
-      router.push("/HomePage/Home")
-
-      // setTimeout(() => {
-      //   BackHandler.addEventListener('hardwareBackPress', () => true);
-      // }, 100);
+      router.replace("/HomePage/Home")
 
     } catch (error) {
       Alert.alert(

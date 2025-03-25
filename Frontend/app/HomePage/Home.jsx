@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   View,
   Text,
@@ -11,12 +11,15 @@ import {
   StatusBar,
   ScrollView,
   SafeAreaView,
-  Platform
+  Platform,
+  BackHandler,
+  Alert
 } from "react-native";
-import { FontAwesome, Entypo, Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useUser } from "../../context/userContext.js";
+import { useFocusEffect } from "@react-navigation/native";
 
 import pastYearCompany from "@/assets/homepageImages/pastyearcompany-Photoroom.png";
 import placementStat from "@/assets/homepageImages/placementstat-Photoroom.png";
@@ -50,7 +53,7 @@ const menuItems = [
     id: 2,
     title: "Connect with Alumni",
     icon: alumni,
-    route: "/screens/ConnectWithAlumni",
+    route: "/screens/ConnectIWithAlumni",
     color: "#10B981",
   },
   {
@@ -103,6 +106,30 @@ const PlacementPlus = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredItems, setFilteredItems] = useState(menuItems);
   const { user, isLoggedIn } = useUser()
+
+  useFocusEffect(
+    useCallback(() => {
+      const backAction = () => {
+        Alert.alert(
+          "Exit App",
+          "Are you sure you want to exit?",
+          [
+            { text: "Cancel", onPress: () => null, style: "cancel" },
+            { text: "Yes", onPress: () => BackHandler.exitApp() },
+          ],
+          { cancelable: false }
+        );
+        return true;
+      };
+
+      const backHandler = BackHandler.addEventListener(
+        "hardwareBackPress",
+        backAction
+      );
+
+      return () => backHandler.remove();
+    }, [])
+  );
 
   const handleSearch = (text) => {
     setSearchQuery(text);
