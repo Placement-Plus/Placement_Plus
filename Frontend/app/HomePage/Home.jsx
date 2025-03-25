@@ -162,7 +162,7 @@ const PlacementPlus = () => {
               <Text style={styles.badgeText}>3</Text>
             </View>
           </Pressable>
-          <Pressable style={styles.profileButton}>
+          <Pressable style={styles.profileButton} onPress={() => router.push("/screens/Profile/Profile")}>
             <Ionicons name="person-circle" size={34} color="#C92EFF" />
           </Pressable>
         </View>

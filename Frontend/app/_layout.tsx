@@ -6,7 +6,7 @@ import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
-import { UserProvider } from "../context/userContext.js"; 
+import { UserProvider } from "../context/userContext.js";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -27,13 +27,18 @@ export default function RootLayout() {
   }
 
   return (
-    <UserProvider> 
+    <UserProvider>
       <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="userloginsign/login" options={{ headerShown: false }} />
           <Stack.Screen name="userloginsign/sign" options={{ headerShown: false }} />
           <Stack.Screen name="HomePage/Home" options={{ headerShown: false }} />
+          <Stack.Screen name="screens/Profile/Profile" options={{ headerShown: false }} />
+          <Stack.Screen name="screens/Profile/ViewProfile" options={{ headerShown: false }} />
+          <Stack.Screen name="screens/Profile/EditProfile" options={{ headerShown: false }} />
+          <Stack.Screen name="screens/Profile/AppliedCompanies" options={{ headerShown: false }} />
+          <Stack.Screen name="screens/Profile/ChangePassword" options={{ headerShown: false }} />
           <Stack.Screen name="screens/PastYearCompanies" options={{ headerShown: false }} />
           <Stack.Screen name="screens/CurrentYearPlacement" options={{ headerShown: false }} />
           <Stack.Screen name="screens/ConnectWithAlumni" options={{ headerShown: false }} />
