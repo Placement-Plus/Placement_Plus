@@ -108,8 +108,8 @@ const ResumeUploadScreen = () => {
             };
 
             // setResumeFile(resume)
-            // await uploadResume(resume)
-            await checkResumeScore(resume)
+            await uploadResume(resume)
+            // await checkResumeScore(resume)
 
         } catch (error) {
             console.error("Error picking document:", error);
@@ -160,8 +160,8 @@ const ResumeUploadScreen = () => {
 
             const result = await response.json();
 
-            if (!response.ok) {
-                throw new Error(result.message || 'Resume upload failed');
+            if (result.statusCode === 200) {
+                Alert.alert("Success", "Resume uploaded successfully!");
             }
 
             // console.log(result?.data);
@@ -196,6 +196,7 @@ const ResumeUploadScreen = () => {
                 method: "POST",
                 headers: {
                     "apikey": 'EUBS320vq05lxYZsWXpjHPAfUMzd1Ynt',
+                    'Content-Type': 'multipart/form-data',
                 },
                 body: formData,
             });
@@ -209,7 +210,7 @@ const ResumeUploadScreen = () => {
             Alert.alert("Success", "Resume uploaded successfully!");
             console.log("API Response:", responseData);
         } catch (error) {
-            console.error("Upload Error:", error);
+            console.error("Upload Error:", error.message);
             Alert.alert("Error", error.message || "Failed to upload resume.");
         }
     };
