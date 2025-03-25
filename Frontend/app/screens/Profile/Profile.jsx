@@ -1,0 +1,484 @@
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Switch, Alert, BackHandler } from 'react-native';
+import { FontAwesome, Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { useUser } from '../../../context/userContext.js';
+import { router } from 'expo-router';
+import { getAccessToken, getRefreshToken, removeAccessToken, removeRefreshToken } from '../../../utils/tokenStorage.js';
+
+const ProfileSettings = () => {
+    const navigation = useNavigation();
+    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+    const [darkModeEnabled, setDarkModeEnabled] = useState(true);
+    const { user: loggedInUser, logout } = useUser()
+
+    const [user, setUser] = useState({
+        name: '',
+        email: '',
+        branch: '',
+        appliedCompanies: [],
+        savedProblems: []
+    });
+
+    useEffect(() => {
+        setUser({
+            name: loggedInUser?.name || '-',
+            email: loggedInUser?.email || '-',
+            branch: loggedInUser?.branch || '-',
+            appliedCompanies: loggedInUser?.appliedCompanies || [],
+            savedProblems: loggedInUser?.savedProblems || []
+        })
+    }, [loggedInUser])
+
+    const handleLogout = async () => {
+
+        try {
+
+            const accessToken = await getAccessToken()
+            const refreshToken = await getRefreshToken()
+
+            if (!accessToken || !refreshToken) {
+                throw new Error('Missing authentication tokens');
+            }
+
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/logout`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                    'x-refresh-token': refreshToken
+                }
+            })
+
+            if (!response.ok)
+                throw new Error('Failed to log out')
+
+            const result = await response.json()
+            console.log(result);
+
+            logout()
+            await removeAccessToken()
+            await removeRefreshToken()
+
+            router.replace('/userloginsign/login');
+
+            setTimeout(() => {
+                BackHandler.addEventListener('hardwareBackPress', () => true);
+            }, 100);
+
+        } catch (error) {
+            console.error('Error logging out:', error?.message);
+            Alert.alert('Error', 'Failed to log out. Please try again.');
+        }
+    };
+
+    const confirmLogout = async () => {
+        Alert.alert(
+            "Log Out",
+            "Are you sure you want to log out?",
+            [
+                {
+                    text: "Cancel",
+                    style: "cancel"
+                },
+                {
+                    text: "Log Out",
+                    onPress: handleLogout,
+                    style: "destructive"
+                }
+            ]
+        );
+    };
+
+    const handleToggleNotifications = () => {
+        setNotificationsEnabled(!notificationsEnabled);
+    };
+
+    const handleToggleDarkMode = () => {
+        setDarkModeEnabled(!darkModeEnabled);
+    };
+
+    const navigateTo = (screen) => {
+        navigation.navigate(screen);
+    };
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.header}>
+                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color="#C92EFF" />
+                </TouchableOpacity>
+                <Text style={styles.headerTitle}>Profile Settings</Text>
+                <View style={{ width: 24 }} />
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+                {/* Profile Card */}
+                <View style={styles.profileCard}>
+                    <View style={styles.profileImageContainer}>
+                        <FontAwesome name="user" size={60} color="#fff" />
+                    </View>
+                    <View style={styles.profileInfo}>
+                        <Text style={styles.profileName}>{user.name}</Text>
+                        <Text style={styles.profileEmail}>{user.email}</Text>
+                        <Text style={styles.profileEmail}>{user.branch}</Text>
+                    </View>
+                </View>
+
+                {/* Stats Section */}
+                <View style={styles.statsContainer}>
+                    <View style={styles.statItem}>
+                        <Text style={styles.statValue}>{user.appliedCompanies.length}</Text>
+                        <Text style={styles.statLabel}>Applied</Text>
+                    </View>
+                    <View style={styles.statDivider} />
+                    <View style={styles.statItem}>
+                        <Text style={styles.statValue}>{user.savedProblems.length}</Text>
+                        <Text style={styles.statLabel}>Saved Problems</Text>
+                    </View>
+                </View>
+
+                {/* Profile Settings */}
+                <View style={styles.settingsGroup}>
+                    <Text style={styles.settingsGroupTitle}>Profile</Text>
+
+                    <TouchableOpacity
+                        style={styles.settingsItem}
+                        onPress={() => router.push('/screens/Profile/ViewProfile')}
+                    >
+                        <View style={styles.settingsIconContainer}>
+                            <FontAwesome name="user" size={20} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>View Profile</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.settingsItem}
+                        onPress={() => router.push('/screens/Profile/EditProfile')}
+                    >
+                        <View style={styles.settingsIconContainer}>
+                            <FontAwesome name="edit" size={20} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>Edit Profile</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.settingsItem}
+                        onPress={() => router.push('/screens/Profile/ChangePassword')}
+                    >
+                        <View style={styles.settingsIconContainer}>
+                            <FontAwesome name="lock" size={20} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>Change Password</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                    </TouchableOpacity>
+                </View>
+
+                {/* Job Applications */}
+                <View style={styles.settingsGroup}>
+                    <Text style={styles.settingsGroupTitle}>Job Applications</Text>
+
+                    <TouchableOpacity
+                        style={styles.settingsItem}
+                        onPress={() => router.push('/screens/Profile/AppliedCompanies')}
+                    >
+                        <View style={styles.settingsIconContainer}>
+                            <FontAwesome name="building" size={20} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>View Applied Companies</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.settingsItem}
+                        onPress={() => navigateTo('ApplicationStatus')}
+                    >
+                        <View style={styles.settingsIconContainer}>
+                            <FontAwesome name="list-alt" size={20} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>Application Status</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.settingsItem}
+                        onPress={() => navigateTo('SavedJobs')}
+                    >
+                        <View style={styles.settingsIconContainer}>
+                            <FontAwesome name="bookmark" size={20} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>Saved Jobs</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                    </TouchableOpacity>
+                </View>
+
+                {/* Learning */}
+                <View style={styles.settingsGroup}>
+                    <Text style={styles.settingsGroupTitle}>Learning</Text>
+
+                    <TouchableOpacity
+                        style={styles.settingsItem}
+                        onPress={() => navigateTo('SavedProblems')}
+                    >
+                        <View style={styles.settingsIconContainer}>
+                            <FontAwesome name="code" size={20} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>Saved Problems</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                    </TouchableOpacity>
+                </View>
+
+                {/* App Settings */}
+                <View style={styles.settingsGroup}>
+                    <Text style={styles.settingsGroupTitle}>App Settings</Text>
+
+                    <View style={styles.settingsItem}>
+                        <View style={styles.settingsIconContainer}>
+                            <Ionicons name="notifications" size={22} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>Notifications</Text>
+                        <Switch
+                            trackColor={{ false: "#3e3e3e", true: "rgba(201, 46, 255, 0.4)" }}
+                            thumbColor={notificationsEnabled ? "#C92EFF" : "#f4f3f4"}
+                            ios_backgroundColor="#3e3e3e"
+                            onValueChange={handleToggleNotifications}
+                            value={notificationsEnabled}
+                        />
+                    </View>
+
+                    <View style={styles.settingsItem}>
+                        <View style={styles.settingsIconContainer}>
+                            <Ionicons name="moon" size={22} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>Dark Mode</Text>
+                        <Switch
+                            trackColor={{ false: "#3e3e3e", true: "rgba(201, 46, 255, 0.4)" }}
+                            thumbColor={darkModeEnabled ? "#C92EFF" : "#f4f3f4"}
+                            ios_backgroundColor="#3e3e3e"
+                            onValueChange={handleToggleDarkMode}
+                            value={darkModeEnabled}
+                        />
+                    </View>
+
+                </View>
+
+                {/* Additional Options */}
+                <View style={styles.settingsGroup}>
+                    <Text style={styles.settingsGroupTitle}>Additional Options</Text>
+
+                    <TouchableOpacity
+                        style={styles.settingsItem}
+                        onPress={() => navigateTo('Help')}
+                    >
+                        <View style={styles.settingsIconContainer}>
+                            <Ionicons name="help-circle" size={22} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>Help & Support</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.settingsItem}
+                        onPress={() => navigateTo('PrivacyPolicy')}
+                    >
+                        <View style={styles.settingsIconContainer}>
+                            <Ionicons name="shield-checkmark" size={22} color="#fff" />
+                        </View>
+                        <Text style={styles.settingsItemText}>Privacy Policy</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        style={styles.settingsItem}
+                        onPress={confirmLogout}
+                    >
+                        <View style={[styles.settingsIconContainer, styles.logoutIconContainer]}>
+                            <Ionicons name="log-out" size={22} color="#ff4d4d" />
+                        </View>
+                        <Text style={styles.logoutText}>Log Out</Text>
+                    </TouchableOpacity>
+                </View>
+
+                <View style={styles.versionContainer}>
+                    <Text style={styles.versionText}>Version 1.0.0</Text>
+                </View>
+            </ScrollView>
+        </View>
+    );
+};
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        backgroundColor: "#1a012c",
+    },
+    header: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        paddingVertical: 15,
+        paddingHorizontal: 15,
+        borderBottomWidth: 1,
+        borderBottomColor: '#390852',
+        marginTop: 15
+    },
+    backButton: {
+        padding: 5,
+    },
+    headerTitle: {
+        color: '#C92EFF',
+        fontSize: 20,
+        fontWeight: 'bold',
+    },
+    profileCard: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#2d0a41',
+        marginHorizontal: 15,
+        marginTop: 20,
+        padding: 20,
+        borderRadius: 15,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: 0,
+            height: 3,
+        },
+        shadowOpacity: 0.27,
+        shadowRadius: 4.65,
+        elevation: 6,
+    },
+    profileImageContainer: {
+        position: 'relative',
+        marginRight: 15,
+    },
+    profileImage: {
+        width: 80,
+        height: 80,
+        borderRadius: 40,
+        borderWidth: 3,
+        borderColor: '#C92EFF',
+    },
+    editAvatarButton: {
+        position: 'absolute',
+        bottom: 0,
+        right: 0,
+        backgroundColor: '#C92EFF',
+        width: 28,
+        height: 28,
+        borderRadius: 14,
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    profileInfo: {
+        flex: 1,
+    },
+    profileName: {
+        color: '#fff',
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 2,
+    },
+    profileEmail: {
+        color: '#b388e9',
+        fontSize: 14,
+        marginBottom: 5,
+    },
+    profileRole: {
+        color: '#C92EFF',
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    statsContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        backgroundColor: '#2d0a41',
+        marginHorizontal: 15,
+        marginTop: 15,
+        padding: 15,
+        borderRadius: 15,
+    },
+    statItem: {
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    statValue: {
+        color: '#fff',
+        fontSize: 24,
+        fontWeight: 'bold',
+    },
+    statLabel: {
+        color: '#b388e9',
+        fontSize: 14,
+        marginTop: 5,
+    },
+    statDivider: {
+        width: 1,
+        height: '80%',
+        backgroundColor: '#390852',
+    },
+    settingsGroup: {
+        marginTop: 25,
+        marginHorizontal: 15,
+    },
+    settingsGroupTitle: {
+        color: '#C92EFF',
+        fontSize: 16,
+        fontWeight: 'bold',
+        marginBottom: 10,
+        paddingLeft: 5,
+    },
+    settingsItem: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#2d0a41',
+        paddingVertical: 15,
+        paddingHorizontal: 15,
+        borderRadius: 10,
+        marginBottom: 10,
+    },
+    settingsIconContainer: {
+        width: 36,
+        height: 36,
+        borderRadius: 18,
+        backgroundColor: 'rgba(201, 46, 255, 0.2)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        marginRight: 15,
+    },
+    settingsItemText: {
+        flex: 1,
+        color: '#fff',
+        fontSize: 16,
+    },
+    logoutIconContainer: {
+        backgroundColor: 'rgba(255, 77, 77, 0.1)',
+    },
+    logoutText: {
+        flex: 1,
+        color: '#ff4d4d',
+        fontSize: 16,
+        fontWeight: '500',
+    },
+    languageIndicator: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    languageText: {
+        color: '#b388e9',
+        fontSize: 14,
+        marginRight: 5,
+    },
+    versionContainer: {
+        alignItems: 'center',
+        marginVertical: 30,
+    },
+    versionText: {
+        color: '#777',
+        fontSize: 14,
+    },
+});
+
+export default ProfileSettings;
