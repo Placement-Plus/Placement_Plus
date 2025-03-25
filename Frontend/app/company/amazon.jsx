@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, Alert, TextInput } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
-import companyLogo from "@/assets/images/nvidia.png";
+import companyLogo from "@/assets/images/amazon.png";
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 
 const getDifficultyStyle = (difficulty) => {
@@ -167,7 +167,7 @@ const CodingProblems = () => {
             <View style={styles.row}>
               <Text style={[styles.cell, styles.col1]}>{index + 1}.</Text>
               <Text style={[styles.cell, styles.col2]}>{item.name}</Text>
-              <TouchableOpacity onPress={() => handleOpenLink(item.link)}>
+              <TouchableOpacity onPress={() => handleOpenLink(item?.link)}>
                 <FontAwesome name="code" size={22} color="#fff" style={styles.icon} />
               </TouchableOpacity>
               <Text style={[styles.difficulty, styles.col4, getDifficultyStyle(item.difficulty)]}>
@@ -420,9 +420,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     paddingVertical: 5,
-    paddingHorizontal: 10,
     borderRadius: 5,
     textAlign: "center",
+    marginLeft: 5
   },
   easy: {
     backgroundColor: "#0f5132",
@@ -438,8 +438,8 @@ const styles = StyleSheet.create({
   },
   col1: { flex: 0.5, alignItems: "center", justifyContent: "center" },
   col2: { flex: 2, alignItems: "flex-start", paddingLeft: 10 },
-  col3: { flex: 0.8, alignItems: "center", paddingRight: 15 },
-  col4: { flex: 1, alignItems: "center", justifyContent: "center" },
+  col3: { flex: 1, alignItems: "center", paddingRight: 15 },
+  col4: { flex: 1.2, alignItems: "center", justifyContent: "center" },
 
   // Empty state styles
   emptyContainer: {

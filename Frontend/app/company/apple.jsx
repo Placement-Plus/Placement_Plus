@@ -420,9 +420,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "bold",
     paddingVertical: 5,
-    paddingHorizontal: 10,
     borderRadius: 5,
     textAlign: "center",
+    marginLeft: 10
   },
   easy: {
     backgroundColor: "#0f5132",
@@ -438,8 +438,8 @@ const styles = StyleSheet.create({
   },
   col1: { flex: 0.5, alignItems: "center", justifyContent: "center" },
   col2: { flex: 2, alignItems: "flex-start", paddingLeft: 10 },
-  col3: { flex: 0.8, alignItems: "center", paddingRight: 15 },
-  col4: { flex: 1, alignItems: "center", justifyContent: "center" },
+  col3: { flex: 1, alignItems: "center", paddingRight: 15 },
+  col4: { flex: 1.2, alignItems: "center", justifyContent: "center" },
 
   // Empty state styles
   emptyContainer: {
