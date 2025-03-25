@@ -80,7 +80,7 @@ const SignupScreen = () => {
 
   const scrollViewRef = useRef(null);
 
-  const { register } = useUser()
+  const { login } = useUser()
 
   const branches = [
     "CSE",
@@ -139,7 +139,6 @@ const SignupScreen = () => {
     }
   };
 
-
   const handleRegister = async () => {
     setLoading(true);
 
@@ -193,7 +192,7 @@ const SignupScreen = () => {
 
       await storeAccessToken(result?.data?.accessToken)
       await storeRefreshToken(result?.data?.refreshToken)
-      register(result?.data?.createdUser)
+      login(result?.data?.createdUser)
 
       router.replace("/HomePage/Home")
 

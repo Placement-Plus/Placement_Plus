@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, BackHandler } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { SimpleLineIcons, Feather, MaterialIcons } from "@expo/vector-icons";
 import * as Yup from "yup";
@@ -102,9 +102,9 @@ const LoginScreen = () => {
 
       const result = await response.json();
 
-      if (!response.ok) {
-        throw new Error(result.message || 'Login failed');
-      }
+      // if (!response.ok) {
+      //   throw new Error(result.message || 'Login failed');
+      // }
 
       await storeAccessToken(result?.data?.accessToken)
       await storeRefreshToken(result?.data?.refreshToken)
@@ -114,9 +114,13 @@ const LoginScreen = () => {
       // console.log(await getRefreshToken());
 
 
-      // console.log('Login successful:', result);
+      console.log('Login successful:', result);
 
-      router.replace("/HomePage/Home")
+      router.push("/HomePage/Home")
+
+      // setTimeout(() => {
+      //   BackHandler.addEventListener('hardwareBackPress', () => true);
+      // }, 100);
 
     } catch (error) {
       Alert.alert(
