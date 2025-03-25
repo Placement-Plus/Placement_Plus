@@ -117,8 +117,10 @@ const applyToCompany = asyncHandler(async (req, res) => {
             {
                 $addToSet:
                 {
-                    appliedStudents: new mongoose.Types.ObjectId(req.user._id),
-                    status: "applied"
+                    appliedStudents: {
+                        studentId: new mongoose.Types.ObjectId(req.user._id),
+                        status: "applied"
+                    }
                 }
             },
             { new: true, session }
@@ -128,8 +130,10 @@ const applyToCompany = asyncHandler(async (req, res) => {
             req.user._id,
             {
                 $addToSet: {
-                    appliedCompanies: new mongoose.Types.ObjectId(companyId),
-                    status: "applied"
+                    appliedCompanies: {
+                        companyId: new mongoose.Types.ObjectId(companyId),
+                        status: "applied"
+                    }
                 }
             },
             { new: true, session }
@@ -141,7 +145,7 @@ const applyToCompany = asyncHandler(async (req, res) => {
         return res.status(200).json(
             new ApiResponse(
                 200,
-                {},
+                user,
                 "Applied successfully"
             )
         )
@@ -163,7 +167,7 @@ const getAllAppliedCompany = asyncHandler(async (req, res) => {
         {
             $lookup: {
                 from: "upcomingcompanies",
-                localField: "appliedCompanies._id",
+                localField: "appliedCompanies.companyId",
                 foreignField: "_id",
                 as: "companyDetails"
             }
@@ -174,17 +178,24 @@ const getAllAppliedCompany = asyncHandler(async (req, res) => {
         {
             $project: {
                 _id: 0,
-                companyId: "$appliedCompanies._id",
+                companyId: "$companyDetails._id",
                 applicationStatus: "$appliedCompanies.applicationStatus",
                 applicationDate: "$appliedCompanies.applicationDate",
                 companyName: "$companyDetails.companyName",
                 jobRole: "$companyDetails.role",
                 jobLocation: "$companyDetails.jobLocation",
                 opportunityType: "$companyDetails.opportunityType",
-                hiringProcess: "$companyDetails.hiringProcess"
+                hiringProcess: "$companyDetails.hiringProcess",
+                cgpaCriteria: "$companyDetails.cgpaCriteria",
+                ctc: "$companyDetails.ctc",
+                stipend: "$companyDetails.stipend",
+                branches: "$companyDetails.eligibleBranches",
+                mode: "$companyDetails.mode",
+                pocDetails: "$companyDetails.pocDetails"
             }
         }
-    ]);
+    ]
+    );
 
     return res.status(200).json(
         new ApiResponse(
