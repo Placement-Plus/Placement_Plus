@@ -48,6 +48,7 @@ export default function RootLayout() {
           <Stack.Screen name="screens/hrQuestions" options={{ headerShown: false }} />
           <Stack.Screen name="screens/UpcomingCompanies" options={{ headerShown: false }} />
           <Stack.Screen name="screens/BranchWisePlacement" options={{ headerShown: false }} />
+          <Stack.Screen name="screens/StudentPlacements" options={{ headerShown: false }} />
           <Stack.Screen name="screens/PlacementPolicies" options={{ headerShown: false }} />
           <Stack.Screen name="screens/UploadResume" options={{ headerShown: false }} />
           <Stack.Screen name="screens/ChatBot" options={{ headerShown: false }} />

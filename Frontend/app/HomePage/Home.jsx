@@ -44,9 +44,9 @@ const menuItems = [
   },
   {
     id: 1,
-    title: "Current Year Placement",
+    title: "Placement Statistics",
     icon: placementStat,
-    route: "/screens/CurrentYearPlacement",
+    route: "/screens/BranchWisePlacement",
     color: "#EC4899",
   },
   {
@@ -72,9 +72,9 @@ const menuItems = [
   },
   {
     id: 5,
-    title: "Branch Stats",
+    title: "Student Placement",
     icon: branchStat,
-    route: "/screens/BranchWisePlacement",
+    route: "/screens/StudentPlacements",
     color: "#EF4444",
   },
   {
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingTop: Platform.OS === 'android' ? 50 : 10,
+    paddingTop: Platform.OS === 'android' ? 33 : 10,
     paddingBottom: 16,
   },
   logoContainer: {
