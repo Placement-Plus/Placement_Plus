@@ -19,6 +19,21 @@ const getSlab = (lpa) => {
         return 4;
 }
 
+const monthList = {
+    "01": "January",
+    "02": "February",
+    "03": "March",
+    "04": "April",
+    "05": "May",
+    "06": "June",
+    "07": "July",
+    "08": "August",
+    "09": "September",
+    "10": "October",
+    "11": "November",
+    "12": "December"
+};
+
 const addPlacedStudent = asyncHandler(async (req, res) => {
     const { studentId, companyName, role, ctc, stipend, jobLocation, branch, placementType } = req.body;
     if (!studentId || !companyName || !role || !jobLocation || !branch || !placementType || !(ctc || stipend))
@@ -47,14 +62,15 @@ const addPlacedStudent = asyncHandler(async (req, res) => {
 
             if (placementDetails) {
                 let updatedCtcValues = placementDetails.ctcValues || [];
-                updatedCtcValues.push(lpa);
-                updatedCtcValues.sort((a, b) => a - b);
+                updatedCtcValues.push({ ctc: lpa, month: new Date().toISOString().slice(5, 7) });
+                updatedCtcValues.sort((a, b) => a.ctc - b.ctc);
+
 
                 const n = updatedCtcValues.length;
                 const medianPackage =
                     n % 2 === 1
-                        ? updatedCtcValues[Math.floor(n / 2)]
-                        : (updatedCtcValues[n / 2 - 1] + updatedCtcValues[n / 2]) / 2;
+                        ? updatedCtcValues[Math.floor(n / 2)].ctc
+                        : (updatedCtcValues[n / 2 - 1].ctc + updatedCtcValues[n / 2].ctc) / 2;
 
                 const newAvgPackage =
                     ((placementDetails.avgPackage * placementDetails.placedStudents) + lpa) /
@@ -83,7 +99,7 @@ const addPlacedStudent = asyncHandler(async (req, res) => {
                         maxPackage: lpa,
                         totalStudents: 60,
                         placedStudents: 1,
-                        ctcValues: [lpa]
+                        ctcValues: [{ ctc: lpa, month: new Date().toISOString().slice(5, 7) }]
                     }],
                     { session }
                 );
@@ -128,7 +144,39 @@ const getStudentPlacement = asyncHandler(async (req, res) => {
 
 const getAllPlacedStudents = asyncHandler(async (req, res) => {
 
-    const placementDetails = await PlacedStudent.find()
+    const placementDetails = await PlacedStudent.aggregate([
+        {
+            $lookup: {
+                from: "users",
+                localField: "studentId",
+                foreignField: "_id",
+                as: "studentData"
+            }
+        },
+        {
+            $unwind: {
+                path: "$studentData",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $project: {
+                role: 1,
+                branch: 1,
+                stipend: 1,
+                jobLocation: 1,
+                placementType: 1,
+                companyName: 1,
+                ctc: 1,
+                updatedAt: 1,
+                createdAt: 1,
+                "studentData.name": 1,
+                "studentData.branch": 1,
+                "studentData.semester": 1,
+                "studentData.rollNo": 1
+            }
+        }
+    ])
     if (!placementDetails)
         throw new ApiError(404, "Student Placement details not found")
 
