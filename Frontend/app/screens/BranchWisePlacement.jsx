@@ -1,166 +1,216 @@
 import React, { useState } from 'react';
-import { 
-  StyleSheet, 
-  View, 
-  Text, 
-  SafeAreaView, 
-  ScrollView, 
-  TouchableOpacity, 
+import {
+  StyleSheet,
+  View,
+  Text,
+  SafeAreaView,
+  ScrollView,
+  TouchableOpacity,
   Dimensions,
-  Modal
+  Modal,
+  Alert
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import { Feather } from '@expo/vector-icons';
+import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js'
 
 const PlacementDashboard = () => {
-  const [selectedYear, setSelectedYear] = useState('2025');
   const [selectedBranch, setSelectedBranch] = useState('All Branches');
   const [branchModalVisible, setBranchModalVisible] = useState(false);
-  
-  // Available branches
+  const [placementData, setPlacementData] = useState([
+    {
+      "_id": "67c5a5320d1d84d76200a791",
+      "branch": "CSE",
+      "avgPackage": 32.333333333333336,
+      "medianPackage": 32,
+      "maxPackage": 35,
+      "totalStudents": 60,
+      "placedStudents": 3,
+      "ctcValues": [
+        {
+          "_id": "67e2f7d23cefdb1a4140aa01",
+          "ctc": 30,
+          "month": "January"
+        },
+        {
+          "_id": "67e2f7d23cefdb1a4140aa02",
+          "ctc": 32,
+          "month": "January"
+        },
+        {
+          "_id": "67e2f7d23cefdb1a4140aa03",
+          "ctc": 35,
+          "month": "March"
+        }
+      ],
+      "createdAt": "2025-03-03T12:48:50.571Z",
+      "updatedAt": "2025-03-03T17:10:09.718Z",
+      "__v": 0
+    },
+    {
+      "_id": "67c5aa4b6dd7e0e4ea94eabe",
+      "branch": "EE",
+      "avgPackage": 25,
+      "medianPackage": 25,
+      "maxPackage": 25,
+      "totalStudents": 60,
+      "placedStudents": 1,
+      "ctcValues": [
+        {
+          "_id": "67e2f7d23cefdb1a4140aa04",
+          "ctc": 25,
+          "month": "February"
+        }
+      ],
+      "createdAt": "2025-03-03T13:10:35.967Z",
+      "updatedAt": "2025-03-03T13:10:35.967Z",
+      "__v": 0
+    }
+  ])
+
   const branches = [
     'All Branches',
-    'Computer Science',
-    'Electronics',
-    'Mechanical',
-    'Civil',
-    'Electrical'
+    ...new Set(placementData.map(item => item.branch))
   ];
 
-  // Sample data for placements in 2025 (branch-wise)
-  const branchData = {
-    'All Branches': {
-      totalPlacements: 487,
-      averageCTC: 12.8,
-      highestPackage: 45,
-      companiesVisited: 72,
-      placementRate: 92,
-      monthlyData: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [
-          {
-            data: [32, 45, 38, 42, 50, 65, 53, 42, 35, 28, 25, 32],
-            color: (opacity = 1) => `rgba(186, 104, 200, ${opacity})`,
-            strokeWidth: 2
-          }
-        ]
-      },
-      ctcRanges: {
-        labels: ['<5 LPA', '5-10 LPA', '10-15 LPA', '15-20 LPA', '20+ LPA'],
-        data: [15, 32, 28, 18, 7]
+  const getPlacementData = async () => {
+    try {
+      const accessToken = await getAccessToken()
+      const refreshToken = await getRefreshToken()
+      if (!accessToken || !refreshToken) {
+        Alert.alert("Error", "Please login again to view this page")
+        return
       }
-    },
-    'Computer Science': {
-      totalPlacements: 156,
-      averageCTC: 18.5,
-      highestPackage: 45,
-      companiesVisited: 58,
-      placementRate: 98,
-      monthlyData: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [
-          {
-            data: [12, 18, 15, 14, 20, 25, 22, 15, 10, 8, 5, 6],
-            color: (opacity = 1) => `rgba(186, 104, 200, ${opacity})`,
-            strokeWidth: 2
-          }
-        ]
-      },
-      ctcRanges: {
-        labels: ['<5 LPA', '5-10 LPA', '10-15 LPA', '15-20 LPA', '20+ LPA'],
-        data: [5, 25, 30, 25, 15]
+
+      const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/placement-statistics/get-placement-statistics`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'x-refresh-token': refreshToken
+        }
+      })
+
+      const result = await response.json()
+      console.log(result);
+
+      if (result.statusCode === 200) {
+        setPlacementData(result.data)
+      } else {
+        Alert.alert("Error", result.message)
+        return
       }
-    },
-    'Electronics': {
-      totalPlacements: 124,
-      averageCTC: 14.2,
-      highestPackage: 32,
-      companiesVisited: 48,
-      placementRate: 94,
-      monthlyData: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [
-          {
-            data: [8, 12, 10, 15, 18, 16, 12, 10, 9, 5, 6, 5],
-            color: (opacity = 1) => `rgba(186, 104, 200, ${opacity})`,
-            strokeWidth: 2
-          }
-        ]
-      },
-      ctcRanges: {
-        labels: ['<5 LPA', '5-10 LPA', '10-15 LPA', '15-20 LPA', '20+ LPA'],
-        data: [10, 30, 35, 18, 7]
-      }
-    },
-    'Mechanical': {
-      totalPlacements: 98,
-      averageCTC: 9.5,
-      highestPackage: 22,
-      companiesVisited: 35,
-      placementRate: 86,
-      monthlyData: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [
-          {
-            data: [5, 8, 7, 9, 10, 15, 12, 10, 8, 6, 4, 4],
-            color: (opacity = 1) => `rgba(186, 104, 200, ${opacity})`,
-            strokeWidth: 2
-          }
-        ]
-      },
-      ctcRanges: {
-        labels: ['<5 LPA', '5-10 LPA', '10-15 LPA', '15-20 LPA', '20+ LPA'],
-        data: [25, 40, 22, 10, 3]
-      }
-    },
-    'Civil': {
-      totalPlacements: 56,
-      averageCTC: 8.2,
-      highestPackage: 18,
-      companiesVisited: 25,
-      placementRate: 82,
-      monthlyData: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [
-          {
-            data: [4, 5, 4, 5, 6, 7, 6, 5, 4, 3, 3, 4],
-            color: (opacity = 1) => `rgba(186, 104, 200, ${opacity})`,
-            strokeWidth: 2
-          }
-        ]
-      },
-      ctcRanges: {
-        labels: ['<5 LPA', '5-10 LPA', '10-15 LPA', '15-20 LPA', '20+ LPA'],
-        data: [30, 45, 18, 5, 2]
-      }
-    },
-    'Electrical': {
-      totalPlacements: 85,
-      averageCTC: 10.6,
-      highestPackage: 25,
-      companiesVisited: 38,
-      placementRate: 88,
-      monthlyData: {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
-        datasets: [
-          {
-            data: [5, 8, 7, 6, 9, 12, 10, 9, 7, 5, 4, 3],
-            color: (opacity = 1) => `rgba(186, 104, 200, ${opacity})`,
-            strokeWidth: 2
-          }
-        ]
-      },
-      ctcRanges: {
-        labels: ['<5 LPA', '5-10 LPA', '10-15 LPA', '15-20 LPA', '20+ LPA'],
-        data: [20, 38, 25, 12, 5]
-      }
+
+    } catch (error) {
+      console.error(error)
+      Alert.alert("Error", error.message)
     }
-  };
+  }
 
   // Get data for selected branch
-  const placementData = branchData[selectedBranch];
+  const getCurrentBranchData = () => {
 
-  // Placement statistics component
+    const monthOrder = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+
+    const getMonthlyData = () => {
+      const monthlyCounts = {};
+      const currentMonthIndex = new Date().getMonth();
+      const filteredMonths = monthOrder.slice(0, currentMonthIndex + 1);
+
+      // Initialize monthlyCounts with 0 for each month
+      filteredMonths.forEach(month => {
+        monthlyCounts[month] = 0;
+      });
+
+      // Filter data based on selectedBranch
+      const relevantData = selectedBranch === "All Branches"
+        ? placementData
+        : placementData.filter(branch => branch.branch === selectedBranch);
+
+      // Accumulate placement counts per month
+      relevantData.forEach(branch => {
+        if (branch.ctcValues) {
+          branch.ctcValues.forEach(({ month }) => {
+            if (filteredMonths.includes(month)) {
+              monthlyCounts[month] += 1;
+            }
+          });
+        }
+      });
+
+      return {
+        labels: filteredMonths,
+        datasets: [{
+          data: filteredMonths.map(month => monthlyCounts[month])
+        }]
+      };
+    };
+    const rangeCounts = [0, 0, 0, 0, 0];
+
+    placementData.forEach(branch => {
+      if (!branch.ctcValues || branch.ctcValues.length === 0) return;
+
+      branch?.ctcValues.forEach(({ ctc }) => {
+        if (ctc < 25) rangeCounts[0]++;
+        else if (ctc >= 25 && ctc < 30) rangeCounts[1]++;
+        else if (ctc >= 30 && ctc < 35) rangeCounts[2]++;
+        else if (ctc >= 35 && ctc < 40) rangeCounts[3]++;
+        else rangeCounts[4]++;
+      })
+    });
+
+    const totalCount = rangeCounts.reduce((sum, count) => sum + count, 0);
+    const rangePercentages = rangeCounts.map(count => Number(((count / totalCount) * 100).toFixed(2)));
+
+    if (selectedBranch === 'All Branches') {
+      const totalPlaced = placementData.reduce((sum, item) => sum + item.placedStudents, 0);
+      const totalStudents = placementData.reduce((sum, item) => sum + item.totalStudents, 0);
+      const avgCTC = placementData.length
+        ? Number((placementData.reduce((sum, item) => sum + item.avgPackage, 0) / placementData.length).toFixed(2))
+        : 0;
+      const highestPackage = Math.max(...placementData.map(item => item.maxPackage));
+      const placementRate = totalStudents ? Number(((totalPlaced / totalStudents) * 100).toFixed(2)) : 0;
+
+      return {
+        totalPlacements: totalPlaced,
+        averageCTC: avgCTC,
+        highestPackage: highestPackage.toFixed(2),
+        placementRate,
+        monthlyData: getMonthlyData(placementData),
+        ctcRanges: {
+          labels: ['<25', '25-30', '30-35', '35-40', '40+'],
+          data: rangePercentages
+        }
+      };
+    }
+
+    const branchData = placementData.find(item => item.branch === selectedBranch);
+    if (!branchData) return null;
+
+    return {
+      totalPlacements: branchData.placedStudents,
+      averageCTC: Number(branchData.avgPackage).toFixed(2),
+      highestPackage: Number(branchData.maxPackage).toFixed(2),
+      placementRate: Number(((branchData.placedStudents / branchData.totalStudents) * 100).toFixed(2)),
+      monthlyData: getMonthlyData([branchData]),
+      ctcRanges: {
+        labels: ['<25', '25-30', '30-35', '35-40', '40+'],
+        data: [
+          branchData.ctcValues.filter(v => v.ctc < 25).length,
+          branchData.ctcValues.filter(v => v.ctc >= 25 && v.ctc < 30).length,
+          branchData.ctcValues.filter(v => v.ctc >= 30 && v.ctc < 35).length,
+          branchData.ctcValues.filter(v => v.ctc >= 35 && v.ctc < 40).length,
+          branchData.ctcValues.filter(v => v.ctc >= 40).length
+        ].map(count => Number(((count / branchData.ctcValues.length) * 100).toFixed(2)))
+      }
+    };
+  };
+
+  const currentBranchData = getCurrentBranchData();
+
+  // StatCard component (unchanged from previous version)
   const StatCard = ({ title, value, unit, change }) => (
     <View style={styles.statCard}>
       <Text style={styles.statTitle}>{title}</Text>
@@ -170,7 +220,7 @@ const PlacementDashboard = () => {
       </View>
       {change && (
         <Text style={[
-          styles.statChange, 
+          styles.statChange,
           change > 0 ? styles.positive : styles.negative
         ]}>
           {change > 0 ? '+' : ''}{change}% vs 2024
@@ -179,7 +229,7 @@ const PlacementDashboard = () => {
     </View>
   );
 
-  // Branch selector modal
+  // BranchModal component (unchanged from previous version)
   const BranchModal = () => (
     <Modal
       animationType="slide"
@@ -208,7 +258,7 @@ const PlacementDashboard = () => {
                   setBranchModalVisible(false);
                 }}
               >
-                <Text 
+                <Text
                   style={[
                     styles.branchOptionText,
                     selectedBranch === branch && styles.selectedBranchOptionText
@@ -227,6 +277,8 @@ const PlacementDashboard = () => {
     </Modal>
   );
 
+  if (!currentBranchData) return null;
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView>
@@ -235,36 +287,10 @@ const PlacementDashboard = () => {
             <Text style={styles.title}>Placement Dashboard</Text>
             <Text style={styles.subtitle}>Academic Year 2024-2025</Text>
           </View>
-          <View style={styles.yearSelector}>
-            <TouchableOpacity 
-              style={[
-                styles.yearButton, 
-                selectedYear === '2024' && styles.selectedYear
-              ]}
-              onPress={() => setSelectedYear('2024')}
-            >
-              <Text style={[
-                styles.yearText,
-                selectedYear === '2024' && styles.selectedYearText
-              ]}>2024</Text>
-            </TouchableOpacity>
-            <TouchableOpacity 
-              style={[
-                styles.yearButton, 
-                selectedYear === '2025' && styles.selectedYear
-              ]}
-              onPress={() => setSelectedYear('2025')}
-            >
-              <Text style={[
-                styles.yearText,
-                selectedYear === '2025' && styles.selectedYearText
-              ]}>2025</Text>
-            </TouchableOpacity>
-          </View>
         </View>
 
         {/* Branch Selector */}
-        <TouchableOpacity 
+        <TouchableOpacity
           style={styles.branchSelector}
           onPress={() => setBranchModalVisible(true)}
         >
@@ -276,37 +302,38 @@ const PlacementDashboard = () => {
         </TouchableOpacity>
 
         <View style={styles.statsContainer}>
-          <StatCard 
-            title="Total Placements" 
-            value={placementData.totalPlacements} 
-            change={8.2} 
+          <StatCard
+            title="Total Placements"
+            value={currentBranchData.totalPlacements}
+            change={8.2}
           />
-          <StatCard 
-            title="Average CTC" 
-            value={placementData.averageCTC} 
+          <StatCard
+            title="Average CTC"
+            value={currentBranchData.averageCTC}
             unit="LPA"
-            change={12.3} 
+            change={12.3}
           />
-          <StatCard 
-            title="Highest Package" 
-            value={placementData.highestPackage} 
+          <StatCard
+            title="Highest Package"
+            value={currentBranchData.highestPackage}
             unit="LPA"
-            change={15.4} 
+            change={15.4}
           />
-          <StatCard 
-            title="Placement Rate" 
-            value={placementData.placementRate} 
+          <StatCard
+            title="Placement Rate"
+            value={currentBranchData.placementRate}
             unit="%"
-            change={5.9} 
+            change={5.9}
           />
         </View>
 
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>Monthly Placements (2025) - {selectedBranch}</Text>
           <LineChart
-            data={placementData.monthlyData}
+            data={currentBranchData.monthlyData}
             width={Dimensions.get('window').width - 40}
             height={220}
+            yAxisInterval={Math.max(...currentBranchData.monthlyData.datasets[0].data) > 10 ? 2 : 1} fromZero={true}
             chartConfig={{
               backgroundColor: '#1C1235',
               backgroundGradientFrom: '#1C1235',
@@ -331,18 +358,23 @@ const PlacementDashboard = () => {
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>CTC Distribution (%) - {selectedBranch}</Text>
           <View style={styles.ctcDistribution}>
-            {placementData.ctcRanges.labels.map((label, index) => (
+            {currentBranchData.ctcRanges.labels.map((label, index) => (
               <View key={index} style={styles.ctcItem}>
-                <View style={styles.ctcBarContainer}>
-                  <View 
+                <View
+                  style={styles.ctcBarContainer}
+                  onLayout={(event) => {
+                    const { height } = event.nativeEvent.layout;
+                  }}
+                >
+                  <View
                     style={[
-                      styles.ctcBar, 
-                      { height: placementData.ctcRanges.data[index] * 3 }
-                    ]} 
+                      styles.ctcBar,
+                      { height: currentBranchData.ctcRanges.data[index] }
+                    ]}
                   />
                 </View>
                 <Text style={styles.ctcLabel}>{label}</Text>
-                <Text style={styles.ctcValue}>{placementData.ctcRanges.data[index]}%</Text>
+                <Text style={styles.ctcValue}>{currentBranchData.ctcRanges.data[index]}%</Text>
               </View>
             ))}
           </View>
@@ -370,6 +402,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: 20,
+    marginTop: 10
   },
   title: {
     fontSize: 24,
@@ -465,6 +498,7 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     borderBottomWidth: 1,
     borderBottomColor: '#2A1E43',
+    paddingHorizontal: 10
   },
   selectedBranchOption: {
     backgroundColor: 'rgba(201, 46, 255, 0.1)',
@@ -533,6 +567,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 3,
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   chartTitle: {
     fontSize: 16,
@@ -585,5 +622,4 @@ const styles = StyleSheet.create({
     color: '#BA68C8',
   },
 });
-
 export default PlacementDashboard;
