@@ -27,10 +27,20 @@ const PlacementStatisticsSchema = new Schema(
             type: Number,
             required: true
         },
-        ctcValues: {
-            type: [Number],
-            default: []
-        }
+        ctcValues: [{
+            ctc: {
+                type: Number,
+                required: true
+            },
+            month: {
+                type: String,
+                required: true,
+                enum: [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                ]
+            }
+        }]
     },
     { timestamps: true }
 )
