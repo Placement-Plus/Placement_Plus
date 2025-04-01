@@ -4,6 +4,7 @@ import { User } from '../Models/user.model.js'
 import asyncHandler from '../Utils/AsyncHandler.js'
 import bcrypt from 'bcrypt'
 import { uploadResumeOnAppwrite, getResumeFromAppwrite } from '../Utils/appwrite.js'
+import { sendPushNotification } from '../Utils/sendNotification.js'
 
 const generateAccesandRefreshToken = async (userId) => {
     try {
@@ -23,7 +24,7 @@ const generateAccesandRefreshToken = async (userId) => {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, rollNo, password, mobileNo, branch, semester, CGPA, batch, course } = req.body
+    const { name, email, rollNo, password, mobileNo, branch, semester, CGPA, batch, course, pushToken } = req.body
 
     if ([name, email, rollNo, password, mobileNo, branch, semester, CGPA, batch, course].some((field) => !field))
         throw new ApiError(400, "All fields are required")
@@ -39,6 +40,10 @@ const registerUser = asyncHandler(async (req, res) => {
 
     if (email.trim().substring(0, 9) !== String(rollNo))
         throw new ApiError(400, "Email should contain roll no")
+
+    // if (pushToken)
+    //     console.log(pushToken);
+
 
     const existedUser = await User.findOne({
         $or: [{ email, rollNo }]
@@ -67,7 +72,8 @@ const registerUser = asyncHandler(async (req, res) => {
         branch,
         resumeLink: resume.$id,
         batch,
-        course
+        course,
+        notificationPushToken: pushToken
     })
 
     const { refreshToken, accessToken } = await generateAccesandRefreshToken(user._id)
@@ -75,6 +81,18 @@ const registerUser = asyncHandler(async (req, res) => {
     const createdUser = await User.findById(user._id).select(" -password -refreshToken")
     if (!createdUser)
         throw new ApiError(500, "Something went wrong while creating user")
+
+    if (createdUser.notificationPushToken) {
+        console.log("Sending notification");
+
+        await fetch("http://localhost:5000/api/v1/notifications/send-welcome-notification", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ pushToken, message: `Welcome ${name} to Placement Plus! 🚀` }),
+        });
+
+        console.log("Notification sent");
+    }
 
     return res.status(201).json(
         new ApiResponse(
@@ -86,6 +104,8 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body
+    console.log(email, password);
+
 
     if (!email)
         throw new ApiError(400, "Email is Required")

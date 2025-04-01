@@ -26,6 +26,7 @@ import companyReviewRouter from './Routes/companyReview.routes.js'
 import resumeRouter from './Routes/resume.routes.js'
 import hrQuestionRouter from './Routes/hrQuestion.routes.js'
 import CSFundamentalsRouter from "./Routes/csFundamentals.routes.js"
+import NotificationRouter from "./Routes/notification.routes.js"
 
 
 app.use("/api/v1/users", userRouter)
@@ -40,7 +41,7 @@ app.use("/api/v1/company-review", companyReviewRouter)
 app.use("/api/v1/resume", resumeRouter)
 app.use("/api/v1/hr-questions", hrQuestionRouter)
 app.use("/api/v1/cs-fundamentals", CSFundamentalsRouter)
-
+app.use("/api/v1/notifications", NotificationRouter)
 
 
 export { app }

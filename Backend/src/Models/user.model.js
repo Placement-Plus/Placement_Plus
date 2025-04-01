@@ -85,6 +85,9 @@ const userSchema = new Schema(
         refreshToken: {
             type: String
         },
+        notificationPushToken: {
+            type: String
+        },
         appliedCompanies: [{
             companyId: {
                 type: mongoose.Schema.Types.ObjectId,
