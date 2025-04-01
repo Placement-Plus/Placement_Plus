@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard, BackHandler } from "react-native";
 import { Link, useRouter } from "expo-router";
 import { SimpleLineIcons, Feather, MaterialIcons } from "@expo/vector-icons";
@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { LinearGradient } from "expo-linear-gradient";
 import { storeAccessToken, storeRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js"
+import { registerForPushNotificationsAsync } from "../../utils/notificationService.js";
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string()
@@ -21,12 +22,34 @@ const LoginScreen = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
+    pushToken: ""
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState({});
   const { login } = useUser()
+
+  // useEffect(() => {
+  //   registerForPushNotificationsAsync().then((token) => {
+  //     console.log(token);
+  //     setFormData({
+  //       ...formData,
+  //       pushToken: token
+  //     })
+
+  //   })
+  // }, [])
+
+  // useEffect(() => {
+  //   const getPermission = async () => {
+  //     const authStatus = await requestNotificationPermission();
+  //     console.log("Final Permission Status:", authStatus);
+  //   };
+
+  //   getPermission();
+  // }, []);
+
 
   const handleChange = (field, value) => {
     setFormData({
@@ -90,6 +113,8 @@ const LoginScreen = () => {
     if (!isValid) return;
 
     setIsLoading(true);
+    console.log(formData);
+
 
     try {
       const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/login`, {
@@ -101,27 +126,22 @@ const LoginScreen = () => {
       });
 
       const result = await response.json();
+      console.log(result);
 
-      // if (!response.ok) {
-      //   throw new Error(result.message || 'Login failed');
-      // }
+      if (result.statusCode === 200) {
+        await storeAccessToken(result?.data?.accessToken)
+        await storeRefreshToken(result?.data?.refreshToken)
+        login(result?.data?.user)
 
-      await storeAccessToken(result?.data?.accessToken)
-      await storeRefreshToken(result?.data?.refreshToken)
-      login(result?.data?.user)
-
-      // console.log(await getAccessToken());
-      // console.log(await getRefreshToken());
-
-
-      // console.log('Login successful:', result);
-
-      router.replace("/HomePage/Home")
+        router.replace("/HomePage/Home")
+      } else {
+        Alert.alert("Error", result?.message || "Something went wrong")
+      }
 
     } catch (error) {
       Alert.alert(
         "Login Failed",
-        error.message || "Something went wrong. Please try again.",
+        error?.message || "Something went wrong. Please try again.",
         [{ text: "OK" }]
       );
       console.error('Error:', error.message);

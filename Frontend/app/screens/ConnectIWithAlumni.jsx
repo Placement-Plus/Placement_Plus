@@ -15,6 +15,8 @@ import {
 } from 'react-native';
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js'
+import { useUser } from '../../context/userContext.js';
+import { router } from 'expo-router';
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.85;
@@ -25,6 +27,7 @@ const AlumniPage = () => {
 	const flatListRef = useRef(null);
 	const scrollX = useRef(new Animated.Value(0)).current;
 	const [alumniData, setAlumniData] = useState([])
+	const { theme } = useUser()
 
 	useEffect(() => {
 		fetchAlumniData()
@@ -229,6 +232,310 @@ const AlumniPage = () => {
 		);
 	};
 
+	const getStyles = (currentTheme) => StyleSheet.create({
+		container: {
+			flex: 1,
+			backgroundColor: currentTheme === 'light' ? '#F5F5F5' : '#120023',
+		},
+		header: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+			width: '100%',
+			paddingTop: 10,
+			paddingBottom: 8,
+			paddingHorizontal: 16,
+			borderBottomWidth: 1,
+			borderBottomColor: currentTheme === 'light' ? '#E0E0E0' : 'rgba(255, 255, 255, 0.05)',
+			marginBottom: 20,
+			marginTop: 20,
+		},
+		logoContainer: {
+			flexDirection: 'row',
+			alignItems: 'center',
+		},
+		logo: {
+			width: 28,
+			height: 28,
+			resizeMode: 'contain',
+			marginRight: 8,
+		},
+		logoText: {
+			color: currentTheme === 'light' ? '#6A0DAD' : 'white',
+			fontSize: 18,
+			fontWeight: '700',
+		},
+		profileButton: {
+			padding: 4,
+		},
+		titleContainer: {
+			alignItems: 'center',
+			marginVertical: 12,
+			paddingHorizontal: 20,
+		},
+		indicatorContainer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+		},
+		indicator: {
+			height: 6,
+			width: 6,
+			borderRadius: 3,
+			marginHorizontal: 4,
+			backgroundColor: currentTheme === 'light' ? '#C9C9C9' : '#555',
+		},
+		activeIndicator: {
+			width: 20,
+			backgroundColor: currentTheme === 'light' ? '#6A0DAD' : '#e535f7',
+		},
+		carouselContainer: {
+			paddingHorizontal: width * 0.075,
+		},
+		cardContainer: {
+			width: CARD_WIDTH,
+			height: CARD_HEIGHT,
+			justifyContent: 'center',
+			alignItems: 'center',
+		},
+		cardScroll: {
+			width: '100%',
+			borderRadius: 24,
+		},
+		card: {
+			backgroundColor: currentTheme === 'light' ? '#FFFFFF' : '#2c0847',
+			borderRadius: 24,
+			padding: 16,
+			shadowColor: currentTheme === 'light' ? '#6A0DAD' : '#e535f7',
+			shadowOffset: { width: 0, height: 8 },
+			shadowOpacity: currentTheme === 'light' ? 0.1 : 0.3,
+			shadowRadius: 12,
+			elevation: 8,
+			width: '100%',
+			borderWidth: currentTheme === 'light' ? 1 : 0,
+			borderColor: currentTheme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'transparent',
+		},
+		alumniHeader: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			marginBottom: 12,
+		},
+		headerTextContainer: {
+			marginLeft: 12,
+			flex: 1,
+		},
+		alumniName: {
+			fontSize: 20,
+			fontWeight: 'bold',
+			color: currentTheme === 'light' ? '#333333' : 'white',
+		},
+		roleContainer: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			marginTop: 4,
+		},
+		roleText: {
+			fontSize: 14,
+			color: currentTheme === 'light' ? '#6A0DAD' : '#f0c5f1',
+			marginLeft: 4,
+			fontWeight: '500',
+		},
+		batchContainer: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			marginTop: 4,
+		},
+		batchText: {
+			fontSize: 14,
+			color: currentTheme === 'light' ? '#6A0DAD' : '#f0c5f1',
+			marginLeft: 4,
+			fontWeight: '400',
+		},
+		companySection: {
+			backgroundColor: currentTheme === 'light' ? 'rgba(106, 13, 173, 0.05)' : 'rgba(139, 8, 144, 0.15)',
+			borderRadius: 16,
+			padding: 12,
+			marginVertical: 10,
+			borderWidth: currentTheme === 'light' ? 1 : 0,
+			borderColor: currentTheme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'transparent',
+		},
+		companyHeader: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			marginBottom: 8,
+		},
+		companyLogo: {
+			width: 28,
+			height: 28,
+			borderRadius: 14,
+			marginRight: 8,
+		},
+		companyName: {
+			fontSize: 16,
+			fontWeight: 'bold',
+			color: currentTheme === 'light' ? '#333333' : 'white',
+		},
+		previousCompaniesSection: {
+			backgroundColor: currentTheme === 'light' ? 'rgba(106, 13, 173, 0.05)' : 'rgba(139, 8, 144, 0.15)',
+			borderRadius: 16,
+			padding: 12,
+			marginVertical: 10,
+			borderWidth: currentTheme === 'light' ? 1 : 0,
+			borderColor: currentTheme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'transparent',
+		},
+		previousCompanyItem: {
+			marginBottom: 10,
+			borderBottomWidth: 1,
+			borderBottomColor: currentTheme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(255, 255, 255, 0.1)',
+			paddingBottom: 10,
+		},
+		previousCompanyName: {
+			color: currentTheme === 'light' ? '#333333' : 'white',
+			fontSize: 16,
+			fontWeight: 'bold',
+			marginBottom: 4,
+		},
+		previousCompanyDuration: {
+			color: currentTheme === 'light' ? '#6A0DAD' : '#f0c5f1',
+			fontSize: 14,
+			marginBottom: 4,
+		},
+		previousCompanyExperience: {
+			color: currentTheme === 'light' ? '#666666' : 'white',
+			fontSize: 14,
+			lineHeight: 20,
+		},
+		cultureBadge: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			backgroundColor: currentTheme === 'light' ? '#6A0DAD' : '#8b0890',
+			alignSelf: 'flex-start',
+			paddingHorizontal: 8,
+			paddingVertical: 3,
+			borderRadius: 10,
+			marginBottom: 8,
+		},
+		cultureLabel: {
+			color: 'white',
+			fontSize: 12,
+			fontWeight: 'bold',
+			marginLeft: 4,
+		},
+		cultureDescription: {
+			color: currentTheme === 'light' ? '#333333' : 'white',
+			fontSize: 14,
+			lineHeight: 20,
+		},
+		divider: {
+			height: 1,
+			backgroundColor: currentTheme === 'light' ? 'rgba(0, 0, 0, 0.1)' : 'rgba(254, 254, 254, 0.15)',
+			marginVertical: 10,
+		},
+		detailsContainer: {
+			width: '100%',
+		},
+		detailItem: {
+			flexDirection: 'row',
+			marginBottom: 12,
+			alignItems: 'flex-start',
+		},
+		iconBackground: {
+			width: 28,
+			height: 28,
+			borderRadius: 14,
+			backgroundColor: currentTheme === 'light' ? '#6A0DAD' : '#8b0890',
+			justifyContent: 'center',
+			alignItems: 'center',
+			marginRight: 12,
+		},
+		detailTextContainer: {
+			flex: 1,
+		},
+		detailLabel: {
+			fontSize: 12,
+			color: currentTheme === 'light' ? '#6A0DAD' : '#f0c5f1',
+			marginBottom: 2,
+			fontWeight: '500',
+		},
+		detailValue: {
+			fontSize: 14,
+			color: currentTheme === 'light' ? '#333333' : 'white',
+			fontWeight: '400',
+		},
+		connectButton: {
+			backgroundColor: currentTheme === 'light' ? '#6A0DAD' : '#e535f7',
+			borderRadius: 12,
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'center',
+			paddingVertical: 10,
+			marginTop: 8,
+		},
+		connectIcon: {
+			marginRight: 8,
+		},
+		connectText: {
+			color: 'white',
+			fontSize: 15,
+			fontWeight: 'bold',
+		},
+		navigationButtons: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+			marginTop: 10,
+			marginBottom: 12,
+			paddingHorizontal: 20,
+		},
+		navButton: {
+			backgroundColor: currentTheme === 'light' ? '#6A0DAD' : '#8b0890',
+			flexDirection: 'row',
+			alignItems: 'center',
+			paddingVertical: 8,
+			paddingHorizontal: 10,
+			borderRadius: 12,
+			justifyContent: 'space-around',
+			width: 110
+		},
+		navButtonText: {
+			color: 'white',
+			fontSize: 14,
+			fontWeight: 'bold',
+			marginHorizontal: 4,
+		},
+		pageIndicator: {
+			backgroundColor: currentTheme === 'light' ? 'rgba(0, 0, 0, 0.05)' : 'rgba(255, 255, 255, 0.1)',
+			paddingHorizontal: 10,
+			paddingVertical: 4,
+			borderRadius: 12,
+		},
+		pageText: {
+			color: currentTheme === 'light' ? '#333333' : 'white',
+			fontSize: 14,
+			fontWeight: '500',
+		},
+		footer: {
+			flexDirection: 'row',
+			justifyContent: 'center',
+			alignItems: 'center',
+			marginTop: 'auto',
+			marginBottom: 12,
+			paddingTop: 12,
+			borderTopWidth: 1,
+			borderTopColor: currentTheme === 'light' ? '#E0E0E0' : 'rgba(255, 255, 255, 0.08)',
+		},
+		socialButton: {
+			width: 32,
+			height: 32,
+			borderRadius: 16,
+			backgroundColor: currentTheme === 'light' ? 'rgba(106, 13, 173, 0.7)' : 'rgba(139, 8, 144, 0.7)',
+			justifyContent: 'center',
+			alignItems: 'center',
+			marginHorizontal: 8,
+		},
+	});
+
+	const styles = getStyles(theme)
+
 	return (
 		<SafeAreaView style={styles.container}>
 			<StatusBar barStyle="light-content" backgroundColor="#120023" />
@@ -239,8 +546,11 @@ const AlumniPage = () => {
 					<Image source={require('@/assets/images/logo.png')} style={styles.logo} />
 					<Text style={styles.logoText}>Placement Plus</Text>
 				</View>
-				<TouchableOpacity style={styles.profileButton}>
-					<Ionicons name="person-circle" size={32} color="#fff" />
+				<TouchableOpacity
+					style={styles.profileButton}
+					onPress={() => router.push('screens/Profile/Profile')}
+				>
+					<Ionicons name="person-circle" size={32} color={'#6A0DAD'} />
 				</TouchableOpacity>
 			</View>
 
@@ -335,298 +645,6 @@ const AlumniPage = () => {
 	);
 };
 
-const styles = StyleSheet.create(
-	{
-		container: {
-			flex: 1,
-			backgroundColor: '#120023',
-		},
-		header: {
-			flexDirection: 'row',
-			justifyContent: 'space-between',
-			alignItems: 'center',
-			width: '100%',
-			paddingTop: 10,
-			paddingBottom: 8,
-			paddingHorizontal: 16,
-			borderBottomWidth: 1,
-			borderBottomColor: 'rgba(255, 255, 255, 0.05)',
-			marginBottom: 20,
-			marginTop: 15,
-		},
-		logoContainer: {
-			flexDirection: 'row',
-			alignItems: 'center',
-		},
-		logo: {
-			width: 28,
-			height: 28,
-			resizeMode: 'contain',
-			marginRight: 8,
-		},
-		logoText: {
-			color: 'white',
-			fontSize: 18,
-			fontWeight: '700',
-		},
-		profileButton: {
-			padding: 4,
-		},
-		titleContainer: {
-			alignItems: 'center',
-			marginVertical: 12,
-			paddingHorizontal: 20,
-		},
-		indicatorContainer: {
-			flexDirection: 'row',
-			justifyContent: 'center',
-		},
-		indicator: {
-			height: 6,
-			width: 6,
-			borderRadius: 3,
-			marginHorizontal: 4,
-		},
-		activeIndicator: {
-			width: 20,
-		},
-		carouselContainer: {
-			paddingHorizontal: width * 0.075,
-		},
-		cardContainer: {
-			width: CARD_WIDTH,
-			height: CARD_HEIGHT,
-			justifyContent: 'center',
-			alignItems: 'center',
-		},
-		cardScroll: {
-			width: '100%',
-			borderRadius: 24,
-		},
-		card: {
-			backgroundColor: '#2c0847',
-			borderRadius: 24,
-			padding: 16,
-			shadowColor: '#e535f7',
-			shadowOffset: { width: 0, height: 8 },
-			shadowOpacity: 0.3,
-			shadowRadius: 12,
-			elevation: 8,
-			width: '100%',
-		},
-		alumniHeader: {
-			flexDirection: 'row',
-			alignItems: 'center',
-			marginBottom: 12,
-		},
-		headerTextContainer: {
-			marginLeft: 12,
-			flex: 1,
-		},
-		alumniName: {
-			fontSize: 20,
-			fontWeight: 'bold',
-			color: 'white',
-		},
-		roleContainer: {
-			flexDirection: 'row',
-			alignItems: 'center',
-			marginTop: 4,
-		},
-		roleText: {
-			fontSize: 14,
-			color: '#f0c5f1',
-			marginLeft: 4,
-			fontWeight: '500',
-		},
-		batchContainer: {
-			flexDirection: 'row',
-			alignItems: 'center',
-			marginTop: 4,
-		},
-		batchText: {
-			fontSize: 14,
-			color: '#f0c5f1',
-			marginLeft: 4,
-			fontWeight: '400',
-		},
-		companySection: {
-			backgroundColor: 'rgba(139, 8, 144, 0.15)',
-			borderRadius: 16,
-			padding: 12,
-			marginVertical: 10,
-		},
-		companyHeader: {
-			flexDirection: 'row',
-			alignItems: 'center',
-			marginBottom: 8,
-		},
-		companyLogo: {
-			width: 28,
-			height: 28,
-			borderRadius: 14,
-			marginRight: 8,
-		},
-		companyName: {
-			fontSize: 16,
-			fontWeight: 'bold',
-			color: 'white',
-		},
-		previousCompaniesSection: {
-			backgroundColor: 'rgba(139, 8, 144, 0.15)',
-			borderRadius: 16,
-			padding: 12,
-			marginVertical: 10,
-		},
-		previousCompanyItem: {
-			marginBottom: 10,
-			borderBottomWidth: 1,
-			borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-			paddingBottom: 10,
-		},
-		previousCompanyName: {
-			color: 'white',
-			fontSize: 16,
-			fontWeight: 'bold',
-			marginBottom: 4,
-		},
-		previousCompanyDuration: {
-			color: '#f0c5f1',
-			fontSize: 14,
-			marginBottom: 4,
-		},
-		previousCompanyExperience: {
-			color: 'white',
-			fontSize: 14,
-			lineHeight: 20,
-		},
-		cultureBadge: {
-			flexDirection: 'row',
-			alignItems: 'center',
-			backgroundColor: '#8b0890',
-			alignSelf: 'flex-start',
-			paddingHorizontal: 8,
-			paddingVertical: 3,
-			borderRadius: 10,
-			marginBottom: 8,
-		},
-		cultureLabel: {
-			color: 'white',
-			fontSize: 12,
-			fontWeight: 'bold',
-			marginLeft: 4,
-		},
-		cultureDescription: {
-			color: 'white',
-			fontSize: 14,
-			lineHeight: 20,
-		},
-		divider: {
-			height: 1,
-			backgroundColor: 'rgba(254, 254, 254, 0.15)',
-			marginVertical: 10,
-		},
-		detailsContainer: {
-			width: '100%',
-		},
-		detailItem: {
-			flexDirection: 'row',
-			marginBottom: 12,
-			alignItems: 'flex-start',
-		},
-		iconBackground: {
-			width: 28,
-			height: 28,
-			borderRadius: 14,
-			backgroundColor: '#8b0890',
-			justifyContent: 'center',
-			alignItems: 'center',
-			marginRight: 12,
-		},
-		detailTextContainer: {
-			flex: 1,
-		},
-		detailLabel: {
-			fontSize: 12,
-			color: '#f0c5f1',
-			marginBottom: 2,
-			fontWeight: '500',
-		},
-		detailValue: {
-			fontSize: 14,
-			color: 'white',
-			fontWeight: '400',
-		},
-		connectButton: {
-			backgroundColor: '#e535f7',
-			borderRadius: 12,
-			flexDirection: 'row',
-			alignItems: 'center',
-			justifyContent: 'center',
-			paddingVertical: 10,
-			marginTop: 8,
-		},
-		connectIcon: {
-			marginRight: 8,
-		},
-		connectText: {
-			color: 'white',
-			fontSize: 15,
-			fontWeight: 'bold',
-		},
-		navigationButtons: {
-			flexDirection: 'row',
-			justifyContent: 'space-between',
-			alignItems: 'center',
-			marginTop: 10,
-			marginBottom: 12,
-			paddingHorizontal: 20,
-		},
-		navButton: {
-			backgroundColor: '#8b0890',
-			flexDirection: 'row',
-			alignItems: 'center',
-			paddingVertical: 8,
-			paddingHorizontal: 10,
-			borderRadius: 12,
-			justifyContent: 'center',
-		},
-		navButtonText: {
-			color: 'white',
-			fontSize: 14,
-			fontWeight: 'bold',
-			marginHorizontal: 4,
-		},
-		pageIndicator: {
-			backgroundColor: 'rgba(255, 255, 255, 0.1)',
-			paddingHorizontal: 10,
-			paddingVertical: 4,
-			borderRadius: 12,
-		},
-		pageText: {
-			color: 'white',
-			fontSize: 14,
-			fontWeight: '500',
-		},
-		footer: {
-			flexDirection: 'row',
-			justifyContent: 'center',
-			alignItems: 'center',
-			marginTop: 'auto',
-			marginBottom: 12,
-			paddingTop: 12,
-			borderTopWidth: 1,
-			borderTopColor: 'rgba(255, 255, 255, 0.08)',
-		},
-		socialButton: {
-			width: 32,
-			height: 32,
-			borderRadius: 16,
-			backgroundColor: 'rgba(139, 8, 144, 0.7)',
-			justifyContent: 'center',
-			alignItems: 'center',
-			marginHorizontal: 8,
-		},
-	});
+
 
 export default AlumniPage;

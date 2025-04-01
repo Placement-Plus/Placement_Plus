@@ -9,8 +9,8 @@ import { getAccessToken, getRefreshToken, removeAccessToken, removeRefreshToken 
 const ProfileSettings = () => {
     const navigation = useNavigation();
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-    const [darkModeEnabled, setDarkModeEnabled] = useState(true);
-    const { user: loggedInUser, logout } = useUser()
+    const { user: loggedInUser, logout, theme, toggleTheme } = useUser()
+    const [darkModeEnabled, setDarkModeEnabled] = useState(theme === "dark");
 
     const [user, setUser] = useState({
         name: '',
@@ -19,6 +19,10 @@ const ProfileSettings = () => {
         appliedCompanies: [],
         savedProblems: []
     });
+
+    useEffect(() => {
+        setDarkModeEnabled(theme === "dark")
+    }, [])
 
     useEffect(() => {
         setUser({
@@ -60,7 +64,7 @@ const ProfileSettings = () => {
             await removeAccessToken()
             await removeRefreshToken()
 
-            router.replace('/userloginsign/login');
+            router.replace("/");
 
             setTimeout(() => {
                 BackHandler.addEventListener('hardwareBackPress', () => true);
@@ -96,149 +100,251 @@ const ProfileSettings = () => {
 
     const handleToggleDarkMode = () => {
         setDarkModeEnabled(!darkModeEnabled);
+        toggleTheme()
     };
 
     const navigateTo = (screen) => {
         navigation.navigate(screen);
     };
 
+    const getDynamicStyles = (currentTheme) => StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: currentTheme === 'light' ? "#f0f0f0" : "#1a012c",
+        },
+        header: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 15,
+            paddingHorizontal: 15,
+            borderBottomWidth: 1,
+            borderBottomColor: currentTheme === 'light' ? "#e0e0e0" : '#390852',
+            marginTop: 15
+        },
+        headerTitle: {
+            color: currentTheme === 'light' ? "#6a0dad" : '#C92EFF',
+            fontSize: 20,
+            fontWeight: 'bold',
+        },
+        profileCard: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: currentTheme === 'light' ? "#ffffff" : '#2d0a41',
+            marginHorizontal: 15,
+            marginTop: 20,
+            padding: 20,
+            borderRadius: 15,
+            shadowColor: "#000",
+            shadowOffset: {
+                width: 0,
+                height: 3,
+            },
+            shadowOpacity: 0.27,
+            shadowRadius: 4.65,
+            elevation: 6,
+        },
+        profileName: {
+            color: currentTheme === 'light' ? "#333" : '#fff',
+            fontSize: 18,
+            fontWeight: 'bold',
+            marginBottom: 2,
+        },
+        profileEmail: {
+            color: currentTheme === 'light' ? "#666" : '#b388e9',
+            fontSize: 14,
+            marginBottom: 5,
+        },
+        statsContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            backgroundColor: currentTheme === 'light' ? "#ffffff" : '#2d0a41',
+            marginHorizontal: 15,
+            marginTop: 15,
+            padding: 15,
+            borderRadius: 15,
+        },
+        statValue: {
+            color: currentTheme === 'light' ? "#333" : '#fff',
+            fontSize: 24,
+            fontWeight: 'bold',
+        },
+        statLabel: {
+            color: currentTheme === 'light' ? "#666" : '#b388e9',
+            fontSize: 14,
+            marginTop: 5,
+        },
+        statDivider: {
+            width: 1,
+            height: '80%',
+            backgroundColor: currentTheme === 'light' ? "#e0e0e0" : '#390852',
+        },
+        settingsGroupTitle: {
+            color: currentTheme === 'light' ? "#6a0dad" : '#C92EFF',
+            fontSize: 16,
+            fontWeight: 'bold',
+            marginBottom: 10,
+            paddingLeft: 5,
+        },
+        settingsItem: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: currentTheme === 'light' ? "#ffffff" : '#2d0a41',
+            paddingVertical: 15,
+            paddingHorizontal: 15,
+            borderRadius: 10,
+            marginBottom: 10,
+        },
+        settingsItemText: {
+            flex: 1,
+            color: currentTheme === 'light' ? "#333" : '#fff',
+            fontSize: 16,
+        },
+        versionText: {
+            color: currentTheme === 'light' ? "#666" : '#777',
+            fontSize: 14,
+        }
+    });
+
+    const dynamicStyles = getDynamicStyles(theme);
+
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
+        <View style={dynamicStyles.container}>
+            <View style={dynamicStyles.header}>
                 <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#C92EFF" />
+                    <Ionicons name="arrow-back" size={24} color={theme === 'light' ? "#6a0dad" : "#C92EFF"} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Profile Settings</Text>
+                <Text style={dynamicStyles.headerTitle}>Profile Settings</Text>
                 <View style={{ width: 24 }} />
             </View>
 
             <ScrollView showsVerticalScrollIndicator={false}>
                 {/* Profile Card */}
-                <View style={styles.profileCard}>
+                <View style={dynamicStyles.profileCard}>
                     <View style={styles.profileImageContainer}>
-                        <FontAwesome name="user" size={60} color="#fff" />
+                        <FontAwesome name="user" size={60} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                     </View>
                     <View style={styles.profileInfo}>
-                        <Text style={styles.profileName}>{user.name}</Text>
-                        <Text style={styles.profileEmail}>{user.email}</Text>
-                        <Text style={styles.profileEmail}>{user.branch}</Text>
+                        <Text style={dynamicStyles.profileName}>{user.name}</Text>
+                        <Text style={dynamicStyles.profileEmail}>{user.email}</Text>
+                        <Text style={dynamicStyles.profileEmail}>{user.branch}</Text>
                     </View>
                 </View>
 
                 {/* Stats Section */}
-                <View style={styles.statsContainer}>
+                <View style={dynamicStyles.statsContainer}>
                     <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{user.appliedCompanies.length}</Text>
-                        <Text style={styles.statLabel}>Applied</Text>
+                        <Text style={dynamicStyles.statValue}>{user.appliedCompanies.length}</Text>
+                        <Text style={dynamicStyles.statLabel}>Applied</Text>
                     </View>
-                    <View style={styles.statDivider} />
+                    <View style={dynamicStyles.statDivider} />
                     <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{user.savedProblems.length}</Text>
-                        <Text style={styles.statLabel}>Saved Problems</Text>
+                        <Text style={dynamicStyles.statValue}>{user.savedProblems.length}</Text>
+                        <Text style={dynamicStyles.statLabel}>Saved Problems</Text>
                     </View>
                 </View>
 
                 {/* Profile Settings */}
                 <View style={styles.settingsGroup}>
-                    <Text style={styles.settingsGroupTitle}>Profile</Text>
+                    <Text style={dynamicStyles.settingsGroupTitle}>Profile</Text>
 
                     <TouchableOpacity
-                        style={styles.settingsItem}
+                        style={dynamicStyles.settingsItem}
                         onPress={() => router.push('/screens/Profile/ViewProfile')}
                     >
                         <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="user" size={20} color="#fff" />
+                            <FontAwesome name="user" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>View Profile</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                        <Text style={dynamicStyles.settingsItemText}>View Profile</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.settingsItem}
+                        style={dynamicStyles.settingsItem}
                         onPress={() => router.push('/screens/Profile/EditProfile')}
                     >
                         <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="edit" size={20} color="#fff" />
+                            <FontAwesome name="edit" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>Edit Profile</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                        <Text style={dynamicStyles.settingsItemText}>Edit Profile</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.settingsItem}
+                        style={dynamicStyles.settingsItem}
                         onPress={() => router.push('/screens/Profile/ChangePassword')}
                     >
                         <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="lock" size={20} color="#fff" />
+                            <FontAwesome name="lock" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>Change Password</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                        <Text style={dynamicStyles.settingsItemText}>Change Password</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
                 </View>
 
                 {/* Job Applications */}
                 <View style={styles.settingsGroup}>
-                    <Text style={styles.settingsGroupTitle}>Job Applications</Text>
+                    <Text style={dynamicStyles.settingsGroupTitle}>Job Applications</Text>
 
                     <TouchableOpacity
-                        style={styles.settingsItem}
+                        style={dynamicStyles.settingsItem}
                         onPress={() => router.push('/screens/Profile/AppliedCompanies')}
                     >
                         <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="building" size={20} color="#fff" />
+                            <FontAwesome name="building" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>View Applied Companies</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                        <Text style={dynamicStyles.settingsItemText}>View Applied Companies</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.settingsItem}
+                        style={dynamicStyles.settingsItem}
                         onPress={() => navigateTo('ApplicationStatus')}
                     >
                         <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="list-alt" size={20} color="#fff" />
+                            <FontAwesome name="list-alt" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>Application Status</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                        <Text style={dynamicStyles.settingsItemText}>Application Status</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.settingsItem}
+                        style={dynamicStyles.settingsItem}
                         onPress={() => navigateTo('SavedJobs')}
                     >
                         <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="bookmark" size={20} color="#fff" />
+                            <FontAwesome name="bookmark" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>Saved Jobs</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                        <Text style={dynamicStyles.settingsItemText}>Saved Jobs</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
                 </View>
 
                 {/* Learning */}
                 <View style={styles.settingsGroup}>
-                    <Text style={styles.settingsGroupTitle}>Learning</Text>
+                    <Text style={dynamicStyles.settingsGroupTitle}>Learning</Text>
 
                     <TouchableOpacity
-                        style={styles.settingsItem}
+                        style={dynamicStyles.settingsItem}
                         onPress={() => navigateTo('SavedProblems')}
                     >
                         <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="code" size={20} color="#fff" />
+                            <FontAwesome name="code" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>Saved Problems</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                        <Text style={dynamicStyles.settingsItemText}>Saved Problems</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
                 </View>
 
                 {/* App Settings */}
                 <View style={styles.settingsGroup}>
-                    <Text style={styles.settingsGroupTitle}>App Settings</Text>
+                    <Text style={dynamicStyles.settingsGroupTitle}>App Settings</Text>
 
-                    <View style={styles.settingsItem}>
+                    <View style={dynamicStyles.settingsItem}>
                         <View style={styles.settingsIconContainer}>
-                            <Ionicons name="notifications" size={22} color="#fff" />
+                            <Ionicons name="notifications" size={22} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>Notifications</Text>
+                        <Text style={dynamicStyles.settingsItemText}>Notifications</Text>
                         <Switch
                             trackColor={{ false: "#3e3e3e", true: "rgba(201, 46, 255, 0.4)" }}
                             thumbColor={notificationsEnabled ? "#C92EFF" : "#f4f3f4"}
@@ -248,11 +354,11 @@ const ProfileSettings = () => {
                         />
                     </View>
 
-                    <View style={styles.settingsItem}>
+                    <View style={dynamicStyles.settingsItem}>
                         <View style={styles.settingsIconContainer}>
-                            <Ionicons name="moon" size={22} color="#fff" />
+                            <Ionicons name="moon" size={22} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>Dark Mode</Text>
+                        <Text style={dynamicStyles.settingsItemText}>Dark Mode</Text>
                         <Switch
                             trackColor={{ false: "#3e3e3e", true: "rgba(201, 46, 255, 0.4)" }}
                             thumbColor={darkModeEnabled ? "#C92EFF" : "#f4f3f4"}
@@ -266,32 +372,32 @@ const ProfileSettings = () => {
 
                 {/* Additional Options */}
                 <View style={styles.settingsGroup}>
-                    <Text style={styles.settingsGroupTitle}>Additional Options</Text>
+                    <Text style={dynamicStyles.settingsGroupTitle}>Additional Options</Text>
 
                     <TouchableOpacity
-                        style={styles.settingsItem}
+                        style={dynamicStyles.settingsItem}
                         onPress={() => navigateTo('Help')}
                     >
                         <View style={styles.settingsIconContainer}>
-                            <Ionicons name="help-circle" size={22} color="#fff" />
+                            <Ionicons name="help-circle" size={22} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>Help & Support</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                        <Text style={dynamicStyles.settingsItemText}>Help & Support</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.settingsItem}
+                        style={dynamicStyles.settingsItem}
                         onPress={() => navigateTo('PrivacyPolicy')}
                     >
                         <View style={styles.settingsIconContainer}>
-                            <Ionicons name="shield-checkmark" size={22} color="#fff" />
+                            <Ionicons name="shield-checkmark" size={22} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
-                        <Text style={styles.settingsItemText}>Privacy Policy</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color="#777" />
+                        <Text style={dynamicStyles.settingsItemText}>Privacy Policy</Text>
+                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        style={styles.settingsItem}
+                        style={dynamicStyles.settingsItem}
                         onPress={confirmLogout}
                     >
                         <View style={[styles.settingsIconContainer, styles.logoutIconContainer]}>
@@ -302,7 +408,7 @@ const ProfileSettings = () => {
                 </View>
 
                 <View style={styles.versionContainer}>
-                    <Text style={styles.versionText}>Version 1.0.0</Text>
+                    <Text style={dynamicStyles.versionText}>Version 1.0.0</Text>
                 </View>
             </ScrollView>
         </View>
@@ -478,6 +584,13 @@ const styles = StyleSheet.create({
     versionText: {
         color: '#777',
         fontSize: 14,
+    },
+    backButton: {
+        padding: 5,
+    },
+    profileImageContainer: {
+        position: 'relative',
+        marginRight: 15,
     },
 });
 

@@ -7,15 +7,19 @@ import {
     TextInput,
     TouchableOpacity,
     SafeAreaView,
-    ActivityIndicator
+    ActivityIndicator,
+    Image
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
+import { FontAwesome } from '@expo/vector-icons';
+import { useUser } from '../../context/userContext.js';
 
 const PlacementDashboard = () => {
 
     const [placementData, setPlacementData] = useState([])
     const [loading, setLoading] = useState(false)
+    const { theme } = useUser()
 
     // State for filters
     const [selectedBranch, setSelectedBranch] = useState('');
@@ -25,6 +29,16 @@ const PlacementDashboard = () => {
     // Derive unique filter options
     const branchOptions = ['', ...new Set(placementData?.map(item => item?.studentData?.branch))];
     const typeOptions = ['', 'Internship', 'Full Time', 'Internship + Full Time'];
+
+    // Theme colors
+    const themeColor = theme === 'light' ? '#6A0DAD' : '#C92EFF';
+    const backgroundColor = theme === 'light' ? '#F5F5F5' : '#0D021F';
+    const cardBackgroundColor = theme === 'light' ? '#FFFFFF' : '#1C1235';
+    const cardBorderColor = theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : '#2A1E43';
+    const textColor = theme === 'light' ? '#333333' : 'white';
+    const secondaryTextColor = theme === 'light' ? '#666666' : '#BA68C8';
+    const inputBackgroundColor = theme === 'light' ? 'rgba(106, 13, 173, 0.05)' : '#1C1235';
+    const emptyTextColor = theme === 'light' ? '#666666' : '#BA68C8';
 
     useEffect(() => {
         getStudentPlacementData()
@@ -85,55 +99,58 @@ const PlacementDashboard = () => {
 
     // Render individual placement item
     const renderPlacementItem = ({ item }) => (
-        <View style={styles.placementCard}>
+        <View style={[styles.placementCard, {
+            backgroundColor: cardBackgroundColor,
+            borderColor: cardBorderColor,
+        }]}>
             {/* Student Details */}
-            <View style={styles.studentHeader}>
-                <Text style={styles.studentName}>{item?.studentData?.name || "N/A"}</Text>
-                <Text style={styles.studentRollNo}>Roll No: {item?.studentData?.rollNo || "-"}</Text>
+            <View style={[styles.studentHeader, { borderBottomColor: cardBorderColor }]}>
+                <Text style={[styles.studentName, { color: textColor }]}>{item?.studentData?.name || "N/A"}</Text>
+                <Text style={[styles.studentRollNo, { color: secondaryTextColor }]}>Roll No: {item?.studentData?.rollNo || "-"}</Text>
             </View>
 
             {/* Student Additional Details */}
             <View style={styles.studentDetails}>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Branch:</Text>
-                    <Text style={styles.detailValue}>{item?.studentData?.branch || "-"}</Text>
+                    <Text style={[styles.detailLabel, { color: secondaryTextColor }]}>Branch:</Text>
+                    <Text style={[styles.detailValue, { color: textColor }]}>{item?.studentData?.branch || "-"}</Text>
                 </View>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Semester:</Text>
-                    <Text style={styles.detailValue}>{item?.studentData?.semester || "-"}</Text>
+                    <Text style={[styles.detailLabel, { color: secondaryTextColor }]}>Semester:</Text>
+                    <Text style={[styles.detailValue, { color: textColor }]}>{item?.studentData?.semester || "-"}</Text>
                 </View>
             </View>
 
             {/* Placement Details */}
-            <View style={styles.placementDetails}>
-                <Text style={styles.placementTitle}>Placement Details</Text>
+            <View style={[styles.placementDetails, { borderTopColor: cardBorderColor }]}>
+                <Text style={[styles.placementTitle, { color: themeColor }]}>Placement Details</Text>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Company:</Text>
-                    <Text style={styles.companyName}>{item?.companyName}</Text>
+                    <Text style={[styles.detailLabel, { color: secondaryTextColor }]}>Company:</Text>
+                    <Text style={[styles.companyName, { color: themeColor }]}>{item?.companyName}</Text>
                 </View>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Role:</Text>
-                    <Text style={styles.detailValue}>{item?.role}</Text>
+                    <Text style={[styles.detailLabel, { color: secondaryTextColor }]}>Role:</Text>
+                    <Text style={[styles.detailValue, { color: textColor }]}>{item?.role}</Text>
                 </View>
                 {item?.ctc && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>CTC:</Text>
-                        <Text style={styles.detailValue}>{item?.ctc}</Text>
+                        <Text style={[styles.detailLabel, { color: secondaryTextColor }]}>CTC:</Text>
+                        <Text style={[styles.detailValue, { color: textColor }]}>{item?.ctc}</Text>
                     </View>
                 )}
                 {item.stipend && (
                     <View style={styles.detailRow}>
-                        <Text style={styles.detailLabel}>Stipend:</Text>
-                        <Text style={styles.detailValue}>{item?.stipend}</Text>
+                        <Text style={[styles.detailLabel, { color: secondaryTextColor }]}>Stipend:</Text>
+                        <Text style={[styles.detailValue, { color: textColor }]}>{item?.stipend}</Text>
                     </View>
                 )}
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Location:</Text>
-                    <Text style={styles.detailValue}>{item?.jobLocation}</Text>
+                    <Text style={[styles.detailLabel, { color: secondaryTextColor }]}>Location:</Text>
+                    <Text style={[styles.detailValue, { color: textColor }]}>{item?.jobLocation}</Text>
                 </View>
                 <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Type:</Text>
-                    <Text style={styles.detailValue}>{item?.placementType}</Text>
+                    <Text style={[styles.detailLabel, { color: secondaryTextColor }]}>Type:</Text>
+                    <Text style={[styles.detailValue, { color: textColor }]}>{item?.placementType}</Text>
                 </View>
             </View>
         </View>
@@ -148,61 +165,99 @@ const PlacementDashboard = () => {
 
     if (loading) {
         return (
-            <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-                <ActivityIndicator size="large" color="#C92EFF" />
+            <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center' },
+            { backgroundColor: backgroundColor }
+            ]}>
+                <ActivityIndicator size="large" color={themeColor} />
             </View>
         )
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            <Text style={styles.title}>Student Placement Dashboard</Text>
+        <SafeAreaView style={[styles.container, { backgroundColor: backgroundColor }]}>
+            <Text style={[styles.title, { color: textColor }]}>Student Placement Dashboard</Text>
 
             {/* Filters Container */}
-            <View style={styles.filtersContainer}>
+            <View style={[styles.filtersContainer, { backgroundColor: cardBackgroundColor }]}>
                 {/* Search Input */}
-                <TextInput
-                    placeholder="Search by Name, Roll No, or Company"
-                    value={searchQuery}
-                    onChangeText={setSearchQuery}
-                    style={styles.searchInput}
-                    placeholderTextColor="#BA68C8"
-                />
+                <View style={[styles.searchContainer, {
+                    backgroundColor: inputBackgroundColor,
+                    borderColor: cardBorderColor
+                }]}>
+                    <FontAwesome name="search" size={18} color={themeColor} style={styles.searchIcon} />
+                    <TextInput
+                        placeholder="Search by Name, Roll No, or Company"
+                        value={searchQuery}
+                        onChangeText={setSearchQuery}
+                        style={[styles.searchInput, { color: textColor }]}
+                        placeholderTextColor={secondaryTextColor}
+                    />
+                </View>
 
                 {/* Branch Picker */}
-                <Picker
-                    selectedValue={selectedBranch}
-                    onValueChange={(itemValue) => setSelectedBranch(itemValue)}
-                    style={styles.picker}
-                >
-                    {branchOptions.map((branch, index) => (
-                        <Picker.Item
-                            key={index}
-                            label={branch || 'All Branches'}
-                            value={branch}
-                            color="#1C1235"
-                        />
-                    ))}
-                </Picker>
+                <View style={styles.pickerContainer}>
+                    <Text style={[styles.pickerLabel, { color: secondaryTextColor }]}>Branch:</Text>
+                    <View style={[styles.pickerWrapper, {
+                        backgroundColor: inputBackgroundColor,
+                        borderColor: cardBorderColor
+                    }]}>
+                        <Picker
+                            selectedValue={selectedBranch}
+                            onValueChange={(itemValue) => setSelectedBranch(itemValue)}
+                            style={[styles.picker, { color: textColor }]}
+                            dropdownIconColor={themeColor}
+                            mode="dropdown"
+                        >
+                            <Picker.Item
+                                label="All Branches"
+                                value=""
+                                color={theme === 'light' ? '#333333' : '#000000'}
+                            />
+                            {branchOptions.filter(branch => branch !== '').map((branch, index) => (
+                                <Picker.Item
+                                    key={index}
+                                    label={branch}
+                                    value={branch}
+                                    color={theme === 'light' ? '#333333' : '#000000'}
+                                />
+                            ))}
+                        </Picker>
+                    </View>
+                </View>
 
-                {/* Opportunity Type Picker */}
-                <Picker
-                    selectedValue={selectedType}
-                    onValueChange={(itemValue) => setSelectedType(itemValue)}
-                    style={styles.picker}
-                >
-                    {typeOptions.map((type, index) => (
-                        <Picker.Item
-                            key={index}
-                            label={type || 'All Types'}
-                            value={type}
-                        />
-                    ))}
-                </Picker>
+                <View style={styles.pickerContainer}>
+                    <Text style={[styles.pickerLabel, { color: secondaryTextColor }]}>Type:</Text>
+                    <View style={[styles.pickerWrapper, {
+                        backgroundColor: inputBackgroundColor,
+                        borderColor: cardBorderColor
+                    }]}>
+                        <Picker
+                            selectedValue={selectedType}
+                            onValueChange={(itemValue) => setSelectedType(itemValue)}
+                            style={[styles.picker, { color: textColor }]}
+                            dropdownIconColor={themeColor}
+                            mode="dropdown"
+                        >
+                            <Picker.Item
+                                label="All Types"
+                                value=""
+                                color={theme === 'light' ? '#333333' : '#000000'}
+                            />
+                            {typeOptions.filter(type => type !== '').map((type, index) => (
+                                <Picker.Item
+                                    key={index}
+                                    label={type}
+                                    value={type}
+                                    color={theme === 'light' ? '#333333' : '#000000'}
+                                />
+                            ))}
+                        </Picker>
+                    </View>
+                </View>
 
                 {/* Reset Filters Button */}
                 <TouchableOpacity
-                    style={styles.resetButton}
+                    style={[styles.resetButton, { backgroundColor: themeColor }]}
                     onPress={resetFilters}
                 >
                     <Text style={styles.resetButtonText}>Reset Filters</Text>
@@ -215,8 +270,18 @@ const PlacementDashboard = () => {
                 renderItem={renderPlacementItem}
                 keyExtractor={(item) => item._id}
                 ListEmptyComponent={
-                    <View style={styles.emptyContainer}>
-                        <Text style={styles.emptyText}>No placements found</Text>
+                    <View style={[styles.emptyContainer, { backgroundColor: inputBackgroundColor }]}>
+                        <FontAwesome
+                            name="search"
+                            size={50}
+                            color={themeColor}
+                            style={styles.emptyIcon}
+                        />
+                        <Text style={[styles.emptyTitle, { color: textColor }]}>No Placements Found</Text>
+                        <Text style={[styles.emptyText, { color: emptyTextColor }]}>
+                            We couldn't find any placements that match your search criteria.
+                            Try adjusting your filters or search query.
+                        </Text>
                     </View>
                 }
                 contentContainerStyle={styles.listContainer}
@@ -228,7 +293,6 @@ const PlacementDashboard = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#0D021F',
         marginTop: 20
     },
     title: {
@@ -236,66 +300,90 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
         marginVertical: 15,
-        color: 'white',
     },
     filtersContainer: {
-        padding: 10,
-        backgroundColor: '#1C1235',
-        marginBottom: 10,
+        padding: 15,
+        borderRadius: 10,
+        marginHorizontal: 10,
+        marginBottom: 15,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 2,
     },
-    searchInput: {
+    searchContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
         borderWidth: 1,
-        borderColor: '#2A1E43',
         borderRadius: 8,
         paddingHorizontal: 10,
-        paddingVertical: 8,
-        marginBottom: 10,
-        backgroundColor: '#1C1235',
-        color: 'white',
+        marginBottom: 15,
+    },
+    searchIcon: {
+        marginRight: 10,
+    },
+    searchInput: {
+        flex: 1,
+        paddingVertical: 5,
+        marginVertical: 10
+    },
+    pickerContainer: {
+        marginBottom: 15,
+    },
+    pickerLabel: {
+        marginBottom: 5,
+        fontSize: 14,
+        fontWeight: '500',
+    },
+    pickerWrapper: {
+        borderWidth: 1,
+        borderRadius: 8,
+        marginBottom: 5,
+        overflow: 'hidden',
     },
     picker: {
-        marginBottom: 10,
-        backgroundColor: '#1C1235',
-        color: 'white',
+        height: 50,
+        width: '100%',
+        marginHorizontal: -8,
     },
     resetButton: {
-        backgroundColor: '#C92EFF',
-        padding: 10,
+        padding: 12,
         borderRadius: 8,
         alignItems: 'center',
+        marginTop: 5,
     },
     resetButtonText: {
         color: 'white',
         fontWeight: 'bold',
+        fontSize: 16,
     },
     listContainer: {
         paddingHorizontal: 10,
+        paddingBottom: 20,
     },
     placementCard: {
-        backgroundColor: '#1C1235',
         borderRadius: 10,
         padding: 15,
-        marginBottom: 10,
+        marginBottom: 15,
+        borderWidth: 1,
         shadowColor: '#000',
         shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.3,
+        shadowOpacity: 0.1,
         shadowRadius: 4,
-        elevation: 3,
+        elevation: 2,
     },
     studentHeader: {
         borderBottomWidth: 1,
-        borderBottomColor: '#2A1E43',
         paddingBottom: 10,
         marginBottom: 10,
     },
     studentName: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: 'white',
     },
     studentRollNo: {
         fontSize: 14,
-        color: '#BA68C8',
         marginTop: 5,
     },
     studentDetails: {
@@ -303,43 +391,48 @@ const styles = StyleSheet.create({
     },
     placementDetails: {
         borderTopWidth: 1,
-        borderTopColor: '#2A1E43',
         paddingTop: 10,
     },
     placementTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#C92EFF',
         marginBottom: 10,
     },
     detailRow: {
         flexDirection: 'row',
-        marginBottom: 5,
+        marginBottom: 8,
     },
     detailLabel: {
         fontWeight: 'bold',
         marginRight: 5,
-        color: '#BA68C8',
         width: 100,
     },
     detailValue: {
-        color: 'white',
         flex: 1,
     },
     companyName: {
-        color: '#C92EFF',
         fontWeight: 'bold',
         flex: 1,
     },
     emptyContainer: {
-        flex: 1,
-        justifyContent: 'center',
+        padding: 30,
+        borderRadius: 10,
         alignItems: 'center',
-        marginTop: 50,
+        marginTop: 20,
+        marginHorizontal: 10,
+    },
+    emptyIcon: {
+        marginBottom: 15,
+    },
+    emptyTitle: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginBottom: 10,
     },
     emptyText: {
-        fontSize: 18,
-        color: '#BA68C8',
+        fontSize: 14,
+        textAlign: 'center',
+        marginBottom: 15,
     },
 });
 

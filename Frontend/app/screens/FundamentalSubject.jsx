@@ -10,11 +10,13 @@ import {
     LayoutAnimation,
     Platform,
     UIManager,
-    Linking
+    Linking,
+    Alert
 } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import * as IntentLauncher from 'expo-intent-launcher';
+import { useUser } from '../../context/userContext.js';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -26,6 +28,7 @@ const SubjectMaterials = ({ companyLogo }) => {
     const [activeFilter, setActiveFilter] = useState('All');
     const [filteredSubjects, setFilteredSubjects] = useState([]);
     const [expandedSubjects, setExpandedSubjects] = useState({});
+    const { theme } = useUser()
 
     const filterOptions = ['All', 'Notes', 'Video'];
     const icons = {
@@ -94,6 +97,11 @@ const SubjectMaterials = ({ companyLogo }) => {
                 throw new Error(result.message || 'Something went wrong');
             }
 
+            if (result.statusCode !== 200) {
+                Alert.alert("Error", result?.message || "Something went wrong. please try again later")
+                return;
+            }
+
             const subjectGroups = {};
 
             result.data.forEach(item => {
@@ -151,6 +159,11 @@ const SubjectMaterials = ({ companyLogo }) => {
 
             const result = await response.json();
 
+            if (result.statusCode !== 200) {
+                Alert.alert("Error", result?.message || "Something wnet worng. Please try again later")
+                return
+            }
+
             if (Platform.OS === 'android') {
                 IntentLauncher.startActivityAsync('android.intent.action.VIEW', {
                     data: result?.data,
@@ -195,57 +208,112 @@ const SubjectMaterials = ({ companyLogo }) => {
     const renderSubjectItem = ({ item }) => {
         const isExpanded = expandedSubjects[item.id] || false;
         const subjectIcon = icons[item.name] || 'folder';
+        const themeColor = theme === 'light' ? '#6A0DAD' : '#C92EFF';
 
         return (
-            <View style={styles.subjectContainer}>
+            <View style={[
+                styles.subjectContainer,
+                {
+                    backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.05)' : 'rgba(255, 255, 255, 0.05)',
+                    borderColor: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                }
+            ]}>
                 <TouchableOpacity
                     style={styles.subjectHeader}
                     onPress={() => toggleExpand(item.id)}
                 >
                     <View style={styles.subjectTitleContainer}>
-                        <FontAwesome name={subjectIcon} size={22} color="#C92EFF" style={styles.subjectIcon} />
-                        <Text style={styles.subjectTitle}>{item.name}</Text>
+                        <FontAwesome name={subjectIcon} size={22} color={themeColor} style={styles.subjectIcon} />
+                        <Text style={[
+                            styles.subjectTitle,
+                            { color: theme === 'light' ? '#333333' : '#fff' }
+                        ]}>{item.name}</Text>
                     </View>
                     <FontAwesome
                         name={isExpanded ? 'chevron-up' : 'chevron-down'}
                         size={18}
-                        color="#fff"
+                        color={theme === 'light' ? '#6A0DAD' : '#fff'}
                     />
                 </TouchableOpacity>
 
                 {isExpanded && (
-                    <View style={styles.materialsContainer}>
+                    <View style={[
+                        styles.materialsContainer,
+                        {
+                            borderTopColor: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                        }
+                    ]}>
                         {Array.isArray(item.materials) && item.materials.length > 0 ? (
                             <FlatList
                                 data={item.materials}
                                 keyExtractor={(material) => material.id}
                                 scrollEnabled={false}
                                 ListHeaderComponent={() => (
-                                    <View style={styles.tableHeader}>
-                                        <Text style={[styles.headerText, styles.col1]}>Material</Text>
-                                        <Text style={[styles.headerText, styles.col2]}>Type</Text>
-                                        <Text style={[styles.headerText, styles.col3]}></Text>
+                                    <View style={[
+                                        styles.tableHeader,
+                                        {
+                                            backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'rgba(0, 0, 0, 0.2)',
+                                            borderBottomColor: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                                        }
+                                    ]}>
+                                        <Text style={[
+                                            styles.headerText,
+                                            styles.col1,
+                                            { color: theme === 'light' ? '#333333' : '#fff' }
+                                        ]}>Material</Text>
+                                        <Text style={[
+                                            styles.headerText,
+                                            styles.col2,
+                                            { color: theme === 'light' ? '#333333' : '#fff' }
+                                        ]}>Type</Text>
+                                        <Text style={[
+                                            styles.headerText,
+                                            styles.col3,
+                                            { color: theme === 'light' ? '#333333' : '#fff' }
+                                        ]}></Text>
                                     </View>
                                 )}
                                 renderItem={({ item: material }) => (
                                     <View>
-                                        <View style={styles.materialRow}>
-                                            <Text style={[styles.cell, styles.col1]}>{material.title || 'Untitled'}</Text>
+                                        <View style={[
+                                            styles.materialRow,
+                                            {
+                                                borderBottomColor: theme === 'light' ? 'rgba(106, 13, 173, 0.05)' : 'rgba(255, 255, 255, 0.05)'
+                                            }
+                                        ]}>
+                                            <Text style={[
+                                                styles.cell,
+                                                styles.col1,
+                                                { color: theme === 'light' ? '#333333' : '#fff' }
+                                            ]}>{material.title || 'Untitled'}</Text>
                                             <View style={styles.col2}>
                                                 <FontAwesome
                                                     name={getMaterialTypeIcon(material.type)}
                                                     size={18}
-                                                    color="#C92EFF"
+                                                    color={themeColor}
                                                     style={styles.materialIcon}
                                                 />
                                             </View>
                                             <TouchableOpacity onPress={() => openPdf(material?.pdfLink)}>
-                                                <Text style={[styles.openButton, styles.col3]}>Open</Text>
+                                                <Text style={[
+                                                    styles.openButton,
+                                                    styles.col3,
+                                                    { backgroundColor: theme === 'light' ? '#6A0DAD' : '#C92EFF' }
+                                                ]}>Open</Text>
                                             </TouchableOpacity>
                                         </View>
                                         {material.description && (
-                                            <View style={styles.materialDescriptionContainer}>
-                                                <Text style={styles.materialDescriptionText}>{material.description}</Text>
+                                            <View style={[
+                                                styles.materialDescriptionContainer,
+                                                {
+                                                    backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.05)' : 'rgba(201, 46, 255, 0.05)',
+                                                    borderTopColor: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'rgba(201, 46, 255, 0.2)'
+                                                }
+                                            ]}>
+                                                <Text style={[
+                                                    styles.materialDescriptionText,
+                                                    { color: theme === 'light' ? '#666666' : '#d0d0d0' }
+                                                ]}>{material.description}</Text>
                                             </View>
                                         )}
                                     </View>
@@ -253,7 +321,10 @@ const SubjectMaterials = ({ companyLogo }) => {
                             />
                         ) : (
                             <View style={styles.emptyMaterials}>
-                                <Text style={styles.emptyText}>No materials match your filters</Text>
+                                <Text style={[
+                                    styles.emptyText,
+                                    { color: theme === 'light' ? '#666666' : '#8a8a8a' }
+                                ]}>No materials match your filters</Text>
                             </View>
                         )}
                     </View>
@@ -263,19 +334,36 @@ const SubjectMaterials = ({ companyLogo }) => {
     };
 
     return (
-        <View style={styles.container}>
+        <View style={[
+            styles.container,
+            { backgroundColor: theme === 'light' ? '#F5F5F5' : '#1a012c' }
+        ]}>
             <View style={styles.headerContainer}>
-                <Text style={styles.header}>Learning Materials</Text>
+                <Text style={[
+                    styles.header,
+                    { color: theme === 'light' ? '#6A0DAD' : '#C92EFF' }
+                ]}>Learning Materials</Text>
                 <Image source={companyLogo} style={styles.logo} />
             </View>
 
             <View style={styles.searchFilterContainer}>
-                <View style={styles.searchContainer}>
-                    <FontAwesome name="search" size={18} color="#C92EFF" style={styles.searchIcon} />
+                <View style={[
+                    styles.searchContainer,
+                    { backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'rgba(255, 255, 255, 0.1)' }
+                ]}>
+                    <FontAwesome
+                        name="search"
+                        size={18}
+                        color={theme === 'light' ? '#6A0DAD' : '#C92EFF'}
+                        style={styles.searchIcon}
+                    />
                     <TextInput
-                        style={styles.searchInput}
+                        style={[
+                            styles.searchInput,
+                            { color: theme === 'light' ? '#333333' : '#fff' }
+                        ]}
                         placeholder="Search materials..."
-                        placeholderTextColor="#8a8a8a"
+                        placeholderTextColor={theme === 'light' ? '#666666' : '#8a8a8a'}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                     />
@@ -291,13 +379,25 @@ const SubjectMaterials = ({ companyLogo }) => {
                             <TouchableOpacity
                                 style={[
                                     styles.filterOption,
-                                    activeFilter === item && styles.activeFilterOption
+                                    {
+                                        backgroundColor: theme === 'light'
+                                            ? 'rgba(106, 13, 173, 0.08)'
+                                            : 'rgba(255, 255, 255, 0.08)'
+                                    },
+                                    activeFilter === item && {
+                                        backgroundColor: theme === 'light' ? '#6A0DAD' : '#C92EFF'
+                                    }
                                 ]}
                                 onPress={() => setActiveFilter(item)}
                             >
                                 <Text
                                     style={[
                                         styles.filterText,
+                                        {
+                                            color: theme === 'light'
+                                                ? (activeFilter === item ? '#fff' : '#333333')
+                                                : '#fff'
+                                        },
                                         activeFilter === item && styles.activeFilterText
                                     ]}
                                 >
@@ -317,15 +417,36 @@ const SubjectMaterials = ({ companyLogo }) => {
                     contentContainerStyle={styles.subjectsList}
                 />
             ) : (
-                <View style={styles.emptyContainer}>
-                    <FontAwesome name="search" size={60} color="#C92EFF" style={styles.emptyIcon} />
-                    <Text style={styles.emptyTitle}>No Subjects Found</Text>
-                    <Text style={styles.emptyMessage}>
+                <View style={[
+                    styles.emptyContainer,
+                    {
+                        backgroundColor: theme === 'light'
+                            ? 'rgba(106, 13, 173, 0.05)'
+                            : 'rgba(255, 255, 255, 0.03)'
+                    }
+                ]}>
+                    <FontAwesome
+                        name="search"
+                        size={60}
+                        color={theme === 'light' ? '#6A0DAD' : '#C92EFF'}
+                        style={styles.emptyIcon}
+                    />
+                    <Text style={[
+                        styles.emptyTitle,
+                        { color: theme === 'light' ? '#333333' : '#fff' }
+                    ]}>No Subjects Found</Text>
+                    <Text style={[
+                        styles.emptyMessage,
+                        { color: theme === 'light' ? '#6A0DAD' : '#d8b8e8' }
+                    ]}>
                         We couldn't find any subjects that match your search criteria.
                         Try adjusting your filters or search query.
                     </Text>
                     <TouchableOpacity
-                        style={styles.resetButton}
+                        style={[
+                            styles.resetButton,
+                            { backgroundColor: theme === 'light' ? '#6A0DAD' : '#C92EFF' }
+                        ]}
                         onPress={() => {
                             setSearchQuery('');
                             setActiveFilter('All');
@@ -339,10 +460,10 @@ const SubjectMaterials = ({ companyLogo }) => {
     );
 };
 
+// Styles
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#1a012c",
         padding: 15,
     },
     headerContainer: {
@@ -353,7 +474,6 @@ const styles = StyleSheet.create({
         marginBottom: 15,
     },
     header: {
-        color: "#C92EFF",
         fontSize: 30,
         fontWeight: "bold",
         fontFamily: "sans-serif",
@@ -370,7 +490,6 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
         borderRadius: 8,
         paddingHorizontal: 12,
         marginBottom: 10,
@@ -381,7 +500,6 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         height: 44,
-        color: '#fff',
         fontSize: 16,
     },
     filterContainer: {
@@ -392,13 +510,8 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 20,
         marginRight: 8,
-        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    },
-    activeFilterOption: {
-        backgroundColor: "#C92EFF",
     },
     filterText: {
-        color: '#fff',
         fontSize: 14,
         fontWeight: '500',
     },
@@ -411,10 +524,8 @@ const styles = StyleSheet.create({
     subjectContainer: {
         marginBottom: 15,
         borderRadius: 10,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     subjectHeader: {
         flexDirection: 'row',
@@ -430,13 +541,11 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     subjectTitle: {
-        color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
     },
     materialsContainer: {
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255, 255, 255, 0.1)',
         paddingBottom: 10,
     },
     tableHeader: {
@@ -445,11 +554,8 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 15,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
     },
     headerText: {
-        color: "#fff",
         fontSize: 16,
         fontWeight: "bold",
         textAlign: "left",
@@ -460,10 +566,8 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 15,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255, 255, 255, 0.05)',
     },
     cell: {
-        color: "#fff",
         fontSize: 15,
     },
     materialIcon: {
@@ -500,22 +604,18 @@ const styles = StyleSheet.create({
     materialDescriptionContainer: {
         paddingHorizontal: 16,
         paddingVertical: 8,
-        backgroundColor: 'rgba(201, 46, 255, 0.05)',
         borderBottomLeftRadius: 8,
         borderBottomRightRadius: 8,
         marginHorizontal: 16,
         marginBottom: 8,
         borderTopWidth: 1,
-        borderTopColor: 'rgba(201, 46, 255, 0.2)',
     },
     materialDescriptionText: {
-        color: '#d0d0d0',
         fontSize: 13,
         lineHeight: 18,
         fontWeight: '400',
     },
     openButton: {
-        backgroundColor: '#C92EFF',
         color: '#fff',
         fontWeight: '500',
         paddingVertical: 6,
@@ -525,17 +625,11 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
         fontSize: 14
     },
-    emptyText: {
-        color: '#8a8a8a',
-        fontSize: 16,
-        textAlign: 'center',
-    },
     emptyContainer: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
         padding: 20,
-        backgroundColor: "rgba(255, 255, 255, 0.03)",
         borderRadius: 15,
         marginTop: 20,
     },
@@ -544,14 +638,12 @@ const styles = StyleSheet.create({
         opacity: 0.8,
     },
     emptyTitle: {
-        color: "#fff",
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 10,
         textAlign: "center",
     },
     emptyMessage: {
-        color: "#d8b8e8",
         fontSize: 16,
         textAlign: "center",
         lineHeight: 24,
@@ -559,7 +651,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     resetButton: {
-        backgroundColor: "#C92EFF",
         paddingVertical: 12,
         paddingHorizontal: 30,
         borderRadius: 25,

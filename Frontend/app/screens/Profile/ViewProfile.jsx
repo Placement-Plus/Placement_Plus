@@ -1,6 +1,5 @@
-// ProfileView.js with updated styling
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, SafeAreaView, Platform, Alert, Linking } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../../context/userContext.js';
@@ -9,7 +8,7 @@ import * as IntentLauncher from 'expo-intent-launcher';
 
 const ProfileView = () => {
     const navigation = useNavigation();
-    const { user } = useUser()
+    const { user, theme } = useUser();
 
     const profile = {
         name: user?.name || '-',
@@ -26,17 +25,29 @@ const ProfileView = () => {
         slab: user?.slab || '-'
     };
 
+    const themeColors = {
+        primary: theme === 'light' ? '#6A0DAD' : '#C92EFF',
+        background: theme === 'light' ? '#F5F5F5' : '#1a0525',
+        cardBackground: theme === 'light' ? '#FFFFFF' : '#2d0a41',
+        cardBorder: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : '#390852',
+        headerBackground: theme === 'light' ? '#F0E6F5' : '#2d0a41',
+        text: theme === 'light' ? '#333333' : '#fff',
+        secondaryText: theme === 'light' ? '#666666' : '#b388e9',
+        positiveBadge: theme === 'light' ? '#4CAF50' : '#4CAF50',
+        negativeBadge: theme === 'light' ? '#F44336' : '#F44336',
+    };
+
     const handleGoBack = () => {
         navigation.goBack();
     };
 
     const handleViewResume = async () => {
         try {
-            const accessToken = await getAccessToken()
-            const refreshToken = await getRefreshToken()
+            const accessToken = await getAccessToken();
+            const refreshToken = await getRefreshToken();
 
             if (!accessToken || !refreshToken)
-                throw new Error("Tokens are required")
+                throw new Error("Tokens are required");
 
             const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/view-resume`, {
                 method: 'GET',
@@ -44,20 +55,17 @@ const ProfileView = () => {
                     'Authorization': `Bearer ${accessToken}`,
                     'x-refresh-token': refreshToken
                 }
-            })
+            });
 
             if (!response.ok)
-                throw new Error("Something went wrong")
+                throw new Error("Something went wrong");
 
-            const result = await response.json()
-            // console.log(result);
-
-
-            await openPdf(result?.data)
+            const result = await response.json();
+            await openPdf(result?.data);
 
         } catch (error) {
             console.error('Error fetching resume:', error?.message);
-            Alert.alert('Error', 'Failed to log out. Please try again.');
+            Alert.alert('Error', 'Failed to fetch resume. Please try again.');
         }
     };
 
@@ -68,26 +76,36 @@ const ProfileView = () => {
                 type: 'application/pdf',
             });
         } else {
-            await Linking.openURL(result?.data);
+            await Linking.openURL(pdfLink);
         }
-    }
+    };
 
     const ProfileField = ({ label, value }) => (
         <View style={styles.fieldContainer}>
-            <Text style={styles.fieldLabel}>{label}</Text>
-            <Text style={styles.fieldValue}>{value}</Text>
+            <Text style={[styles.fieldLabel, { color: themeColors.secondaryText }]}>
+                {label}
+            </Text>
+            <Text style={[styles.fieldValue, { color: themeColors.text }]}>
+                {value}
+            </Text>
         </View>
     );
 
     const Badge = ({ text, isPositive, outlined }) => (
         <View style={[
             styles.badge,
-            isPositive ? styles.positiveBadge : styles.negativeBadge,
-            outlined && styles.outlinedBadge
+            isPositive ?
+                { backgroundColor: themeColors.positiveBadge } :
+                { backgroundColor: themeColors.negativeBadge },
+            outlined && {
+                backgroundColor: 'transparent',
+                borderWidth: 1,
+                borderColor: themeColors.primary
+            }
         ]}>
             <Text style={[
                 styles.badgeText,
-                outlined && styles.outlinedBadgeText
+                outlined && { color: themeColors.primary }
             ]}>
                 {text}
             </Text>
@@ -95,54 +113,86 @@ const ProfileView = () => {
     );
 
     return (
-        <SafeAreaView style={styles.container}>
-            <View style={styles.header}>
+        <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
+            <View style={[styles.header, { backgroundColor: themeColors.headerBackground, borderBottomColor: themeColors.cardBorder }]}>
                 <TouchableOpacity onPress={handleGoBack} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#C92EFF" />
-                    <Text style={styles.backButtonText}>Back</Text>
+                    <Ionicons name="arrow-back" size={24} color={themeColors.primary} />
+                    <Text style={[styles.backButtonText, { color: themeColors.primary }]}>Back</Text>
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Profile</Text>
+                <Text style={[styles.headerTitle, { color: themeColors.text }]}>Profile</Text>
                 <View style={{ width: 60 }} />
             </View>
 
             <ScrollView style={styles.scrollView}>
                 <View style={styles.profileHeader}>
-                    <View style={styles.avatarPlaceholder}>
+                    <View style={[styles.avatarPlaceholder, { backgroundColor: themeColors.primary, borderColor: themeColors.primary }]}>
                         <Text style={styles.avatarText}>{profile.name.charAt(0)}</Text>
                     </View>
-                    <Text style={styles.profileName}>{profile.name}</Text>
+                    <Text style={[styles.profileName, { color: themeColors.text }]}>{profile.name}</Text>
                 </View>
 
                 {/* Stats section for semester and CGPA */}
-                <View style={styles.statsContainer}>
+                <View style={[styles.statsContainer,
+                {
+                    backgroundColor: themeColors.cardBackground,
+                    borderColor: themeColors.cardBorder,
+                    shadowColor: theme === 'light' ? "#6A0DAD" : "#000",
+                }
+                ]}>
                     <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{profile.semester}</Text>
-                        <Text style={styles.statLabel}>Semester</Text>
+                        <Text style={[styles.statValue, { color: themeColors.text }]}>
+                            {profile.semester}
+                        </Text>
+                        <Text style={[styles.statLabel, { color: themeColors.secondaryText }]}>
+                            Semester
+                        </Text>
                     </View>
 
-                    <View style={styles.statDivider} />
+                    <View style={[styles.statDivider, { backgroundColor: themeColors.cardBorder }]} />
 
                     <View style={styles.statItem}>
-                        <Text style={styles.statValue}>{profile.cgpa}</Text>
-                        <Text style={styles.statLabel}>CGPA</Text>
+                        <Text style={[styles.statValue, { color: themeColors.text }]}>
+                            {profile.cgpa}
+                        </Text>
+                        <Text style={[styles.statLabel, { color: themeColors.secondaryText }]}>
+                            CGPA
+                        </Text>
                     </View>
                 </View>
 
-                <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Personal Information</Text>
+                <View style={[styles.card, {
+                    backgroundColor: themeColors.cardBackground,
+                    borderColor: themeColors.cardBorder,
+                    shadowColor: theme === 'light' ? "#6A0DAD" : "#000",
+                }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.primary }]}>
+                        Personal Information
+                    </Text>
                     <ProfileField label="Email" value={profile.email} />
                     <ProfileField label="Roll Number" value={profile.rollNo} />
                     <ProfileField label="Mobile Number" value={profile.mobileNo} />
                 </View>
 
-                <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Academic Information</Text>
+                <View style={[styles.card, {
+                    backgroundColor: themeColors.cardBackground,
+                    borderColor: themeColors.cardBorder,
+                    shadowColor: theme === 'light' ? "#6A0DAD" : "#000",
+                }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.primary }]}>
+                        Academic Information
+                    </Text>
                     <ProfileField label="Branch" value={profile.branch} />
                     <ProfileField label="Batch" value={profile.batch} />
                 </View>
 
-                <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Eligibility Status</Text>
+                <View style={[styles.card, {
+                    backgroundColor: themeColors.cardBackground,
+                    borderColor: themeColors.cardBorder,
+                    shadowColor: theme === 'light' ? "#6A0DAD" : "#000",
+                }]}>
+                    <Text style={[styles.sectionTitle, { color: themeColors.primary }]}>
+                        Eligibility Status
+                    </Text>
                     <View style={styles.badgesContainer}>
                         <Badge
                             text={profile.internshipEligible ? "Internship Eligible" : "Not Eligible for Internship"}
@@ -158,7 +208,10 @@ const ProfileView = () => {
                     </View>
                 </View>
 
-                <TouchableOpacity style={styles.button} onPress={handleViewResume}>
+                <TouchableOpacity
+                    style={[styles.button, { backgroundColor: themeColors.primary }]}
+                    onPress={handleViewResume}
+                >
                     <Text style={styles.buttonText}>View Resume</Text>
                 </TouchableOpacity>
             </ScrollView>
@@ -169,7 +222,6 @@ const ProfileView = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#1a0525', // Darker than card backgrounds for contrast
     },
     header: {
         flexDirection: 'row',
@@ -177,9 +229,7 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: '#2d0a41',
         borderBottomWidth: 1,
-        borderBottomColor: '#390852',
         marginTop: 25
     },
     backButton: {
@@ -189,12 +239,10 @@ const styles = StyleSheet.create({
     backButtonText: {
         marginLeft: 4,
         fontSize: 16,
-        color: '#C92EFF',
     },
     headerTitle: {
         fontSize: 18,
         fontWeight: '600',
-        color: '#fff',
     },
     scrollView: {
         flex: 1,
@@ -207,12 +255,10 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#C92EFF',
         justifyContent: 'center',
         alignItems: 'center',
         marginBottom: 16,
         borderWidth: 3,
-        borderColor: '#C92EFF',
     },
     avatarText: {
         fontSize: 32,
@@ -222,15 +268,12 @@ const styles = StyleSheet.create({
     profileName: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#fff',
     },
     card: {
-        backgroundColor: '#2d0a41',
         borderRadius: 15,
         padding: 16,
         marginHorizontal: 15,
         marginBottom: 16,
-        shadowColor: "#000",
         shadowOffset: {
             width: 0,
             height: 3,
@@ -238,25 +281,23 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.27,
         shadowRadius: 4.65,
         elevation: 6,
+        borderWidth: 1,
     },
     sectionTitle: {
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 16,
-        color: '#C92EFF',
     },
     fieldContainer: {
         marginBottom: 12,
     },
     fieldLabel: {
         fontSize: 14,
-        color: '#b388e9',
         marginBottom: 4,
     },
     fieldValue: {
         fontSize: 16,
         fontWeight: '500',
-        color: '#fff',
     },
     badgesContainer: {
         flexDirection: 'row',
@@ -269,27 +310,12 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         marginBottom: 8,
     },
-    positiveBadge: {
-        backgroundColor: '#4CAF50',
-    },
-    negativeBadge: {
-        backgroundColor: '#F44336',
-    },
-    outlinedBadge: {
-        backgroundColor: 'transparent',
-        borderWidth: 1,
-        borderColor: '#C92EFF',
-    },
     badgeText: {
         color: '#fff',
         fontWeight: '500',
         fontSize: 14,
     },
-    outlinedBadgeText: {
-        color: '#C92EFF',
-    },
     button: {
-        backgroundColor: '#C92EFF',
         borderRadius: 15,
         padding: 16,
         alignItems: 'center',
@@ -313,12 +339,10 @@ const styles = StyleSheet.create({
     statsContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        backgroundColor: '#2d0a41',
         marginHorizontal: 15,
         marginBottom: 16,
         padding: 15,
         borderRadius: 15,
-        shadowColor: "#000",
         shadowOffset: {
             width: 0,
             height: 3,
@@ -326,6 +350,7 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.27,
         shadowRadius: 4.65,
         elevation: 6,
+        borderWidth: 1,
     },
     statItem: {
         flex: 1,
@@ -333,19 +358,16 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
     statValue: {
-        color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
     },
     statLabel: {
-        color: '#b388e9',
         fontSize: 14,
         marginTop: 5,
     },
     statDivider: {
         width: 1,
         height: '80%',
-        backgroundColor: '#390852',
     },
 });
 

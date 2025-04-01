@@ -15,6 +15,7 @@ import { BlurView } from 'expo-blur';
 import { LinearGradient } from 'expo-linear-gradient';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import { useUser } from '../../context/userContext.js';
+import { router } from 'expo-router';
 
 const imageMap = {
 	'Apple.png': require('@/assets/images/apple.png'),
@@ -29,7 +30,7 @@ const imageMap = {
 const App = () => {
 	const [companies, setCompanies] = useState([]);
 	const [currentIndex, setCurrentIndex] = useState(0);
-	const { user, login } = useUser()
+	const { user, login, theme } = useUser()
 
 	const showNextCompany = () => {
 		if (currentIndex < companies.length - 1) {
@@ -44,58 +45,174 @@ const App = () => {
 	};
 
 	const renderCompanyCard = () => {
+
 		const item = companies[currentIndex];
+
+		// Gradient colors based on theme
+		const gradientColors = theme === 'light'
+			? ['#FFFFFF', '#F0F0F0']
+			: ['rgba(138, 35, 135, 0.8)', 'rgba(26, 1, 44, 0.9)'];
+
+		// Image border color based on theme
+		const imageBorderColor = theme === 'light'
+			? 'rgba(106, 13, 173, 0.3)'
+			: 'rgba(255, 255, 255, 0.8)';
+
+		// Company name color based on theme
+		const companyNameColor = theme === 'light'
+			? "#6A0DAD"
+			: 'white';
+
 		return (
 			<View style={styles.cardContainer}>
 				<LinearGradient
-					colors={['rgba(138, 35, 135, 0.8)', 'rgba(26, 1, 44, 0.9)']}
+					colors={gradientColors}
 					start={{ x: 0, y: 0 }}
 					end={{ x: 1, y: 1 }}
-					style={styles.card}
+					style={[
+						styles.card,
+						{
+							backgroundColor: theme === 'light'
+								? 'rgba(106, 13, 173, 0.05)'
+								: 'transparent'
+						}
+					]}
 				>
 					<View style={styles.companyHeader}>
 						<Image
-							source={imageMap[`${item.companyName}.png`]}
-							style={styles.image}
+							source={imageMap[`${item?.companyName}.png`]}
+							style={[
+								styles.image,
+								{
+									borderColor: imageBorderColor
+								}
+							]}
 							onError={() => console.log('Image failed to load')}
 						/>
 						<View style={styles.headerTextContainer}>
-							<Text style={styles.companyName}>{item.companyName}</Text>
+							<Text style={[
+								styles.companyName,
+								{ color: companyNameColor }
+							]}>
+								{item?.companyName}
+							</Text>
 						</View>
 					</View>
 
-					<View style={styles.divider} />
+					<View style={[
+						styles.divider,
+						{
+							backgroundColor: theme === 'light'
+								? 'rgba(106, 13, 173, 0.2)'
+								: 'rgba(255, 255, 255, 0.15)'
+						}
+					]} />
 
-					<ScrollView style={styles.detailsScrollView} showsVerticalScrollIndicator={false}>
+					<ScrollView
+						style={styles.detailsScrollView}
+						showsVerticalScrollIndicator={false}
+					>
 						<View style={styles.detailsContainer}>
-							<DetailItem icon="graduation-cap" label="Eligible Branches" value={item?.eligibleBranches?.join(', ')} />
-							<DetailItem icon="users" label="Eligible Batches" value={item?.eligibleBatches?.join(', ')} />
-							<DetailItem icon="briefcase" label="Role" value={item?.role} />
-							<DetailItem icon="star" label="CGPA Criteria" value={item?.cgpaCriteria} />
-							<DetailItem icon="tasks" label="Hiring Process" value={item?.hiringProcess} />
-							<DetailItem icon="map-marker" label="Job Location" value={item?.jobLocation} />
-							<DetailItem icon="calendar" label="Schedule" value={item?.schedule} />
-							<DetailItem icon="laptop" label="Mode" value={item?.mode} />
-							<DetailItem icon="building" label="Opportunity Type" value={item?.opportunityType} />
-							<DetailItem icon="info-circle" label="Extra Details" value={item?.extraDetails} />
-							<DetailItem icon="user" label="Point of Contact" value={item?.pocDetails?.name} />
-							<DetailItem icon="phone" label="Contact Number" value={item?.pocDetails?.contactNo} />
+							<DetailItem
+								icon="graduation-cap"
+								label="Eligible Branches"
+								value={item?.eligibleBranches?.join(', ')}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="users"
+								label="Eligible Batches"
+								value={item?.eligibleBatches?.join(', ')}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="briefcase"
+								label="Role"
+								value={item?.role}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="star"
+								label="CGPA Criteria"
+								value={item?.cgpaCriteria}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="tasks"
+								label="Hiring Process"
+								value={item?.hiringProcess}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="map-marker"
+								label="Job Location"
+								value={item?.jobLocation}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="calendar"
+								label="Schedule"
+								value={item?.schedule}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="laptop"
+								label="Mode"
+								value={item?.mode}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="building"
+								label="Opportunity Type"
+								value={item?.opportunityType}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="info-circle"
+								label="Extra Details"
+								value={item?.extraDetails}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="user"
+								label="Point of Contact"
+								value={item?.pocDetails?.name}
+								theme={theme}
+							/>
+							<DetailItem
+								icon="phone"
+								label="Contact Number"
+								value={item?.pocDetails?.contactNo}
+								theme={theme}
+							/>
+
 							{checkEligibiity(currentIndex) ? (
 								<TouchableOpacity
 									style={[
 										styles.applyButton,
-										styles.eligible
+										styles.eligible,
+										{
+											backgroundColor: theme === 'light'
+												? 'rgba(23, 196, 17, 0.8)'
+												: 'rgba(23, 196, 17, 0.7)'
+										}
 									]}
 									onPress={() => handleApplyCompany(currentIndex)}
 								>
 									<Text style={styles.applyButtonText}>
 										Apply
 									</Text>
-								</TouchableOpacity>) : (
+								</TouchableOpacity>
+							) : (
 								<TouchableOpacity
 									style={[
 										styles.applyButton,
 										styles.notEligible,
+										{
+											backgroundColor: theme === 'light'
+												? 'rgba(207, 17, 17, 0.8)'
+												: 'rgba(207, 17, 17, 0.7)'
+										}
 									]}
 								>
 									<Text style={styles.applyButtonText}>
@@ -144,13 +261,18 @@ const App = () => {
 			});
 
 			const result = await response.json();
+			console.log(result);
+
 
 			if (!response.ok) {
 				throw new Error(result.message || 'Failed to fetch companies');
 			}
-			// console.log(result.data);
 
-			setCompanies(normalizeDecimalFields(result.data));
+			if (result.statusCode === 200) {
+				setCompanies(normalizeDecimalFields(result.data));
+			} else {
+				Alert.alert('Error', result?.message || "Something went wrong. Please try again later")
+			}
 		} catch (error) {
 			Alert.alert(
 				"Error",
@@ -245,17 +367,48 @@ const App = () => {
 		}
 	}
 
-	const DetailItem = ({ icon, label, value }) => (
-		<View style={styles.detailItem}>
-			<View style={styles.iconContainer}>
-				<FontAwesome name={icon} size={16} color="#fff" />
+	const DetailItem = ({ icon, label, value, theme }) => {
+		const iconColor = theme === 'light' ? '#6A0DAD' : '#fff';
+
+		return (
+			<View style={[
+				styles.detailItem,
+			]}>
+				<View style={[
+					styles.iconContainer,
+					{
+						backgroundColor: theme === 'light'
+							? 'rgba(106, 13, 173, 0.2)'
+							: 'rgba(187, 57, 191, 0.3)'
+					}
+				]}>
+					<FontAwesome name={icon} size={16} color={iconColor} />
+				</View>
+				<View style={styles.detailTextContainer}>
+					<Text style={[
+						styles.detailLabel,
+						{
+							color: theme === 'light'
+								? 'rgba(0, 0, 0, 0.6)'
+								: 'rgba(255, 255, 255, 0.7)'
+						}
+					]}>
+						{label}
+					</Text>
+					<Text style={[
+						styles.detailValue,
+						{
+							color: theme === 'light'
+								? '#333333'
+								: 'white'
+						}
+					]}>
+						{value || "Not specified"}
+					</Text>
+				</View>
 			</View>
-			<View style={styles.detailTextContainer}>
-				<Text style={styles.detailLabel}>{label}</Text>
-				<Text style={styles.detailValue}>{value || "Not specified"}</Text>
-			</View>
-		</View>
-	);
+		);
+	};
 
 	if (companies.length === 0) {
 		return (
@@ -270,23 +423,80 @@ const App = () => {
 		);
 	}
 
+	const backgroundGradientColors = theme === 'light'
+		? ['#F5F5F5', '#E0E0E0']
+		: ['#2d0e3e', '#1a012c'];
+
+	const statusBarStyle = theme === 'light' ? 'dark-content' : 'light-content';
+	const statusBarBackgroundColor = theme === 'light'
+		? '#F5F5F5'
+		: '#2d0e3e';
+
 	return (
-		<SafeAreaView style={styles.safeArea}>
+
+		<SafeAreaView style={[
+			styles.safeArea,
+			{
+				backgroundColor: theme === 'light'
+					? '#F5F5F5'
+					: '#2d0e3e'
+			}
+		]}>
 			<LinearGradient
-				colors={['#2d0e3e', '#1a012c']}
-				style={styles.container}
+				colors={backgroundGradientColors}
+				style={[
+					styles.container,
+					{
+						backgroundColor: theme === 'light'
+							? '#F5F5F5'
+							: '#2d0e3e'
+					}
+				]}
 			>
-				<StatusBar barStyle="light-content" backgroundColor="#2d0e3e" />
+				<StatusBar
+					barStyle={statusBarStyle}
+					backgroundColor={statusBarBackgroundColor}
+				/>
 
 				{/* Header with Logo */}
-				<BlurView intensity={30} tint="dark" style={styles.headerBlur}>
+				<BlurView
+					intensity={theme === 'light' ? 10 : 30}
+					tint={theme === 'light' ? 'light' : 'dark'}
+					style={[
+						styles.headerBlur,
+						{
+							borderBottomColor: theme === 'light'
+								? 'rgba(0,0,0,0.1)'
+								: 'rgba(255, 255, 255, 0.1)'
+						}
+					]}
+				>
 					<View style={styles.header}>
 						<View style={styles.logoContainer}>
-							<Image source={require('@/assets/images/logo.png')} style={styles.logo} />
-							<Text style={styles.logoText}>Placement Plus</Text>
+							<Image
+								source={require('@/assets/images/logo.png')}
+								style={styles.logo}
+							/>
+							<Text style={[
+								styles.logoText,
+								{
+									color: theme === 'light'
+										? '#6A0DAD'
+										: '#ffffff'
+								}
+							]}>
+								Placement Plus
+							</Text>
 						</View>
-						<TouchableOpacity style={styles.profileButton}>
-							<Ionicons name="person-circle" size={35} color="#fff" />
+						<TouchableOpacity
+							style={styles.profileButton}
+							onPress={() => router.push('screens/Profile/Profile')}
+						>
+							<Ionicons
+								name="person-circle"
+								size={35}
+								color={'#6A0DAD'}
+							/>
 						</TouchableOpacity>
 					</View>
 				</BlurView>
@@ -307,7 +517,15 @@ const App = () => {
 									<View
 										style={[
 											styles.indicator,
-											{ backgroundColor: currentIndex === i ? '#bb39bf' : 'rgba(255, 255, 255, 0.2)' },
+											{
+												backgroundColor: currentIndex === i
+													? (theme === 'light'
+														? 'rgba(106, 13, 173, 0.7)'
+														: '#bb39bf')
+													: (theme === 'light'
+														? 'rgba(106, 13, 173, 0.2)'
+														: 'rgba(255, 255, 255, 0.2)')
+											}
 										]}
 									/>
 								</TouchableOpacity>
@@ -324,42 +542,135 @@ const App = () => {
 					<TouchableOpacity
 						style={[
 							styles.navButton,
-							currentIndex === 0 ? styles.navButtonDisabled : styles.navButtonEnabled
+							currentIndex === 0
+								? styles.navButtonDisabled
+								: styles.navButtonEnabled,
+							{
+								backgroundColor: currentIndex === 0
+									? (theme === 'light'
+										? 'rgba(106, 13, 173, 0.3)'
+										: 'rgba(187, 57, 191, 0.3)')
+									: (theme === 'light'
+										? 'rgba(106, 13, 173, 0.7)'
+										: 'rgba(187, 57, 191, 0.8)')
+							}
 						]}
 						onPress={showPreviousCompany}
 						disabled={currentIndex === 0}
 					>
-						<FontAwesome name="chevron-left" size={16} color="white" />
+						<FontAwesome
+							name="chevron-left"
+							size={16}
+							color="white"
+						/>
 						<Text style={styles.navButtonText}>Previous</Text>
 					</TouchableOpacity>
 
 					<TouchableOpacity
 						style={[
 							styles.navButton,
-							currentIndex === companies.length - 1 ? styles.navButtonDisabled : styles.navButtonEnabled
+							currentIndex === companies.length - 1
+								? styles.navButtonDisabled
+								: styles.navButtonEnabled,
+							{
+								backgroundColor: currentIndex === companies.length - 1
+									? (theme === 'light'
+										? 'rgba(106, 13, 173, 0.3)'
+										: 'rgba(187, 57, 191, 0.3)')
+									: (theme === 'light'
+										? 'rgba(106, 13, 173, 0.7)'
+										: 'rgba(187, 57, 191, 0.8)')
+							}
 						]}
 						onPress={showNextCompany}
 						disabled={currentIndex === companies.length - 1}
 					>
 						<Text style={styles.navButtonText}>Next</Text>
-						<FontAwesome name="chevron-right" size={16} color="white" />
+						<FontAwesome
+							name="chevron-right"
+							size={16}
+							color="white"
+						/>
 					</TouchableOpacity>
 				</View>
 
 				{/* Footer with Social Media Icons */}
-				<BlurView intensity={20} tint="dark" style={styles.footerBlur}>
+				<BlurView
+					intensity={theme === 'light' ? 10 : 20}
+					tint={theme === 'light' ? 'light' : 'dark'}
+					style={[
+						styles.footerBlur,
+						{
+							borderTopColor: theme === 'light'
+								? 'rgba(0,0,0,0.1)'
+								: 'rgba(255, 255, 255, 0.1)'
+						}
+					]}
+				>
 					<View style={styles.footer}>
-						<TouchableOpacity style={styles.socialButton}>
-							<FontAwesome name="facebook" size={20} color="#fff" />
+						<TouchableOpacity
+							style={[
+								styles.socialButton,
+								{
+									backgroundColor: theme === 'light'
+										? 'rgba(106, 13, 173, 0.2)'
+										: 'rgba(187, 57, 191, 0.3)'
+								}
+							]}
+						>
+							<FontAwesome
+								name="facebook"
+								size={20}
+								color={theme === 'light' ? '#6A0DAD' : '#fff'}
+							/>
 						</TouchableOpacity>
-						<TouchableOpacity style={styles.socialButton}>
-							<FontAwesome name="twitter" size={20} color="#fff" />
+						<TouchableOpacity
+							style={[
+								styles.socialButton,
+								{
+									backgroundColor: theme === 'light'
+										? 'rgba(106, 13, 173, 0.2)'
+										: 'rgba(187, 57, 191, 0.3)'
+								}
+							]}
+						>
+							<FontAwesome
+								name="twitter"
+								size={20}
+								color={theme === 'light' ? '#6A0DAD' : '#fff'}
+							/>
 						</TouchableOpacity>
-						<TouchableOpacity style={styles.socialButton}>
-							<FontAwesome name="instagram" size={20} color="#fff" />
+						<TouchableOpacity
+							style={[
+								styles.socialButton,
+								{
+									backgroundColor: theme === 'light'
+										? 'rgba(106, 13, 173, 0.2)'
+										: 'rgba(187, 57, 191, 0.3)'
+								}
+							]}
+						>
+							<FontAwesome
+								name="instagram"
+								size={20}
+								color={theme === 'light' ? '#6A0DAD' : '#fff'}
+							/>
 						</TouchableOpacity>
-						<TouchableOpacity style={styles.socialButton}>
-							<FontAwesome name="linkedin" size={20} color="#fff" />
+						<TouchableOpacity
+							style={[
+								styles.socialButton,
+								{
+									backgroundColor: theme === 'light'
+										? 'rgba(106, 13, 173, 0.2)'
+										: 'rgba(187, 57, 191, 0.3)'
+								}
+							]}
+						>
+							<FontAwesome
+								name="linkedin"
+								size={20}
+								color={theme === 'light' ? '#6A0DAD' : '#fff'}
+							/>
 						</TouchableOpacity>
 					</View>
 				</BlurView>

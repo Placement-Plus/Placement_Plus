@@ -105,7 +105,10 @@ const PlacementPlus = () => {
   const scaleAnims = useRef(menuItems.map(() => new Animated.Value(1))).current;
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredItems, setFilteredItems] = useState(menuItems);
-  const { user, isLoggedIn } = useUser()
+  const { user, isLoggedIn, theme } = useUser()
+
+  console.log(theme);
+
 
   useFocusEffect(
     useCallback(() => {
@@ -168,51 +171,309 @@ const PlacementPlus = () => {
     router.push(route);
   };
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#14011F" />
 
+  const getDynamicStyles = (currentTheme) => StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: currentTheme === 'light' ? "#F5F5F5" : "#14011F",
+    },
+    backgroundGradient: {
+      position: 'absolute',
+      left: 0,
+      right: 0,
+      top: 0,
+      bottom: 0,
+      backgroundColor: currentTheme === 'light'
+        ? 'linear-gradient(to bottom, #FFFFFF, #E0E0E0)'
+        : undefined,
+    },
+    header: {
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      paddingHorizontal: 16,
+      paddingTop: Platform.OS === 'android' ? 33 : 10,
+      paddingBottom: 16,
+      borderBottomWidth: currentTheme === 'light' ? 1 : 0,
+      borderBottomColor: currentTheme === 'light' ? "#E0E0E0" : "transparent",
+    },
+    logoContainer: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    logo: {
+      width: 28,
+      height: 28,
+      resizeMode: "contain",
+      marginRight: 8,
+    },
+    logoText: {
+      color: currentTheme === 'light' ? "#6A0DAD" : "white",
+      fontSize: 20,
+      fontWeight: "bold",
+    },
+    headerRight: {
+      flexDirection: "row",
+      alignItems: "center",
+    },
+    notificationButton: {
+      padding: 8,
+      marginRight: 8,
+      position: "relative",
+    },
+    notificationBadge: {
+      position: "absolute",
+      top: 6,
+      right: 6,
+      backgroundColor: "#FF4747",
+      width: 16,
+      height: 16,
+      borderRadius: 8,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    badgeText: {
+      color: "white",
+      fontSize: 10,
+      fontWeight: "bold",
+    },
+    profileButton: {
+      padding: 4,
+    },
+    welcomeSection: {
+      paddingHorizontal: 16,
+      marginBottom: 20,
+    },
+    welcomeText: {
+      color: currentTheme === 'light' ? "#333333" : "white",
+      fontSize: 28,
+      fontWeight: "bold",
+      letterSpacing: 0.5,
+    },
+    welcomeSubtext: {
+      color: currentTheme === 'light' ? "#666666" : "#BBB",
+      fontSize: 16,
+      marginTop: 4,
+    },
+    searchContainer: {
+      paddingHorizontal: 16,
+      marginBottom: 24,
+    },
+    searchBar: {
+      flexDirection: "row",
+      alignItems: "center",
+      backgroundColor: currentTheme === 'light' ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.08)",
+      borderRadius: 16,
+      paddingHorizontal: 16,
+      paddingVertical: 12,
+      borderWidth: 1,
+      borderColor: currentTheme === 'light' ? "rgba(0, 0, 0, 0.1)" : "rgba(255, 255, 255, 0.05)",
+    },
+    searchIcon: {
+      marginRight: 12,
+      color: currentTheme === 'light' ? "#666666" : "#9D9DB5",
+    },
+    searchInput: {
+      flex: 1,
+      color: currentTheme === 'light' ? "#333333" : "white",
+      fontSize: 16,
+      padding: 0,
+    },
+    gridContainer: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-between",
+    },
+    gridItemWrapper: {
+      width: "33%",
+      paddingHorizontal: 4,
+      marginBottom: 20,
+    },
+    gridItem: {
+      alignItems: "center",
+    },
+    iconContainer: {
+      width: CARD_WIDTH,
+      height: CARD_WIDTH,
+      borderRadius: 20,
+      justifyContent: "center",
+      alignItems: "center",
+      marginBottom: 10,
+      borderWidth: 1,
+      borderColor: currentTheme === 'light' ? "rgba(0, 0, 0, 0.05)" : "rgba(255, 255, 255, 0.1)",
+      backgroundColor: currentTheme === 'light' ? "rgba(106, 13, 173, 0.05)" : undefined,
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+    },
+    gridIcon: {
+      width: CARD_WIDTH * 0.7,
+      height: CARD_WIDTH * 0.7,
+      resizeMode: "contain",
+    },
+    gridText: {
+      color: currentTheme === 'light' ? "#333333" : "white",
+      fontSize: 13,
+      fontWeight: "500",
+      textAlign: "center",
+      width: CARD_WIDTH + 8,
+      lineHeight: 18,
+    },
+    noResults: {
+      alignItems: "center",
+      justifyContent: "center",
+      paddingVertical: 60,
+    },
+    noResultsText: {
+      color: currentTheme === 'light' ? "#333333" : "white",
+      fontSize: 18,
+      fontWeight: "600",
+      marginTop: 16,
+    },
+    noResultsSubText: {
+      color: currentTheme === 'light' ? "#666666" : "#9D9DB5",
+      fontSize: 14,
+      marginTop: 8,
+    },
+    footerContainer: {
+      position: "absolute",
+      bottom: 0,
+      left: 0,
+      right: 0,
+      overflow: "hidden",
+    },
+    footerGradient: {
+      position: "absolute",
+      height: 100,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      backgroundColor: currentTheme === 'light'
+        ? 'linear-gradient(to top, #F5F5F5, transparent)'
+        : undefined,
+    },
+    footer: {
+      flexDirection: "row",
+      justifyContent: "space-around",
+      alignItems: "center",
+      backgroundColor: currentTheme === 'light'
+        ? "rgba(255, 255, 255, 0.8)"
+        : "rgba(29, 10, 63, 0.6)",
+      paddingVertical: 16,
+      paddingBottom: Platform.OS === 'ios' ? 36 : 16,
+      borderTopLeftRadius: 24,
+      borderTopRightRadius: 24,
+      borderTopWidth: 1,
+      borderColor: currentTheme === 'light' ? "#E0E0E0" : "rgba(255, 255, 255, 0.05)",
+    },
+    socialButton: {
+      alignItems: "center",
+      justifyContent: "center",
+    },
+    socialIconContainer: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      justifyContent: "center",
+      alignItems: "center",
+      shadowColor: "#000",
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+      elevation: 3,
+    },
+    homeButton: {
+      marginTop: -20,
+      shadowColor: "#6A0DAD",
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 10,
+    },
+    homeButtonGradient: {
+      width: 60,
+      height: 60,
+      borderRadius: 30,
+      justifyContent: "center",
+      alignItems: "center",
+      borderWidth: 4,
+      borderColor: currentTheme === 'light' ? "#F5F5F5" : "#14011F",
+    },
+  });
+  const dynamicStyles = getDynamicStyles(theme)
+
+  return (
+    <SafeAreaView style={dynamicStyles.container}>
+      <StatusBar
+        style={theme === 'light' ? 'dark' : 'light'}
+        backgroundColor={theme === 'light' ? "#F5F5F5" : "#14011F"}
+      />
       <LinearGradient
-        colors={['#1D0A3F', '#14011F']}
-        style={styles.backgroundGradient}
+        colors={theme === 'dark'
+          ? ['#1D0A3F', '#14011F']
+          : ['#FFFFFF', '#F5F5F5']
+        }
+        style={dynamicStyles.backgroundGradient}
       />
 
-      <View style={styles.header}>
-        <View style={styles.logoContainer}>
-          <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
-          <Text style={styles.logoText}>Placement Plus</Text>
+      <View style={dynamicStyles.header}>
+        <View style={dynamicStyles.logoContainer}>
+          <Image source={require("@/assets/images/logo.png")} style={dynamicStyles.logo} />
+          <Text style={dynamicStyles.logoText}>Placement Plus</Text>
         </View>
-        <View style={styles.headerRight}>
-          <Pressable style={styles.notificationButton}>
-            <Ionicons name="notifications-outline" size={24} color="#fff" />
-            <View style={styles.notificationBadge}>
-              <Text style={styles.badgeText}>3</Text>
+        <View style={dynamicStyles.headerRight}>
+          <Pressable style={dynamicStyles.notificationButton}>
+            <Ionicons
+              name="notifications-outline"
+              size={24}
+              color={theme === 'light' ? "#333" : "#fff"}
+            />
+            <View style={dynamicStyles.notificationBadge}>
+              <Text style={dynamicStyles.badgeText}>3</Text>
             </View>
           </Pressable>
-          <Pressable style={styles.profileButton} onPress={() => router.push("/screens/Profile/Profile")}>
-            <Ionicons name="person-circle" size={34} color="#C92EFF" />
+          <Pressable
+            style={dynamicStyles.profileButton}
+            onPress={() => router.push("/screens/Profile/Profile")}
+          >
+            <Ionicons
+              name="person-circle"
+              size={34}
+              color={theme === 'light' ? "#6A0DAD" : "#C92EFF"}
+            />
           </Pressable>
         </View>
       </View>
 
-      <View style={styles.welcomeSection}>
-        <Text style={styles.welcomeText}>{`Hello, ${user?.name.split(" ")[0]}`}</Text>
-        <Text style={styles.welcomeSubtext}>What would you like to explore today?</Text>
+      <View style={dynamicStyles.welcomeSection}>
+        <Text style={dynamicStyles.welcomeText}>{`Hello, ${user?.name.split(" ")[0]}`}</Text>
+        <Text style={dynamicStyles.welcomeSubtext}>What would you like to explore today?</Text>
       </View>
 
-      <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#9D9DB5" style={styles.searchIcon} />
+      <View style={dynamicStyles.searchContainer}>
+        <View style={dynamicStyles.searchBar}>
+          <Ionicons
+            name="search"
+            size={20}
+            color={theme === 'light' ? "#666666" : "#9D9DB5"}
+            style={dynamicStyles.searchIcon}
+          />
           <TextInput
             placeholder="Search for resources..."
-            style={styles.searchInput}
-            placeholderTextColor="#9D9DB5"
+            style={dynamicStyles.searchInput}
+            placeholderTextColor={theme === 'light' ? "#666666" : "#9D9DB5"}
             value={searchQuery}
             onChangeText={handleSearch}
           />
           {searchQuery.length > 0 && (
             <Pressable onPress={() => handleSearch("")}>
-              <Ionicons name="close-circle" size={20} color="#9D9DB5" />
+              <Ionicons
+                name="close-circle"
+                size={20}
+                color={theme === 'light' ? "#666666" : "#9D9DB5"}
+              />
             </Pressable>
           )}
         </View>
@@ -220,35 +481,35 @@ const PlacementPlus = () => {
 
       <ScrollView
         ref={scrollViewRef}
-        style={styles.scrollView}
-        contentContainerStyle={styles.scrollContent}
+        style={dynamicStyles.scrollView}
+        contentContainerStyle={dynamicStyles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         {filteredItems.length > 0 ? (
-          <View style={styles.gridContainer}>
+          <View style={dynamicStyles.gridContainer}>
             {filteredItems.map((item, index) => (
               <Pressable
                 key={item.id}
                 onPressIn={() => handlePressIn(index)}
                 onPressOut={() => handlePressOut(index)}
                 onPress={() => handlePress(item.route)}
-                style={styles.gridItemWrapper}
+                style={dynamicStyles.gridItemWrapper}
               >
                 <Animated.View
                   style={[
-                    styles.gridItem,
+                    dynamicStyles.gridItem,
                     { transform: [{ scale: scaleAnims[index] }] },
                   ]}
                 >
                   <LinearGradient
                     colors={[`${item.color}40`, `${item.color}15`]}
-                    style={styles.iconContainer}
+                    style={dynamicStyles.iconContainer}
                     start={{ x: 0, y: 0 }}
                     end={{ x: 1, y: 1 }}
                   >
-                    <Image source={item.icon} style={styles.gridIcon} />
+                    <Image source={item.icon} style={dynamicStyles.gridIcon} />
                   </LinearGradient>
-                  <Text style={styles.gridText} numberOfLines={2}>
+                  <Text style={dynamicStyles.gridText} numberOfLines={2}>
                     {item.title}
                   </Text>
                 </Animated.View>
@@ -256,21 +517,29 @@ const PlacementPlus = () => {
             ))}
           </View>
         ) : (
-          <View style={styles.noResults}>
-            <Ionicons name="search-outline" size={50} color="#3A3A5A" />
-            <Text style={styles.noResultsText}>No matching resources found</Text>
-            <Text style={styles.noResultsSubText}>Try searching with different keywords</Text>
+          <View style={dynamicStyles.noResults}>
+            <Ionicons
+              name="search-outline"
+              size={50}
+              color={theme === 'light' ? "#666666" : "#3A3A5A"}
+            />
+            <Text style={dynamicStyles.noResultsText}>No matching resources found</Text>
+            <Text style={dynamicStyles.noResultsSubText}>Try searching with different keywords</Text>
           </View>
         )}
       </ScrollView>
 
       {/* Social Media Footer */}
-      <View style={styles.footerContainer}>
+      <View style={dynamicStyles.footerContainer}>
         <LinearGradient
-          colors={['rgba(20, 1, 31, 0)', 'rgba(29, 10, 63, 0.95)']}
-          style={styles.footerGradient}
+          colors={
+            theme === 'dark'
+              ? ['rgba(20, 1, 31, 0)', 'rgba(29, 10, 63, 0.95)']
+              : ['rgba(245, 245, 245, 0)', 'rgba(245, 245, 245, 0.95)']
+          }
+          style={dynamicStyles.footerGradient}
         />
-        <View style={styles.footer}>
+        <View style={dynamicStyles.footer}>
           <Pressable style={styles.socialButton}>
             <LinearGradient
               colors={['#3b5998', '#324e8d']}
@@ -316,6 +585,7 @@ const PlacementPlus = () => {
             </LinearGradient>
           </Pressable>
         </View>
+
       </View>
     </SafeAreaView>
   );

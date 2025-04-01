@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
+import { useUser } from '../../context/userContext.js';
 
 const HRQuestionsScreen = () => {
     const [questions, setQuestions] = useState([]);
@@ -20,6 +21,7 @@ const HRQuestionsScreen = () => {
     const [expandedId, setExpandedId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState('All');
+    const { theme } = useUser()
 
     useEffect(() => {
         fetchQuestions();
@@ -45,6 +47,10 @@ const HRQuestionsScreen = () => {
                 throw new Error(result.message || 'Something went wrong');
             }
 
+            if (result.statusCode !== 200) {
+                Alert.alert("Error", result?.message || "Something wnet worng. Please try again later")
+                return
+            }
             setQuestions(result.data);
             setLoading(false);
         } catch (error) {
@@ -77,22 +83,35 @@ const HRQuestionsScreen = () => {
         (item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.answer.toLowerCase().includes(searchQuery.toLowerCase()))
     );
+    const themeColor = theme === 'light' ? '#6A0DAD' : '#C92EFF';
 
     if (loading) {
         return (
-            <View style={styles.container}>
-                <ActivityIndicator size="large" color="#C92EFF" />
-                <Text style={[styles.emptyText, { marginTop: 15 }]}>Loading HR Questions...</Text>
+            <View style={[
+                styles.container,
+                { backgroundColor: theme === 'light' ? '#F5F5F5' : '#1a012c' }
+            ]}>
+                <ActivityIndicator size="large" color={themeColor} />
+                <Text style={[
+                    styles.emptyText,
+                    { marginTop: 15, color: theme === 'light' ? '#666666' : '#8a8a8a' }
+                ]}>Loading HR Questions...</Text>
             </View>
         );
     }
 
     return (
-        <SafeAreaView style={styles.container}>
-            <StatusBar barStyle="light-content" backgroundColor="#1a012c" />
+        <SafeAreaView style={[
+            styles.container,
+            { backgroundColor: theme === 'light' ? '#F5F5F5' : '#1a012c' }
+        ]}>
+            <StatusBar barStyle={theme === 'light' ? "dark-content" : "light-content"} backgroundColor={theme === 'light' ? '#F5F5F5' : '#1a012c'} />
 
             <View style={styles.headerContainer}>
-                <Text style={styles.header}>HR Knowledge Base</Text>
+                <Text style={[
+                    styles.header,
+                    { color: themeColor }
+                ]}>HR Knowledge Base</Text>
                 {/* <Image
                     source={require('@/assets/images/logo.png')}  // Replace with your actual logo path
                     style={styles.logo}
@@ -100,12 +119,18 @@ const HRQuestionsScreen = () => {
             </View>
 
             <View style={styles.searchFilterContainer}>
-                <View style={styles.searchContainer}>
-                    <FontAwesome name="search" size={20} color="#C92EFF" style={styles.searchIcon} />
+                <View style={[
+                    styles.searchContainer,
+                    { backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'rgba(255, 255, 255, 0.1)' }
+                ]}>
+                    <FontAwesome name="search" size={20} color={themeColor} style={styles.searchIcon} />
                     <TextInput
-                        style={styles.searchInput}
+                        style={[
+                            styles.searchInput,
+                            { color: theme === 'light' ? '#333333' : '#fff' }
+                        ]}
                         placeholder="Search questions..."
-                        placeholderTextColor="rgba(255, 255, 255, 0.5)"
+                        placeholderTextColor={theme === 'light' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.5)'}
                         value={searchQuery}
                         onChangeText={setSearchQuery}
                     />
@@ -121,13 +146,25 @@ const HRQuestionsScreen = () => {
                             key={option}
                             style={[
                                 styles.filterOption,
-                                activeFilter === option && styles.activeFilterOption
+                                {
+                                    backgroundColor: theme === 'light'
+                                        ? 'rgba(106, 13, 173, 0.08)'
+                                        : 'rgba(255, 255, 255, 0.08)'
+                                },
+                                activeFilter === option && {
+                                    backgroundColor: themeColor
+                                }
                             ]}
                             onPress={() => setActiveFilter(option)}
                         >
                             <Text
                                 style={[
                                     styles.filterText,
+                                    {
+                                        color: theme === 'light'
+                                            ? (activeFilter === option ? '#fff' : '#333333')
+                                            : '#fff'
+                                    },
                                     activeFilter === option && styles.activeFilterText
                                 ]}
                             >
@@ -144,7 +181,13 @@ const HRQuestionsScreen = () => {
                     keyExtractor={(item) => item._id}
                     contentContainerStyle={styles.subjectsList}
                     renderItem={({ item }) => (
-                        <View style={styles.subjectContainer}>
+                        <View style={[
+                            styles.subjectContainer,
+                            {
+                                backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.05)' : 'rgba(255, 255, 255, 0.05)',
+                                borderColor: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                            }
+                        ]}>
                             <TouchableOpacity
                                 style={styles.subjectHeader}
                                 onPress={() => toggleExpand(item._id)}
@@ -153,41 +196,66 @@ const HRQuestionsScreen = () => {
                                     <FontAwesome
                                         name={getCategoryIcon(item.category)}
                                         size={22}
-                                        color="#C92EFF"
+                                        color={themeColor}
                                         style={styles.subjectIcon}
                                     />
-                                    <Text style={styles.subjectTitle}>{item.question}</Text>
+                                    <Text style={[
+                                        styles.subjectTitle,
+                                        { color: theme === 'light' ? '#333333' : '#fff' }
+                                    ]}>{item.question}</Text>
                                 </View>
                                 <FontAwesome
                                     name={expandedId === item._id ? 'chevron-up' : 'chevron-down'}
                                     size={18}
-                                    color="#fff"
+                                    color={theme === 'light' ? '#6A0DAD' : '#fff'}
                                 />
                             </TouchableOpacity>
 
                             {expandedId === item._id && (
-                                <View style={styles.materialsContainer}>
+                                <View style={[
+                                    styles.materialsContainer,
+                                    {
+                                        borderTopColor: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'rgba(255, 255, 255, 0.1)'
+                                    }
+                                ]}>
                                     <View style={styles.materialRow}>
-                                        <Text style={[styles.cell, { flex: 1 }]}>{item.answer}</Text>
+                                        <Text style={[
+                                            styles.cell,
+                                            { flex: 1, color: theme === 'light' ? '#333333' : '#fff' }
+                                        ]}>{item.answer}</Text>
                                     </View>
                                 </View>
                             )}
                         </View>
                     )}
                     ListEmptyComponent={() => (
-                        <View style={styles.emptyContainer}>
+                        <View style={[
+                            styles.emptyContainer,
+                            {
+                                backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.05)' : 'rgba(255, 255, 255, 0.03)'
+                            }
+                        ]}>
                             <FontAwesome
                                 name="search"
                                 size={60}
-                                color="rgba(255, 255, 255, 0.3)"
+                                color={theme === 'light' ? 'rgba(106, 13, 173, 0.3)' : 'rgba(255, 255, 255, 0.3)'}
                                 style={styles.emptyIcon}
                             />
-                            <Text style={styles.emptyTitle}>No Questions Found</Text>
-                            <Text style={styles.emptyMessage}>
+                            <Text style={[
+                                styles.emptyTitle,
+                                { color: theme === 'light' ? '#333333' : '#fff' }
+                            ]}>No Questions Found</Text>
+                            <Text style={[
+                                styles.emptyMessage,
+                                { color: theme === 'light' ? '#6A0DAD' : '#d8b8e8' }
+                            ]}>
                                 Try adjusting your search or select a different category filter
                             </Text>
                             <TouchableOpacity
-                                style={styles.resetButton}
+                                style={[
+                                    styles.resetButton,
+                                    { backgroundColor: themeColor }
+                                ]}
                                 onPress={() => {
                                     setSearchQuery('');
                                     setActiveFilter('All');
@@ -199,19 +267,33 @@ const HRQuestionsScreen = () => {
                     )}
                 />
             ) : (
-                <View style={styles.emptyContainer}>
+                <View style={[
+                    styles.emptyContainer,
+                    {
+                        backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.05)' : 'rgba(255, 255, 255, 0.03)'
+                    }
+                ]}>
                     <FontAwesome
                         name="search"
                         size={60}
-                        color="rgba(255, 255, 255, 0.3)"
+                        color={theme === 'light' ? 'rgba(106, 13, 173, 0.3)' : 'rgba(255, 255, 255, 0.3)'}
                         style={styles.emptyIcon}
                     />
-                    <Text style={styles.emptyTitle}>No Questions Found</Text>
-                    <Text style={styles.emptyMessage}>
+                    <Text style={[
+                        styles.emptyTitle,
+                        { color: theme === 'light' ? '#333333' : '#fff' }
+                    ]}>No Questions Found</Text>
+                    <Text style={[
+                        styles.emptyMessage,
+                        { color: theme === 'light' ? '#6A0DAD' : '#d8b8e8' }
+                    ]}>
                         Try adjusting your search or select a different category filter
                     </Text>
                     <TouchableOpacity
-                        style={styles.resetButton}
+                        style={[
+                            styles.resetButton,
+                            { backgroundColor: themeColor }
+                        ]}
                         onPress={() => {
                             setSearchQuery('');
                             setActiveFilter('All');
@@ -228,7 +310,6 @@ const HRQuestionsScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#1a012c",
         padding: 15,
     },
     headerContainer: {
@@ -240,7 +321,6 @@ const styles = StyleSheet.create({
         marginTop: 15
     },
     header: {
-        color: "#C92EFF",
         fontSize: 30,
         fontWeight: "bold",
         fontFamily: "sans-serif",
@@ -257,7 +337,6 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: 'rgba(255, 255, 255, 0.1)',
         borderRadius: 8,
         paddingHorizontal: 12,
         marginBottom: 10,
@@ -268,7 +347,6 @@ const styles = StyleSheet.create({
     searchInput: {
         flex: 1,
         height: 44,
-        color: '#fff',
         fontSize: 16,
     },
     filterContainer: {
@@ -279,13 +357,8 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
         borderRadius: 20,
         marginRight: 8,
-        backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    },
-    activeFilterOption: {
-        backgroundColor: "#C92EFF",
     },
     filterText: {
-        color: '#fff',
         fontSize: 14,
         fontWeight: '500',
     },
@@ -298,10 +371,8 @@ const styles = StyleSheet.create({
     subjectContainer: {
         marginBottom: 15,
         borderRadius: 10,
-        backgroundColor: 'rgba(255, 255, 255, 0.05)',
         overflow: 'hidden',
         borderWidth: 1,
-        borderColor: 'rgba(255, 255, 255, 0.1)',
     },
     subjectHeader: {
         flexDirection: 'row',
@@ -318,14 +389,12 @@ const styles = StyleSheet.create({
         marginRight: 10,
     },
     subjectTitle: {
-        color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
         flex: 1,
     },
     materialsContainer: {
         borderTopWidth: 1,
-        borderTopColor: 'rgba(255, 255, 255, 0.1)',
         paddingBottom: 10,
     },
     tableHeader: {
@@ -334,11 +403,8 @@ const styles = StyleSheet.create({
         paddingVertical: 10,
         paddingHorizontal: 15,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-        backgroundColor: 'rgba(0, 0, 0, 0.2)',
     },
     headerText: {
-        color: "#fff",
         fontSize: 16,
         fontWeight: "bold",
         textAlign: "left",
@@ -349,10 +415,8 @@ const styles = StyleSheet.create({
         paddingVertical: 12,
         paddingHorizontal: 15,
         borderBottomWidth: 1,
-        borderBottomColor: 'rgba(255, 255, 255, 0.05)',
     },
     cell: {
-        color: "#fff",
         fontSize: 15,
         lineHeight: 22,
     },
@@ -362,21 +426,17 @@ const styles = StyleSheet.create({
     materialDescriptionContainer: {
         paddingHorizontal: 16,
         paddingVertical: 12,
-        backgroundColor: 'rgba(201, 46, 255, 0.05)',
         marginHorizontal: 15,
         marginBottom: 10,
         borderRadius: 8,
         borderWidth: 1,
-        borderColor: 'rgba(201, 46, 255, 0.2)',
     },
     materialDescriptionText: {
-        color: '#d0d0d0',
         fontSize: 13,
         lineHeight: 18,
         fontWeight: '400',
     },
     openButton: {
-        backgroundColor: '#C92EFF',
         color: '#fff',
         fontWeight: '500',
         paddingVertical: 6,
@@ -388,7 +448,6 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-start',
     },
     emptyText: {
-        color: '#8a8a8a',
         fontSize: 16,
         textAlign: 'center',
     },
@@ -397,7 +456,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         padding: 20,
-        backgroundColor: "rgba(255, 255, 255, 0.03)",
         borderRadius: 15,
         marginTop: 20,
         minHeight: 300,
@@ -407,14 +465,12 @@ const styles = StyleSheet.create({
         opacity: 0.8,
     },
     emptyTitle: {
-        color: "#fff",
         fontSize: 24,
         fontWeight: "bold",
         marginBottom: 10,
         textAlign: "center",
     },
     emptyMessage: {
-        color: "#d8b8e8",
         fontSize: 16,
         textAlign: "center",
         lineHeight: 24,
@@ -422,7 +478,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
     },
     resetButton: {
-        backgroundColor: "#C92EFF",
         paddingVertical: 12,
         paddingHorizontal: 30,
         borderRadius: 25,

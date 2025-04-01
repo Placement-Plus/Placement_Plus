@@ -1,7 +1,8 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Animated, StatusBar, Dimensions } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { useUser } from "../../context/userContext.js";
 
 import microsoftLogo from "@/assets/images/microsoft.png";
 import appleLogo from "@/assets/images/apple.png";
@@ -53,6 +54,19 @@ const companies = [
 const PastYearCompanies = () => {
   const router = useRouter();
   const scaleAnimations = useRef(companies.map(() => new Animated.Value(1))).current;
+  const { theme } = useUser()
+
+  // Theme colors
+  const themeColors = {
+    darkBackground: "#14011F",
+    lightBackground: "#F5F5F5",
+    darkText: "#fff",
+    lightText: "#333333",
+    lightSubtitleText: "#666666",
+    darkSubtitleText: "#AAA",
+    darkPurple: "#C92EFF",
+    lightPurple: "#6A0DAD",
+  };
 
   const handleCompanyPress = (index, companyName) => {
     Animated.sequence([
@@ -71,42 +85,103 @@ const PastYearCompanies = () => {
     });
   };
 
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
+
+  // Get current theme color
+  const getThemeColor = (darkValue, lightValue) => theme === 'dark' ? darkValue : lightValue;
+
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#14011F" />
-      
+    <View style={[
+      styles.container,
+      { backgroundColor: getThemeColor(themeColors.darkBackground, themeColors.lightBackground) }
+    ]}>
+      <StatusBar
+        barStyle={theme === 'dark' ? "light-content" : "dark-content"}
+        backgroundColor={getThemeColor(themeColors.darkBackground, themeColors.lightBackground)}
+      />
+
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[
+        styles.header,
+        {
+          borderBottomColor: getThemeColor("rgba(255, 255, 255, 0.1)", "rgba(106, 13, 173, 0.1)")
+        }
+      ]}>
         <View style={styles.logoContainer}>
           <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
-          <Text style={styles.logoText}>Placement Plus</Text>
+          <Text style={[
+            styles.logoText,
+            { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
+          ]}>Placement Plus</Text>
         </View>
-        <TouchableOpacity style={styles.profileButton}>
-          <Ionicons name="person-circle" size={34} color="#C92EFF" />
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity style={styles.profileButton} onPress={() => router.push('screens/Profile/Profile')}>
+            <Ionicons
+              name="person-circle"
+              size={34}
+              color={getThemeColor(themeColors.darkPurple, themeColors.lightPurple)}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Search bar */}
       <View style={styles.searchContainer}>
-        <View style={styles.searchBar}>
-          <Ionicons name="search" size={20} color="#666" style={styles.searchIcon} />
-          <Text style={styles.searchPlaceholder}>Search companies...</Text>
+        <View style={[
+          styles.searchBar,
+          {
+            backgroundColor: getThemeColor(
+              "rgba(255, 255, 255, 0.08)",
+              "rgba(106, 13, 173, 0.1)"
+            )
+          }
+        ]}>
+          <Ionicons
+            name="search"
+            size={20}
+            color={getThemeColor("#666", "#6A0DAD")}
+            style={styles.searchIcon}
+          />
+          <Text style={[
+            styles.searchPlaceholder,
+            { color: getThemeColor("#888", "#666666") }
+          ]}>Search companies...</Text>
         </View>
-        <TouchableOpacity style={styles.filterButton}>
-          <MaterialIcons name="filter-list" size={22} color="#C92EFF" />
+        <TouchableOpacity style={[
+          styles.filterButton,
+          {
+            backgroundColor: getThemeColor(
+              "rgba(201, 46, 255, 0.15)",
+              "rgba(106, 13, 173, 0.1)"
+            )
+          }
+        ]}>
+          <MaterialIcons
+            name="filter-list"
+            size={22}
+            color={getThemeColor(themeColors.darkPurple, themeColors.lightPurple)}
+          />
         </TouchableOpacity>
       </View>
 
       {/* Content */}
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.titleContainer}>
-          <Text style={styles.title}>Interview Questions</Text>
-          <Text style={styles.subtitle}>Prepare with real questions from top companies</Text>
+          <Text style={[
+            styles.title,
+            { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
+          ]}>Interview Questions</Text>
+          <Text style={[
+            styles.subtitle,
+            { color: getThemeColor(themeColors.darkSubtitleText, themeColors.lightSubtitleText) }
+          ]}>Prepare with real questions from top companies</Text>
         </View>
-        
+
         <View style={styles.companyList}>
           {companies.map((company, index) => (
             <TouchableOpacity
@@ -117,13 +192,37 @@ const PastYearCompanies = () => {
               <Animated.View
                 style={[
                   styles.companyItem,
-                  { transform: [{ scale: scaleAnimations[index] }] },
+                  {
+                    backgroundColor: getThemeColor(
+                      "rgba(255, 255, 255, 0.06)",
+                      "rgba(106, 13, 173, 0.05)"
+                    ),
+                    borderColor: getThemeColor(
+                      "rgba(255, 255, 255, 0.1)",
+                      "rgba(106, 13, 173, 0.1)"
+                    ),
+                    transform: [{ scale: scaleAnimations[index] }]
+                  },
                 ]}
               >
                 <Image source={company.logo} style={styles.companyLogo} />
-                <Text style={styles.companyText}>{company.name}</Text>
-                <View style={styles.questionsCount}>
-                  <Text style={styles.countText}>50+</Text>
+                <Text style={[
+                  styles.companyText,
+                  { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
+                ]}>{company.name}</Text>
+                <View style={[
+                  styles.questionsCount,
+                  {
+                    backgroundColor: getThemeColor(
+                      "rgba(201, 46, 255, 0.2)",
+                      "rgba(106, 13, 173, 0.2)"
+                    )
+                  }
+                ]}>
+                  <Text style={[
+                    styles.countText,
+                    { color: getThemeColor(themeColors.darkPurple, themeColors.lightPurple) }
+                  ]}>50+</Text>
                 </View>
               </Animated.View>
             </TouchableOpacity>
@@ -137,7 +236,6 @@ const PastYearCompanies = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#14011F",
   },
   header: {
     flexDirection: "row",
@@ -147,7 +245,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
     paddingBottom: 16,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.1)",
+    marginTop: -15
   },
   logoContainer: {
     flexDirection: "row",
@@ -160,9 +258,16 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   logoText: {
-    color: "white",
     fontSize: 20,
     fontWeight: "bold",
+  },
+  headerButtons: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  themeToggle: {
+    padding: 8,
+    marginRight: 8,
   },
   profileButton: {
     padding: 4,
@@ -177,7 +282,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
     borderRadius: 10,
     paddingHorizontal: 12,
     paddingVertical: 10,
@@ -187,11 +291,9 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   searchPlaceholder: {
-    color: "#888",
     fontSize: 15,
   },
   filterButton: {
-    backgroundColor: "rgba(201, 46, 255, 0.15)",
     padding: 10,
     borderRadius: 10,
   },
@@ -203,13 +305,11 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    color: "#fff",
     fontSize: 28,
     fontWeight: "bold",
     marginBottom: 6,
   },
   subtitle: {
-    color: "#AAA",
     fontSize: 14,
   },
   companyList: {
@@ -219,13 +319,11 @@ const styles = StyleSheet.create({
   },
   companyItem: {
     width: ITEM_WIDTH,
-    backgroundColor: "rgba(255, 255, 255, 0.06)",
     borderRadius: 16,
     padding: 16,
     marginBottom: 16,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
   },
   companyLogo: {
     width: 56,
@@ -234,19 +332,16 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   companyText: {
-    color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
     marginBottom: 8,
   },
   questionsCount: {
-    backgroundColor: "rgba(201, 46, 255, 0.2)",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
   countText: {
-    color: "#C92EFF",
     fontSize: 12,
     fontWeight: "bold",
   },

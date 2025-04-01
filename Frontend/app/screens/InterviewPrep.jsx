@@ -14,9 +14,11 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useUser } from "../../context/userContext.js";
 
 const PreparationHub = () => {
   const router = useRouter();
+  const { theme } = useUser()
   const navigateTo = (routeName) => {
     try {
       console.log("Navigating to:", routeName);
@@ -37,7 +39,9 @@ const PreparationHub = () => {
       description: "Data Structures & Algorithms",
       route: "/screens/QuestionAskByCompanies", // Route for DSA preparation
       icon: (props) => <FontAwesome5 name="code" {...props} />, // Icon for DSA
-      gradient: ["#3a1c71", "#d76d77"], // Gradient colors
+      gradient: theme === 'light'
+        ? ["#f0f0ff", "#e0e0ff"]
+        : ["#3a1c71", "#d76d77"], // Gradient colors
       topics: "100+ Algorithms & 50+ Data Structures", // Topics description
     },
     {
@@ -46,16 +50,20 @@ const PreparationHub = () => {
       description: "OS, DBMS, CN & OOPS",
       route: "/screens/FundamentalSubject", // Route for Computer Fundamentals
       icon: (props) => <MaterialCommunityIcons name="laptop" {...props} />, // Icon for CS
-      gradient: ["#000428", "#004e92"], // Gradient colors
+      gradient: theme === 'light'
+        ? ["#e6f7ff", "#c2e0ff"] // Updated light theme gradient
+        : ["#000428", "#004e92"], // Gradient colors
       topics: "4 Subjects & 200+ Important Topics", // Topics description
     },
     {
       id: "hr",
       title: "HR Preparation",
       description: "Interview Skills & Communication",
-      route: "/screens/hrQuestions", // Route for HR preparation
-      icon: (props) => <Ionicons name="people" {...props} />, // Icon for HR
-      gradient: ["#603813", "#b29f94"], // Gradient colors
+      route: "/screens/hrQuestions",
+      icon: (props) => <Ionicons name="people" {...props} />,
+      gradient: theme === 'light'
+        ? ["#fff5f0", "#ffe6e0"]
+        : ["#603813", "#b29f94"],
       topics: "50+ Common Questions & Mock Interviews", // Topics description
     },
   ];
@@ -77,19 +85,60 @@ const PreparationHub = () => {
         >
           <View style={styles.cardContent}>
             <View style={styles.iconContainer}>
-              {option.icon({ size: 32, color: "white" })} {/* Render icon */}
+              {option.icon({
+                size: 32,
+                color: theme === 'light' ? '#6A0DAD' : 'white'
+              })}
             </View>
             <View style={styles.cardTextContent}>
-              <Text style={styles.cardTitle}>{option.title}</Text>
-              <Text style={styles.cardDescription}>{option.description}</Text>
-              <View style={styles.topicsContainer}>
-                <Text style={styles.topicsText}>{option.topics}</Text>
+              <Text style={[
+                styles.cardTitle,
+                { color: theme === 'light' ? '#333333' : 'white' }
+              ]}>
+                {option.title}
+              </Text>
+              <Text style={[
+                styles.cardDescription,
+                { color: theme === 'light' ? '#6A0DAD' : 'rgba(255, 255, 255, 0.8)' }
+              ]}>
+                {option.description}
+              </Text>
+              <View style={[
+                styles.topicsContainer,
+                {
+                  backgroundColor: theme === 'light'
+                    ? 'rgba(106, 13, 173, 0.05)'
+                    : 'rgba(0, 0, 0, 0.15)'
+                }
+              ]}>
+                <Text style={[
+                  styles.topicsText,
+                  { color: theme === 'light' ? '#6A0DAD' : 'rgba(255, 255, 255, 0.9)' }
+                ]}>
+                  {option.topics}
+                </Text>
               </View>
             </View>
           </View>
-          <View style={styles.cardFooter}>
-            <Text style={styles.getStartedText}>Get Started</Text>
-            <Ionicons name="arrow-forward" size={18} color="white" />
+          <View style={[
+            styles.cardFooter,
+            {
+              backgroundColor: theme === 'light'
+                ? 'rgba(106, 13, 173, 0.1)'
+                : 'rgba(0, 0, 0, 0.2)'
+            }
+          ]}>
+            <Text style={[
+              styles.getStartedText,
+              { color: theme === 'light' ? '#6A0DAD' : 'white' }
+            ]}>
+              Get Started
+            </Text>
+            <Ionicons
+              name="arrow-forward"
+              size={18}
+              color={theme === 'light' ? '#6A0DAD' : 'white'}
+            />
           </View>
         </LinearGradient>
       </TouchableOpacity>
@@ -97,23 +146,47 @@ const PreparationHub = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor="#1a012c" />
+    <View style={[
+      styles.container,
+      { backgroundColor: theme === 'light' ? '#F5F5F5' : '#1a012c' }
+    ]}>
+      <StatusBar
+        barStyle={theme === 'light' ? "dark-content" : "light-content"}
+        backgroundColor={theme === 'light' ? '#F5F5F5' : '#1a012c'}
+      />
 
       {/* Header */}
-      <View style={styles.header}>
+      <View style={[
+        styles.header,
+        {
+          borderBottomColor: theme === 'light'
+            ? '#E0E0E0'
+            : 'rgba(255, 255, 255, 0.1)'
+        }
+      ]}>
         <View style={styles.headerContent}>
           <View>
-            <Text style={styles.greeting}>Hello, Candidate</Text>
-            <Text style={styles.subtitle}>
+            <Text style={[
+              styles.greeting,
+              { color: theme === 'light' ? '#333333' : 'white' }
+            ]}>
+              Hello, Candidate
+            </Text>
+            <Text style={[
+              styles.subtitle,
+              { color: theme === 'light' ? '#6A0DAD' : '#f0c5f1' }
+            ]}>
               What would you like to prepare today?
             </Text>
           </View>
-          <TouchableOpacity style={styles.profileButton}>
+          <TouchableOpacity style={[
+            styles.profileButton,
+            { borderColor: theme === 'light' ? '#6A0DAD' : '#8b0890' }
+          ]}>
             <Image
-              source={require("@/assets/images/logo.png")} // Replace with your image path
+              source={require("@/assets/images/logo.png")}
               style={styles.profileImage}
-              defaultSource={require("@/assets/images/logo.png")} // Fallback image
+              defaultSource={require("@/assets/images/logo.png")}
             />
           </TouchableOpacity>
         </View>
@@ -121,12 +194,16 @@ const PreparationHub = () => {
 
       {/* Page Content */}
       <View style={styles.content}>
-        <Text style={styles.sectionTitle}>Preparation Tracks</Text>
+        <Text style={[
+          styles.sectionTitle,
+          { color: theme === 'light' ? '#333333' : 'white' }
+        ]}>
+          Preparation Tracks
+        </Text>
 
         {/* Preparation Options */}
         <View style={styles.cardsContainer}>
-          {preparationOptions.map(renderPreparationCard)}{" "}
-          {/* Render all cards */}
+          {preparationOptions.map(renderPreparationCard)}
         </View>
       </View>
     </View>
@@ -137,14 +214,12 @@ const PreparationHub = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1a012c",
   },
   header: {
     paddingTop: 20,
     paddingHorizontal: 20,
     paddingBottom: 15,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(255, 255, 255, 0.1)",
     marginTop: 10
   },
   headerContent: {
@@ -155,11 +230,9 @@ const styles = StyleSheet.create({
   greeting: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "white",
   },
   subtitle: {
     fontSize: 16,
-    color: "#f0c5f1",
     marginTop: 5,
   },
   profileButton: {
@@ -168,7 +241,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     overflow: "hidden",
     borderWidth: 2,
-    borderColor: "#8b0890",
   },
   profileImage: {
     width: "100%",
@@ -181,7 +253,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "white",
     marginBottom: 20,
   },
   cardsContainer: {
@@ -221,16 +292,13 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 18,
     fontWeight: "bold",
-    color: "white",
   },
   cardDescription: {
     fontSize: 14,
-    color: "rgba(255, 255, 255, 0.8)",
     marginTop: 4,
   },
   topicsContainer: {
     marginTop: 8,
-    backgroundColor: "rgba(0, 0, 0, 0.15)",
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 5,
@@ -238,19 +306,16 @@ const styles = StyleSheet.create({
   },
   topicsText: {
     fontSize: 12,
-    color: "rgba(255, 255, 255, 0.9)",
   },
   cardFooter: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
     padding: 15,
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
   },
   getStartedText: {
     fontSize: 14,
     fontWeight: "bold",
-    color: "white",
     marginRight: 8,
   },
 });

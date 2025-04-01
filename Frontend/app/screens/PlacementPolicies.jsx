@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { 
-  View, 
-  Text, 
-  ScrollView, 
-  TouchableOpacity, 
-  StyleSheet, 
-  SafeAreaView, 
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  SafeAreaView,
   StatusBar,
   Pressable,
   Platform
@@ -33,7 +33,7 @@ const PlacementPoliciesScreen = () => {
       shield: <Ionicons name="shield-outline" size={size} color={color} />,
       info: <Ionicons name="information-circle-outline" size={size} color={color} />
     };
-    
+
     return iconMap[name] || <Text style={[styles.icon, { color }]}>•</Text>;
   };
 
@@ -42,98 +42,98 @@ const PlacementPoliciesScreen = () => {
       case 'eligibility':
         return (
           <View style={styles.tabContent}>
-            <PolicyCard 
-              icon="users" 
-              title="Academic Requirements" 
+            <PolicyCard
+              icon="users"
+              title="Academic Requirements"
               items={[
                 "Minimum CGPA of 7.0 or 70% aggregate throughout the academic program",
                 "No current backlogs in any semester",
                 "Maximum of two backlogs allowed if cleared within the prescribed time"
-              ]} 
+              ]}
             />
-            
-            <PolicyCard 
-              icon="book" 
-              title="Attendance & Participation" 
+
+            <PolicyCard
+              icon="book"
+              title="Attendance & Participation"
               items={[
                 "Minimum 75% attendance in all placement training sessions",
                 "Mandatory participation in mock interviews and group discussions",
                 "Completion of assigned pre-placement courses and assessments"
-              ]} 
+              ]}
             />
           </View>
         );
       case 'process':
         return (
           <View style={styles.tabContent}>
-            <PolicyCard 
-              icon="calendar" 
-              title="Application Timeline" 
+            <PolicyCard
+              icon="calendar"
+              title="Application Timeline"
               items={[
                 "Job notifications published 7 days before application deadline",
                 "Resume submission deadline strictly enforced",
                 "Interview schedules announced minimum 48 hours in advance"
-              ]} 
+              ]}
             />
-            
-            <PolicyCard 
-              icon="briefcase" 
-              title="Selection Stages" 
+
+            <PolicyCard
+              icon="briefcase"
+              title="Selection Stages"
               items={[
                 "Resume shortlisting based on company requirements",
                 "Aptitude tests and technical assessments",
                 "Group discussion and personal interviews",
                 "HR interview and document verification"
-              ]} 
+              ]}
             />
           </View>
         );
       case 'rules':
         return (
           <View style={styles.tabContent}>
-            <PolicyCard 
-              icon="award" 
-              title="Job Offers" 
+            <PolicyCard
+              icon="award"
+              title="Job Offers"
               items={[
                 "Students can receive a maximum of 2 offers",
                 "Option to upgrade if new offer is at least 30% higher",
                 "All offer decisions must be communicated within 48 hours"
-              ]} 
+              ]}
             />
-            
-            <PolicyCard 
-              icon="shield" 
-              title="Code of Conduct" 
+
+            <PolicyCard
+              icon="shield"
+              title="Code of Conduct"
               items={[
                 "Professional behavior during all placement activities",
                 "Formal dress code for all interviews and company interactions",
                 "Punctuality for all placement events is mandatory",
                 "Dishonesty or misrepresentation will lead to disqualification"
-              ]} 
+              ]}
             />
           </View>
         );
       case 'blackout':
         return (
           <View style={styles.tabContent}>
-            <PolicyCard 
-              icon="bell" 
-              title="Blackout Period" 
+            <PolicyCard
+              icon="bell"
+              title="Blackout Period"
               items={[
                 "Students with job offers may be restricted from further placements",
                 "Blackout period applies for 2 weeks after receiving an offer",
                 "Students may apply for exemption for specific high-tier companies"
-              ]} 
+              ]}
             />
-            
-            <PolicyCard 
-              icon="info" 
-              title="Special Considerations" 
+
+            <PolicyCard
+              icon="info"
+              title="Special Considerations"
               items={[
                 "Dream company policy allows applications regardless of existing offers",
                 "Deferred placements for those pursuing higher studies",
                 "Entrepreneur track for students with validated startup ideas"
-              ]} 
+              ]}
             />
           </View>
         );
@@ -169,13 +169,13 @@ const PlacementPoliciesScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#14011F" />
-      
+
       {/* Background gradient */}
       <LinearGradient
         colors={['#1D0A3F', '#14011F']}
         style={styles.backgroundGradient}
       />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <Pressable onPress={handleBackPress} style={styles.backButton}>
@@ -189,7 +189,7 @@ const PlacementPoliciesScreen = () => {
           </View>
         </Pressable>
       </View>
-      
+
       <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
         {/* Banner */}
         <LinearGradient
@@ -206,21 +206,21 @@ const PlacementPoliciesScreen = () => {
             These policies are designed to create fair opportunities and maintain the institution's reputation with employers.
           </Text>
         </LinearGradient>
-        
+
         {/* Tabs */}
         <View style={styles.tabContainer}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tabScroll}>
             {[
               { id: 'eligibility', label: 'Eligibility', icon: 'checkmark-circle-outline' },
-              { id: 'process', label: 'Process', icon: 'git-branch-outline' }, 
-              { id: 'rules', label: 'Rules', icon: 'list-outline' }, 
+              { id: 'process', label: 'Process', icon: 'git-branch-outline' },
+              { id: 'rules', label: 'Rules', icon: 'list-outline' },
               { id: 'blackout', label: 'Blackout', icon: 'alert-circle-outline' }
             ].map((tab) => {
               const isActive = activeTab === tab.id;
               return (
-                <TouchableOpacity 
+                <TouchableOpacity
                   key={tab.id}
-                  style={[styles.tab, isActive && styles.activeTab]} 
+                  style={[styles.tab, isActive && styles.activeTab]}
                   onPress={() => setActiveTab(tab.id)}
                 >
                   {isActive ? (
@@ -244,15 +244,15 @@ const PlacementPoliciesScreen = () => {
             })}
           </ScrollView>
         </View>
-        
+
         {/* Tab Content */}
         {renderTabContent()}
-        
+
         {/* Contact Section */}
         <View style={styles.contactSection}>
           <Text style={styles.contactTitle}>Need Help?</Text>
           <Text style={styles.contactText}>Contact the Training & Placement Office</Text>
-          
+
           <LinearGradient
             colors={['rgba(255, 255, 255, 0.08)', 'rgba(255, 255, 255, 0.03)']}
             style={styles.contactCard}
@@ -264,19 +264,19 @@ const PlacementPoliciesScreen = () => {
               <Text style={styles.contactInfo}>placement@institute.edu</Text>
             </View>
             <View style={styles.contactDivider} />
-            
+
             <View style={styles.contactItem}>
               <Ionicons name="business-outline" size={22} color="#C92EFF" />
               <Text style={styles.contactInfo}>Room 201, Admin Block</Text>
             </View>
             <View style={styles.contactDivider} />
-            
+
             <View style={styles.contactItem}>
               <Ionicons name="time-outline" size={22} color="#C92EFF" />
               <Text style={styles.contactInfo}>Mon-Fri: 9:00 AM - 5:00 PM</Text>
             </View>
           </LinearGradient>
-          
+
           <TouchableOpacity style={styles.chatButton}>
             <LinearGradient
               colors={['#C92EFF', '#9332FF']}
@@ -539,4 +539,4 @@ const styles = StyleSheet.create({
   }
 });
 
-export default PlacementPoliciesScreen;8
+export default PlacementPoliciesScreen; 8

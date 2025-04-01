@@ -4,20 +4,31 @@ import {
     Text,
     TouchableOpacity,
     ScrollView,
-    StyleSheet
+    StyleSheet,
+    Alert
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage';
+import { router } from 'expo-router';
+import { useUser } from '../../../context/userContext.js';
 
-const CompanyCard = ({ company }) => {
+const CompanyCard = ({ company, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
+
+
+    // Get theme-specific colors
+    const themeColor = theme === 'light' ? '#6A0DAD' : '#C92EFF';
+    const textColor = theme === 'light' ? '#333333' : '#fff';
+    const secondaryTextColor = theme === 'light' ? '#666666' : '#b388e9';
+    const cardBackground = theme === 'light' ? '#F8F5FF' : '#2d0a41';
+    const borderColor = theme === 'light' ? 'rgba(106, 13, 173, 0.2)' : '#390852';
 
     const toggleExpand = () => {
         setIsExpanded(!isExpanded);
     };
 
     return (
-        <View style={styles.companycardContainer}>
+        <View style={[styles.companycardContainer, { backgroundColor: cardBackground }]}>
             {/* Company Header */}
             <TouchableOpacity
                 style={styles.companycardHeader}
@@ -25,49 +36,61 @@ const CompanyCard = ({ company }) => {
             >
                 <View style={styles.headerLeft}>
                     <View>
-                        <Text style={styles.companyName}>{company.companyName}</Text>
-                        <Text style={styles.roleText}>{company.role}</Text>
+                        <Text style={[styles.companyName, { color: textColor }]}>{company.companyName}</Text>
+                        <Text style={[styles.roleText, { color: secondaryTextColor }]}>{company.role}</Text>
                     </View>
                 </View>
                 <View style={styles.headerRight}>
-                    <Text style={styles.statusText}>{company.applicationStatus}</Text>
+                    <Text style={[styles.statusText, { color: themeColor }]}>{company.applicationStatus}</Text>
                     <Ionicons
                         name={isExpanded ? 'chevron-up' : 'chevron-down'}
                         size={24}
-                        color="#C92EFF"
+                        color={themeColor}
                     />
                 </View>
             </TouchableOpacity>
 
             {/* Expanded Details */}
             {isExpanded && (
-                <View style={styles.expandedContent}>
+                <View style={[styles.expandedContent, { borderTopColor: borderColor }]}>
                     <View style={styles.detailsContainer}>
                         <View style={styles.detailsColumn}>
                             <View style={styles.detailItem}>
-                                <View style={styles.detailIconContainer}>
-                                    <Ionicons name="location-outline" size={20} color="#C92EFF" />
+                                <View style={[styles.detailIconContainer, {
+                                    backgroundColor: theme === 'light'
+                                        ? 'rgba(106, 13, 173, 0.2)'
+                                        : 'rgba(201, 46, 255, 0.2)'
+                                }]}>
+                                    <Ionicons name="location-outline" size={20} color={themeColor} />
                                 </View>
-                                <Text style={styles.detailText}>
+                                <Text style={[styles.detailText, { color: textColor }]}>
                                     Location: {company.jobLocation}
                                 </Text>
                             </View>
                             {company.ctc && (
                                 <View style={styles.detailItem}>
-                                    <View style={styles.detailIconContainer}>
-                                        <Ionicons name="cash-outline" size={20} color="#C92EFF" />
+                                    <View style={[styles.detailIconContainer, {
+                                        backgroundColor: theme === 'light'
+                                            ? 'rgba(106, 13, 173, 0.2)'
+                                            : 'rgba(201, 46, 255, 0.2)'
+                                    }]}>
+                                        <Ionicons name="cash-outline" size={20} color={themeColor} />
                                     </View>
-                                    <Text style={styles.detailText}>
+                                    <Text style={[styles.detailText, { color: textColor }]}>
                                         CTC: {company.ctc || 'Not specified'}
                                     </Text>
                                 </View>
                             )}
                             {company.stipend && (
                                 <View style={styles.detailItem}>
-                                    <View style={styles.detailIconContainer}>
-                                        <Ionicons name="cash-outline" size={20} color="#C92EFF" />
+                                    <View style={[styles.detailIconContainer, {
+                                        backgroundColor: theme === 'light'
+                                            ? 'rgba(106, 13, 173, 0.2)'
+                                            : 'rgba(201, 46, 255, 0.2)'
+                                    }]}>
+                                        <Ionicons name="cash-outline" size={20} color={themeColor} />
                                     </View>
-                                    <Text style={styles.detailText}>
+                                    <Text style={[styles.detailText, { color: textColor }]}>
                                         Stipend: {company.stipend || 'Not specified'}
                                     </Text>
                                 </View>
@@ -76,18 +99,26 @@ const CompanyCard = ({ company }) => {
 
                         <View style={styles.detailsColumn}>
                             <View style={styles.detailItem}>
-                                <View style={styles.detailIconContainer}>
-                                    <Ionicons name="school-outline" size={20} color="#C92EFF" />
+                                <View style={[styles.detailIconContainer, {
+                                    backgroundColor: theme === 'light'
+                                        ? 'rgba(106, 13, 173, 0.2)'
+                                        : 'rgba(201, 46, 255, 0.2)'
+                                }]}>
+                                    <Ionicons name="school-outline" size={20} color={themeColor} />
                                 </View>
-                                <Text style={styles.detailText}>
+                                <Text style={[styles.detailText, { color: textColor }]}>
                                     CGPA: {company.cgpaCriteria}
                                 </Text>
                             </View>
                             <View style={styles.detailItem}>
-                                <View style={styles.detailIconContainer}>
-                                    <Ionicons name="briefcase-outline" size={20} color="#C92EFF" />
+                                <View style={[styles.detailIconContainer, {
+                                    backgroundColor: theme === 'light'
+                                        ? 'rgba(106, 13, 173, 0.2)'
+                                        : 'rgba(201, 46, 255, 0.2)'
+                                }]}>
+                                    <Ionicons name="briefcase-outline" size={20} color={themeColor} />
                                 </View>
-                                <Text style={styles.detailText}>
+                                <Text style={[styles.detailText, { color: textColor }]}>
                                     Mode: {company.mode}
                                 </Text>
                             </View>
@@ -96,17 +127,17 @@ const CompanyCard = ({ company }) => {
 
                     {/* Additional Information */}
                     {(company.extraDetails || company.hiringProcess) && (
-                        <View style={styles.additionalInfoSection}>
-                            <Text style={styles.sectionTitle}>Additional Information</Text>
+                        <View style={[styles.additionalInfoSection, { borderTopColor: borderColor }]}>
+                            <Text style={[styles.sectionTitle, { color: themeColor }]}>Additional Information</Text>
                             {company.hiringProcess && (
-                                <Text style={styles.infoText}>
-                                    <Text style={styles.infoLabel}>Hiring Process: </Text>
+                                <Text style={[styles.infoText, { color: textColor }]}>
+                                    <Text style={[styles.infoLabel, { color: themeColor }]}>Hiring Process: </Text>
                                     {company.hiringProcess}
                                 </Text>
                             )}
                             {company.extraDetails && (
-                                <Text style={styles.infoText}>
-                                    <Text style={styles.infoLabel}>Extra Details: </Text>
+                                <Text style={[styles.infoText, { color: textColor }]}>
+                                    <Text style={[styles.infoLabel, { color: themeColor }]}>Extra Details: </Text>
                                     {company.extraDetails}
                                 </Text>
                             )}
@@ -114,13 +145,13 @@ const CompanyCard = ({ company }) => {
                     )}
 
                     {company.pocDetails && (
-                        <View style={styles.additionalInfoSection}>
-                            <Text style={styles.sectionTitle}>Point of Contact</Text>
-                            <Text style={styles.infoText}>
-                                <Text style={styles.infoLabel}>Name: </Text> {company.pocDetails.name}
+                        <View style={[styles.additionalInfoSection, { borderTopColor: borderColor }]}>
+                            <Text style={[styles.sectionTitle, { color: themeColor }]}>Point of Contact</Text>
+                            <Text style={[styles.infoText, { color: textColor }]}>
+                                <Text style={[styles.infoLabel, { color: themeColor }]}>Name: </Text> {company.pocDetails.name}
                             </Text>
-                            <Text style={styles.infoText}>
-                                <Text style={styles.infoLabel}>Contact No: </Text> {company.pocDetails.contactNo}
+                            <Text style={[styles.infoText, { color: textColor }]}>
+                                <Text style={[styles.infoLabel, { color: themeColor }]}>Contact No: </Text> {company.pocDetails.contactNo}
                             </Text>
                         </View>
                     )}
@@ -130,14 +161,21 @@ const CompanyCard = ({ company }) => {
     );
 }
 
-
 const AppliedCompaniesPage = () => {
-    const [companies, setCompanies] = useState([])
+    const [companies, setCompanies] = useState([]);
+    const { theme } = useUser()
+
+    // Theme variables
+    const backgroundColor = theme === 'light' ? '#F5F5F5' : '#1a012c';
+    const themeColor = theme === 'light' ? '#6A0DAD' : '#C92EFF';
+    const borderColor = theme === 'light' ? 'rgba(106, 13, 173, 0.2)' : '#390852';
+    const textColor = theme === 'light' ? '#333333' : '#fff';
+    const secondaryTextColor = theme === 'light' ? '#8324D4' : '#b388e9';
 
     const fetchAppliedCompanies = async () => {
         try {
-            const accessToken = await getAccessToken()
-            const refreshToken = await getRefreshToken()
+            const accessToken = await getAccessToken();
+            const refreshToken = await getRefreshToken();
 
             const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/companies/get-company-details`, {
                 method: 'GET',
@@ -145,33 +183,31 @@ const AppliedCompaniesPage = () => {
                     'Authorization': `Bearer ${accessToken}`,
                     'x-refresh-token': refreshToken
                 }
-            })
+            });
 
-            const result = await response.json()
-            // console.log(result);
+            const result = await response.json();
 
             if (result.statusCode === 200) {
-                setCompanies(result.data)
+                setCompanies(result.data);
             }
 
         } catch (error) {
             console.error('Error: ', error?.message);
-            Alert.alert('Error', 'Failed fetch applied companies. Please try again.');
+            Alert.alert('Error', 'Failed to fetch applied companies. Please try again.');
         }
-    }
+    };
 
     useEffect(() => {
-        fetchAppliedCompanies()
-    }, [])
+        fetchAppliedCompanies();
+    }, []);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color="#C92EFF" />
+        <View style={[styles.container, { backgroundColor }]}>
+            <View style={[styles.header, { borderBottomColor: borderColor }]}>
+                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+                    <Ionicons name="arrow-back" size={24} color={themeColor} />
                 </TouchableOpacity>
-                <Text style={styles.headerTitle}>Applied Companies</Text>
-                <View style={{ width: 24 }}>{/* Placeholder for symmetry */}</View>
+                <Text style={[styles.headerTitle, { color: themeColor }]}>Applied Companies</Text>
             </View>
 
             <ScrollView
@@ -180,11 +216,11 @@ const AppliedCompaniesPage = () => {
             >
                 {companies && companies.length > 0 ? (
                     companies.map((company, index) => (
-                        <CompanyCard key={index} company={company} />
+                        <CompanyCard key={index} company={company} theme={theme} />
                     ))
                 ) : (
                     <View style={styles.emptyState}>
-                        <Text style={styles.emptyStateText}>
+                        <Text style={[styles.emptyStateText, { color: secondaryTextColor }]}>
                             No companies found. You haven't applied to any companies yet.
                         </Text>
                     </View>
@@ -197,32 +233,31 @@ const AppliedCompaniesPage = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#1a012c",
     },
     header: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 15,
-        paddingHorizontal: 15,
+        paddingTop: 15,
+        paddingBottom: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#390852',
-        marginTop: 15,
+        marginTop: 20,
     },
     backButton: {
         padding: 5,
+        marginLeft: 5
     },
     headerTitle: {
-        color: '#C92EFF',
         fontSize: 20,
         fontWeight: 'bold',
+        marginRight: 100
     },
     scrollViewContent: {
         paddingHorizontal: 15,
         paddingBottom: 20,
     },
     companycardContainer: {
-        backgroundColor: '#2d0a41',
         marginTop: 15,
         borderRadius: 15,
         shadowColor: "#000",
@@ -244,13 +279,11 @@ const styles = StyleSheet.create({
         flex: 1,
     },
     companyName: {
-        color: '#fff',
         fontSize: 18,
         fontWeight: 'bold',
         marginTop: 15
     },
     roleText: {
-        color: '#b388e9',
         fontSize: 14,
     },
     headerRight: {
@@ -258,14 +291,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     statusText: {
-        color: '#C92EFF',
         marginRight: 10,
         fontSize: 14,
     },
     expandedContent: {
         padding: 15,
         borderTopWidth: 1,
-        borderTopColor: '#390852',
     },
     detailsContainer: {
         flexDirection: 'row',
@@ -283,13 +314,11 @@ const styles = StyleSheet.create({
         width: 36,
         height: 36,
         borderRadius: 18,
-        backgroundColor: 'rgba(201, 46, 255, 0.2)',
         justifyContent: 'center',
         alignItems: 'center',
         marginRight: 15,
     },
     detailText: {
-        color: '#fff',
         fontSize: 14,
         flex: 1,
     },
@@ -297,30 +326,27 @@ const styles = StyleSheet.create({
         marginTop: 15,
         paddingTop: 15,
         borderTopWidth: 1,
-        borderTopColor: '#390852',
     },
     sectionTitle: {
-        color: '#C92EFF',
         fontSize: 16,
         fontWeight: 'bold',
         marginBottom: 10,
     },
     infoLabel: {
-        color: '#C92EFF',
         fontWeight: 'bold',
     },
     infoText: {
-        color: '#fff',
         marginBottom: 8,
     },
     emptyState: {
         alignItems: 'center',
         justifyContent: 'center',
         padding: 20,
+        marginTop: 30,
     },
     emptyStateText: {
-        color: '#b388e9',
         textAlign: 'center',
+        fontSize: 16,
     },
 });
 

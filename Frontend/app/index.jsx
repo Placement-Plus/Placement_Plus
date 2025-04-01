@@ -1,13 +1,19 @@
 import React from "react";
 import { View, Text, Image, Pressable, StyleSheet } from "react-native";
-import { useRouter } from "expo-router"; 
-import { SimpleLineIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import { LinearGradient } from "expo-linear-gradient";
 
-const WelcomeScreen = () => {
-  const router = useRouter(); 
+const RoleSelectionScreen = () => {
+  const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <LinearGradient
+      colors={['#0D021F', '#1D0442']}
+      style={styles.container}
+      start={{ x: 0, y: 0 }}
+      end={{ x: 1, y: 1 }}
+    >
       {/* Logo */}
       <View style={styles.logoContainer}>
         <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
@@ -16,44 +22,72 @@ const WelcomeScreen = () => {
 
       {/* Title */}
       <Text style={styles.title}>
-        Let's Get <Text style={styles.highlight}>Started!</Text>
+        {/* Select Your <Text style={styles.highlight}>Role</Text> */}
+        Let's Get <Text style={styles.highlight}>Started</Text>
       </Text>
 
-      {/* Navigate to Login */}
-      <Pressable style={styles.button} onPress={() => router.push("userloginsign/login")}>
-        <Text style={styles.buttonText}>SIGN IN</Text>
+      {/* Role Buttons */}
+      <Pressable
+        style={styles.buttonContainer}
+        onPress={() => router.push("Admin/login")}
+      >
+        <LinearGradient
+          colors={['#C92EFF', '#8428B2']}
+          style={styles.button}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <Ionicons name="shield-checkmark" size={28} color="white" style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>ADMIN</Text>
+        </LinearGradient>
       </Pressable>
 
-      {/* Navigate to Signup */}
-      <Pressable style={styles.button} onPress={() => router.push("userloginsign/Signup")}>
-        <Text style={styles.buttonText}>SIGN UP</Text>
+      <Pressable
+        style={styles.buttonContainer}
+        onPress={() => router.push("roles/alumni")}
+      >
+        <LinearGradient
+          colors={['#C92EFF', '#8428B2']}
+          style={styles.button}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <FontAwesome5 name="user-graduate" size={26} color="white" style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>ALUMNI</Text>
+        </LinearGradient>
       </Pressable>
 
-      {/* OR Sign In With */}
-      <Text style={styles.orText}>OR SIGN IN WITH</Text>
-      <View style={styles.socialIcons}>
-        <SimpleLineIcons name="envelope" size={24} color="white" style={styles.icon} />
-        <SimpleLineIcons name="phone" size={24} color="white" style={styles.icon} />
-      </View>
-    </View>
+      <Pressable
+        style={styles.buttonContainer}
+        onPress={() => router.push("screens/Roles/Student")}
+      >
+        <LinearGradient
+          colors={['#C92EFF', '#8428B2']}
+          style={styles.button}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+        >
+          <Ionicons name="school" size={28} color="white" style={styles.buttonIcon} />
+          <Text style={styles.buttonText}>STUDENT</Text>
+        </LinearGradient>
+      </Pressable>
+    </LinearGradient>
   );
 };
 
-
-export default WelcomeScreen;
+export default RoleSelectionScreen;
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0D021F",
-    padding: 20,
+    padding: 30,
   },
   logoContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 80,
+    marginBottom: 60,
   },
   logo: {
     width: 30,
@@ -68,48 +102,61 @@ const styles = StyleSheet.create({
     fontFamily: "sans-serif",
   },
   title: {
-    fontSize: 50,
+    fontSize: 55,
     fontFamily: "sans-serif",
     fontWeight: "bold",
     color: "white",
     textAlign: "center",
-    marginBottom: 80,
-    textDecorationStyle: "solid",
+    marginBottom: 60,
     fontStyle: "italic",
+    textShadowColor: 'rgba(201, 46, 255, 0.6)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
   },
   highlight: {
     color: "#C92EFF",
   },
+  buttonContainer: {
+    width: "80%",
+    marginVertical: 12,
+    borderRadius: 15,
+    overflow: 'hidden',
+    elevation: 8,
+    shadowColor: "#C92EFF",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
   button: {
-    backgroundColor: "#C92EFF",
-    paddingVertical: 15,
-    paddingHorizontal: 80,
-    borderRadius: 10,
-    marginVertical: 15,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    borderRadius: 15,
+  },
+  buttonIcon: {
+    marginRight: 16,
   },
   buttonText: {
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
+    letterSpacing: 1,
   },
-  orText: {
-    color: "white",
-    marginVertical: 15,
-  },
-  socialIcons: {
+  backButton: {
     flexDirection: "row",
-    justifyContent: "center",
-    marginBottom: 20,
+    alignItems: "center",
+    marginTop: 50,
+    backgroundColor: "rgba(255, 255, 255, 0.1)",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 30,
   },
-  icon: {
-    backgroundColor: "#333",
-    padding: 10,
-    borderRadius: 50,
-    marginHorizontal: 10,
+  backIcon: {
+    marginRight: 8,
   },
-  signupText: {
+  backText: {
     color: "white",
-    marginTop: 20,
-    textAlign: "center",
-  },
+    fontSize: 16,
+  }
 });
