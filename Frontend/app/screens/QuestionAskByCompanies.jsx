@@ -4,51 +4,137 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useUser } from "../../context/userContext.js";
 
-import microsoftLogo from "@/assets/images/microsoft.png";
-import appleLogo from "@/assets/images/apple.png";
-import googleLogo from "@/assets/images/google.png";
-import amazonLogo from "@/assets/images/amazon.png";
-import netflixLogo from "@/assets/images/netflix.png";
-import metaLogo from "@/assets/images/meta.png";
-import uberLogo from "@/assets/images/uber.png";
-import nvidiaLogo from "@/assets/images/nvidia.png";
+import microsoftLogo from "@/assets/companyImages/Microsoft_Logo_512px.png";
+import appleLogo from "@/assets/companyImages/apple-white.png";
+import appleLogoBlack from "@/assets/companyImages/apple.png";
+import googleLogo from "@/assets/companyImages/Google-new.png";
+import amazonLogo from "@/assets/companyImages/amazon2.png";
+import netflixLogo from "@/assets/companyImages/Netflix_Symbol_RGB.png";
+import metaLogo from "@/assets/companyImages/meta-new.webp";
+import uberLogo from "@/assets/companyImages/uber-white-without-back.png";
+import uberLogoBlack from "@/assets/companyImages/uber.png";
+import nvidiaLogo from "@/assets/companyImages/Nvidia-white.jpg";
+import nvidiaLogoBlack from "@/assets/companyImages/Nvidia-new.png";
+import flipkartLogo from "@/assets/companyImages/flipkart-bg.png";
+import gameskraftLogo from "@/assets/companyImages/gameskraft-bg.png";
+import morganStanleyLogo from "@/assets/companyImages/morganStanley.jpg"
+import techMahindraLogo from "@/assets/companyImages/tech-mahindra-new.png"
 
 const { width } = Dimensions.get("window");
 const ITEM_WIDTH = (width - 60) / 2;
 
 const companies = [
-  { name: "Microsoft", logo: microsoftLogo },
-  { name: "Apple", logo: appleLogo },
-  { name: "Google", logo: googleLogo },
-  { name: "Amazon", logo: amazonLogo },
-  { name: "Netflix", logo: netflixLogo },
-  { name: "Meta", logo: metaLogo },
-  { name: "Uber", logo: uberLogo },
-  { name: "Nvidia", logo: nvidiaLogo },
-  { name: "Microsoft", logo: microsoftLogo },
-  { name: "Apple", logo: appleLogo },
-  { name: "Google", logo: googleLogo },
-  { name: "Amazon", logo: amazonLogo },
-  { name: "Netflix", logo: netflixLogo },
-  { name: "Meta", logo: metaLogo },
-  { name: "Uber", logo: uberLogo },
-  { name: "Nvidia", logo: nvidiaLogo },
-  { name: "Microsoft", logo: microsoftLogo },
-  { name: "Apple", logo: appleLogo },
-  { name: "Google", logo: googleLogo },
-  { name: "Amazon", logo: amazonLogo },
-  { name: "Netflix", logo: netflixLogo },
-  { name: "Meta", logo: metaLogo },
-  { name: "Uber", logo: uberLogo },
-  { name: "Nvidia", logo: nvidiaLogo },
-  { name: "Microsoft", logo: microsoftLogo },
-  { name: "Apple", logo: appleLogo },
-  { name: "Google", logo: googleLogo },
-  { name: "Amazon", logo: amazonLogo },
-  { name: "Netflix", logo: netflixLogo },
-  { name: "Meta", logo: metaLogo },
-  { name: "Uber", logo: uberLogo },
-  { name: "Nvidia", logo: nvidiaLogo },
+  {
+    name: "Microsoft",
+    dark: {
+      logo: microsoftLogo
+    },
+    light: {
+      logo: microsoftLogo
+    }
+  },
+  {
+    name: "Apple",
+    dark: {
+      logo: appleLogo
+    },
+    light: {
+      logo: appleLogoBlack
+    }
+  },
+  {
+    name: "Google",
+    dark: {
+      logo: googleLogo
+    },
+    light: {
+      logo: googleLogo
+    }
+  },
+  {
+    name: "Amazon",
+    dark: {
+      logo: amazonLogo
+    },
+    light: {
+      logo: amazonLogo
+    }
+  },
+  {
+    name: "Flipkart",
+    dark: {
+      logo: flipkartLogo
+    },
+    light: {
+      logo: flipkartLogo
+    }
+  },
+  {
+    name: "Netflix",
+    dark: {
+      logo: netflixLogo
+    },
+    light: {
+      logo: netflixLogo
+    }
+  },
+  {
+    name: "Meta",
+    dark: {
+      logo: metaLogo
+    },
+    light: {
+      logo: metaLogo
+    }
+  },
+  {
+    name: "Uber",
+    dark: {
+      logo: uberLogo
+    },
+    light: {
+      logo: uberLogoBlack
+    }
+  },
+  {
+    name: "Nvidia",
+    dark: {
+      logo: nvidiaLogo
+    },
+    light: {
+      logo: nvidiaLogoBlack
+    }
+  },
+  {
+
+    name: "GamesKraft",
+    dark: {
+      logo: gameskraftLogo
+    },
+    light: {
+      logo: gameskraftLogo
+    }
+  },
+  {
+
+    name: "Morgan Stanley",
+    dark: {
+      logo: morganStanleyLogo
+    },
+    light: {
+      logo: morganStanleyLogo
+    }
+  },
+  {
+
+    name: "Tech Mahindra",
+    dark: {
+      logo: techMahindraLogo
+    },
+    light: {
+      logo: techMahindraLogo
+    }
+  }
 ];
 
 const PastYearCompanies = () => {
@@ -83,10 +169,7 @@ const PastYearCompanies = () => {
     ]).start(() => {
       router.push(`/company/${companyName.toLowerCase().replace(/ /g, "-")}`);
     });
-  };
 
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   // Get current theme color
@@ -205,7 +288,7 @@ const PastYearCompanies = () => {
                   },
                 ]}
               >
-                <Image source={company.logo} style={styles.companyLogo} />
+                <Image source={company[theme].logo} style={styles.companyLogo} />
                 <Text style={[
                   styles.companyText,
                   { color: getThemeColor(themeColors.darkText, themeColors.lightText) }

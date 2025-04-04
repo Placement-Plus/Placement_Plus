@@ -182,11 +182,13 @@ const PreparationHub = () => {
           <TouchableOpacity style={[
             styles.profileButton,
             { borderColor: theme === 'light' ? '#6A0DAD' : '#8b0890' }
-          ]}>
-            <Image
-              source={require("@/assets/images/logo.png")}
-              style={styles.profileImage}
-              defaultSource={require("@/assets/images/logo.png")}
+          ]}
+            onPress={() => router.push('screens/Profile/Profile')}
+          >
+            <Ionicons
+              name="person-circle"
+              size={45}
+              color={'#6A0DAD'}
             />
           </TouchableOpacity>
         </View>
@@ -240,7 +242,6 @@ const styles = StyleSheet.create({
     height: 45,
     borderRadius: 25,
     overflow: "hidden",
-    borderWidth: 2,
   },
   profileImage: {
     width: "100%",

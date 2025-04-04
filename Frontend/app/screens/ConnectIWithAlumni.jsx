@@ -106,8 +106,7 @@ const AlumniPage = () => {
 	});
 
 	const handleConnect = (linkedInId) => {
-		const linkedInUrl = `https://www.linkedin.com/in/${linkedInId}`;
-		Linking.openURL(linkedInUrl).catch((err) => {
+		Linking.openURL(linkedInId).catch((err) => {
 			console.error('Failed to open LinkedIn:', err);
 			alert('Failed to open LinkedIn profile. Please check the URL.');
 		});

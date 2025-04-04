@@ -6,7 +6,6 @@ import * as Yup from "yup";
 import { LinearGradient } from "expo-linear-gradient";
 import { storeAccessToken, storeRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js"
-import { registerForPushNotificationsAsync } from "../../utils/notificationService.js";
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string()
@@ -22,34 +21,12 @@ const LoginScreen = () => {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
-    pushToken: ""
   });
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [touchedFields, setTouchedFields] = useState({});
   const { login } = useUser()
-
-  // useEffect(() => {
-  //   registerForPushNotificationsAsync().then((token) => {
-  //     console.log(token);
-  //     setFormData({
-  //       ...formData,
-  //       pushToken: token
-  //     })
-
-  //   })
-  // }, [])
-
-  // useEffect(() => {
-  //   const getPermission = async () => {
-  //     const authStatus = await requestNotificationPermission();
-  //     console.log("Final Permission Status:", authStatus);
-  //   };
-
-  //   getPermission();
-  // }, []);
-
 
   const handleChange = (field, value) => {
     setFormData({

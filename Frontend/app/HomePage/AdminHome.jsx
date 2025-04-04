@@ -23,13 +23,10 @@ import { useFocusEffect } from "@react-navigation/native";
 
 import pastYearCompany from "@/assets/homepageImages/pastyearcompany-Photoroom.png";
 import placementStat from "@/assets/homepageImages/placementstat-Photoroom.png";
-import alumni from "@/assets/homepageImages/alumni-Photoroom.png";
 import interviewPreparation from "@/assets/homepageImages/questionaskbycompany-Photoroom.png";
 import upcomingCompany from "@/assets/homepageImages/upcomingcompany-Photoroom.png";
 import branchStat from "@/assets/homepageImages/branchstat-Photoroom.png";
 import placementPolicies from "@/assets/homepageImages/placementpolicies-Photoroom.png";
-import uploadResume from "@/assets/homepageImages/uploadresume-Photoroom.png";
-import chatbot from "@/assets/homepageImages/chatbot-Photoroom.png";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.28;
@@ -37,66 +34,45 @@ const CARD_WIDTH = width * 0.28;
 const menuItems = [
   {
     id: 0,
-    title: "Add Upcoming Company",
+    title: "Add Past Recruiter",
     icon: pastYearCompany,
     route: "/screens/PastYearCompanies",
     color: "#4F46E5",
   },
   {
     id: 1,
-    title: "Placement Statistics",
+    title: "Add placement Data",
     icon: placementStat,
     route: "/screens/BranchWisePlacement",
     color: "#EC4899",
   },
   {
-    id: 2,
-    title: "Connect with Alumni",
-    icon: alumni,
-    route: "/screens/ConnectIWithAlumni",
-    color: "#10B981",
-  },
-  {
     id: 3,
-    title: "Interview Preparation",
+    title: " Add Material for Interview Preparation",
     icon: interviewPreparation,
     route: "/screens/InterviewPrep",
     color: "#F59E0B",
   },
   {
     id: 4,
-    title: "Upcoming Companies",
+    title: " Add Upcoming Companies",
     icon: upcomingCompany,
     route: "/screens/UpcomingCompanies",
     color: "#8B5CF6",
   },
   {
     id: 5,
-    title: "Student Placement",
-    icon: branchStat,
-    route: "/screens/StudentPlacements",
-    color: "#EF4444",
+    title: "Download Placement Data",
+    icon: upcomingCompany,
+    route: "/screens/Admin/DownloadPlacementData",
+    color: "#8B5CF6",
   },
   {
     id: 6,
-    title: "Placement Policies",
-    icon: placementPolicies,
-    route: "/screens/PlacementPolicies",
-    color: "#06B6D4",
-  },
-  {
-    id: 7,
-    title: "Upload Resume",
-    icon: uploadResume,
-    route: "/screens/UploadResume",
-    color: "#F97316",
-  },
-  {
-    id: 8,
-    title: "AI Assistant",
-    icon: chatbot,
-    route: "/screens/ChatBot",
-    color: "#C92EFF",
+    title: "Download Student Data",
+    icon: upcomingCompany,
+    route: "/screens/Admin/DownloadStudentData",
+    color: "#8B5CF6",
   },
 ];
 
@@ -433,7 +409,7 @@ const PlacementPlus = () => {
           </Pressable>
           <Pressable
             style={dynamicStyles.profileButton}
-            onPress={() => router.push("/screens/Profile/Profile")}
+            onPress={() => router.push("/screens/Admin profile/Profile")}
           >
             <Ionicons
               name="person-circle"

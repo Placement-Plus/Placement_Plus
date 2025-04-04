@@ -18,13 +18,16 @@ import { useUser } from '../../context/userContext.js';
 import { router } from 'expo-router';
 
 const imageMap = {
-	'Apple.png': require('@/assets/images/apple.png'),
-	'Google.png': require('@/assets/images/google.png'),
-	'Microsoft.png': require('@/assets/images/microsoft.png'),
-	'Amazon.png': require('@/assets/images/amazon.png'),
-	'Meta.png': require('@/assets/images/meta.png'),
-	'Netflix.png': require('@/assets/images/netflix.png'),
-	'Nvidia.png': require('@/assets/images/nvidia.png'),
+	'Apple.png': require('@/assets/companyImages/apple.png'),
+	'Google.png': require('@/assets/companyImages/Google-new.png'),
+	'Microsoft.png': require('@/assets/companyImages/Microsoft.png'),
+	'Amazon.png': require('@/assets/companyImages/amazon2.png'),
+	'Meta.png': require('@/assets/companyImages/meta-new.webp'),
+	'Netflix.png': require('@/assets/companyImages/Netflix_Symbol_RGB.png'),
+	'Nvidia.png': require('@/assets/companyImages/Nvidia.png'),
+	'Gameskraft.png': require("@/assets/companyImages/gameskraft-bg.png"),
+	'Morgan Stanley.png': require("@/assets/companyImages/morganStanley.jpg"),
+	'Uber.png':require("@/assets/companyImages/uber.png")
 };
 
 const App = () => {
@@ -83,9 +86,9 @@ const App = () => {
 							source={imageMap[`${item?.companyName}.png`]}
 							style={[
 								styles.image,
-								{
-									borderColor: imageBorderColor
-								}
+								// {
+								// 	borderColor: imageBorderColor
+								// }
 							]}
 							onError={() => console.log('Image failed to load')}
 						/>
@@ -301,7 +304,7 @@ const App = () => {
 
 		const branchEligibility = currentCompany?.eligibleBranches?.includes(user.branch)
 		const batchEligibility = currentCompany?.eligibleBatches?.includes(user.batch) || true
-		const cgpaEligibility = currentCompany?.cgpaCriteria <= user.branch || true
+		const cgpaEligibility = currentCompany?.cgpaCriteria <= user.CGPA
 		const internshipEligibility = user.internshipEligible
 		let fullTimeEligibility = user.fullTimeEligible
 		if (!fullTimeEligibility)
@@ -494,7 +497,7 @@ const App = () => {
 						>
 							<Ionicons
 								name="person-circle"
-								size={35}
+								size={45}
 								color={'#6A0DAD'}
 							/>
 						</TouchableOpacity>
@@ -737,7 +740,7 @@ const styles = StyleSheet.create({
 		fontFamily: 'System',
 	},
 	profileButton: {
-		padding: 5,
+		// padding: 5,
 	},
 	titleContainer: {
 		alignItems: 'center',
@@ -781,9 +784,7 @@ const styles = StyleSheet.create({
 	image: {
 		width: 70,
 		height: 70,
-		borderRadius: 35,
-		borderWidth: 3,
-		borderColor: 'rgba(255, 255, 255, 0.8)',
+		// borderRadius: 100,
 	},
 	headerTextContainer: {
 		marginLeft: 15,
