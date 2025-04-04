@@ -11,6 +11,7 @@ import { dirname } from 'path';
 import { fileURLToPath } from 'url';
 import ExcelJS from 'exceljs';
 import mongoose from "mongoose";
+import bcrypt from "bcrypt"
 
 
 const generateAccessandRefreshToken = async (adminId) => {
@@ -331,11 +332,35 @@ const exportStudentDatatoExcel = asyncHandler(async (req, res, next) => {
     }
 });
 
+const changePassword = asyncHandler(async (req, res) => {
+    const { newPassword } = req.body
+
+    const hashPassword = await bcrypt.hash(newPassword, 10)
+
+    const admin = await Admin.findByIdAndUpdate(req.admin._id,
+        { password: hashPassword },
+        { new: true }
+    ).select(" -password -refreshToken")
+    if (!admin)
+        throw new ApiError(500, "Something went wrong while updating password")
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            admin,
+            "Password changed successfully"
+        )
+    )
+
+})
+
+
 export {
     registerAdmin,
     loginAdmin,
     logoutAdmin,
     exportToPDF,
     exportToExcel,
-    exportStudentDatatoExcel
+    exportStudentDatatoExcel,
+    changePassword
 }

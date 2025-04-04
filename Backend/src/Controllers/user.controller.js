@@ -4,7 +4,6 @@ import { User } from '../Models/user.model.js'
 import asyncHandler from '../Utils/AsyncHandler.js'
 import bcrypt from 'bcrypt'
 import { uploadResumeOnAppwrite, getResumeFromAppwrite } from '../Utils/appwrite.js'
-import { sendPushNotification } from '../Utils/sendNotification.js'
 
 const generateAccesandRefreshToken = async (userId) => {
     try {
@@ -104,8 +103,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
 const loginUser = asyncHandler(async (req, res) => {
     const { email, password } = req.body
-    console.log(email, password);
-
 
     if (!email)
         throw new ApiError(400, "Email is Required")
