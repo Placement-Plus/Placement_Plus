@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Switch, Alert, BackHandler } from 'react-native';
-import { FontAwesome, Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
+import { FontAwesome5, FontAwesome, Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../../../context/userContext.js';
 import { router } from 'expo-router';
@@ -9,15 +9,11 @@ import { getAccessToken, getRefreshToken, removeAccessToken, removeRefreshToken 
 const ProfileSettings = () => {
     const navigation = useNavigation();
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-    const { user: loggedInUser, logout, theme, toggleTheme } = useUser()
+    const { admin: loggedInAdmin, adminLogout, theme, toggleTheme } = useUser()
     const [darkModeEnabled, setDarkModeEnabled] = useState(theme === "dark");
 
-    const [user, setUser] = useState({
-        name: '',
-        email: '',
-        branch: '',
-        appliedCompanies: [],
-        savedProblems: []
+    const [admin, setAdmin] = useState({
+        username: '',
     });
 
     useEffect(() => {
@@ -25,14 +21,10 @@ const ProfileSettings = () => {
     }, [])
 
     useEffect(() => {
-        setUser({
-            name: loggedInUser?.name || '-',
-            email: loggedInUser?.email || '-',
-            branch: loggedInUser?.branch || '-',
-            appliedCompanies: loggedInUser?.appliedCompanies || [],
-            savedProblems: loggedInUser?.savedProblems || []
+        setAdmin({
+            username: loggedInAdmin?.username || '-',
         })
-    }, [loggedInUser])
+    }, [loggedInAdmin])
 
     const handleLogout = async () => {
 
@@ -45,7 +37,7 @@ const ProfileSettings = () => {
                 throw new Error('Missing authentication tokens');
             }
 
-            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/logout`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/logout`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -61,7 +53,7 @@ const ProfileSettings = () => {
             // console.log(result);
 
             if (result.statusCode === 200) {
-                logout()
+                adminLogout()
                 await removeAccessToken()
                 await removeRefreshToken()
 
@@ -226,27 +218,13 @@ const ProfileSettings = () => {
                 {/* Profile Card */}
                 <View style={dynamicStyles.profileCard}>
                     <View style={styles.profileImageContainer}>
-                        <FontAwesome name="user" size={60} color={theme === 'light' ? "#6a0dad" : "#fff"} />
+                        <FontAwesome5 name="user-shield" size={60} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                     </View>
                     <View style={styles.profileInfo}>
-                        <Text style={dynamicStyles.profileName}>{user.name}</Text>
-                        <Text style={dynamicStyles.profileEmail}>{user.email}</Text>
-                        <Text style={dynamicStyles.profileEmail}>{user.branch}</Text>
+                        <Text style={dynamicStyles.profileName}>{admin.username}</Text>
                     </View>
                 </View>
 
-                {/* Stats Section */}
-                <View style={dynamicStyles.statsContainer}>
-                    <View style={styles.statItem}>
-                        <Text style={dynamicStyles.statValue}>{user.appliedCompanies.length}</Text>
-                        <Text style={dynamicStyles.statLabel}>Applied</Text>
-                    </View>
-                    <View style={dynamicStyles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={dynamicStyles.statValue}>{user.savedProblems.length}</Text>
-                        <Text style={dynamicStyles.statLabel}>Saved Problems</Text>
-                    </View>
-                </View>
 
                 {/* Profile Settings */}
                 <View style={styles.settingsGroup}>
@@ -254,88 +232,12 @@ const ProfileSettings = () => {
 
                     <TouchableOpacity
                         style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Profile/ViewProfile')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="user" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>View Profile</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Profile/EditProfile')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="edit" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>Edit Profile</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Profile/ChangePassword')}
+                        onPress={() => router.push('/screens/Admin profile/ChangePassword')}
                     >
                         <View style={styles.settingsIconContainer}>
                             <FontAwesome name="lock" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
                         </View>
                         <Text style={dynamicStyles.settingsItemText}>Change Password</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Job Applications */}
-                <View style={styles.settingsGroup}>
-                    <Text style={dynamicStyles.settingsGroupTitle}>Job Applications</Text>
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Profile/AppliedCompanies')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="building" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>View Applied Companies</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        onPress={() => navigateTo('ApplicationStatus')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="list-alt" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>Application Status</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        onPress={() => navigateTo('SavedJobs')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="bookmark" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>Saved Jobs</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Learning */}
-                <View style={styles.settingsGroup}>
-                    <Text style={dynamicStyles.settingsGroupTitle}>Learning</Text>
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        onPress={() => navigateTo('SavedProblems')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="code" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>Saved Problems</Text>
                         <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
                 </View>

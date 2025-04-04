@@ -19,7 +19,6 @@ import * as Yup from 'yup';
 import * as FileSystem from "expo-file-system";
 import { storeAccessToken, storeRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js"
-import { registerForPushNotificationsAsync } from "../../utils/notificationService.js"
 
 const SignupSchema = Yup.object().shape({
 	name: Yup.string().required('Name is required'),
@@ -78,7 +77,6 @@ const SignupScreen = () => {
 	const [errors, setErrors] = useState({});
 	const [loading, setLoading] = useState(false);
 	const [activeDropdown, setActiveDropdown] = useState(null);
-	const [pushToken, setPushToken] = useState(null)
 
 	const scrollViewRef = useRef(null);
 
@@ -95,12 +93,6 @@ const SignupScreen = () => {
 	];
 	const semesters = Array.from({ length: 8 }, (_, i) => `${i + 1}`);
 	const courses = ["B.Tech", "M.Tech"];
-
-	useEffect(() => {
-		registerForPushNotificationsAsync().then(token => {
-			if (token) setPushToken(token);
-		});
-	}, []);
 
 	const handleChange = (field, value) => {
 		setFormData(prev => ({ ...prev, [field]: value }));
