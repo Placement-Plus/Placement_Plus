@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, Alert, TextInput } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import companyLogo from "@/assets/images/amazon.png";
+import companyLogo from "@/assets/companyImages/netflix.png";
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js";
 
@@ -114,7 +114,7 @@ const CodingProblems = () => {
 
       const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/questions/get-company-questions/c/Netflix`, {
         method: 'GET',
-        headers: {
+        headers: {  
           'Authorization': `Bearer ${accessToken}`,
           'x-refresh-token': `${refreshToken}`
         }
@@ -427,7 +427,7 @@ const ScrollableFilterButtons = ({ difficultyFilter, handleFilterChange, theme, 
         },
         text: {
           normal: getThemeColor("#f8d775", "#664d03"),
-          active: "#664d03",
+          active: "#f8d775",
         }
       },
       Hard: {
@@ -510,11 +510,11 @@ const styles = StyleSheet.create({
     marginTop: 15
   },
   logo: {
-    width: 50,
+    width: 80,
     height: 50,
     resizeMode: "contain",
     borderRadius: 100,
-    marginTop: 20
+    marginTop: 25
   },
   searchContainer: {
     flexDirection: "row",

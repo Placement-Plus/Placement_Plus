@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, Alert, TextInput } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import companyLogo from "@/assets/images/amazon.png";
+import companyLogo from "@/assets/companyImages/Nvidia-new.png";
+import companyLogoWhite from "@/assets/companyImages/Nvidia-white.jpg";
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js";
 
@@ -169,7 +170,10 @@ const CodingProblems = () => {
           { color: getThemeColor(themeColors.darkPurple, themeColors.lightPurple) }
         ]}>Coding Problems</Text>
         <View style={styles.headerRight}>
-          <Image source={companyLogo} style={styles.logo} />
+          {theme === 'dark' ? (
+            <Image source={companyLogoWhite} style={[styles.logo, { width: 60, marginTop: 25 }]} />
+          ) : (
+            <Image source={companyLogo} style={styles.logo} />)}
         </View>
       </View>
 
@@ -427,7 +431,7 @@ const ScrollableFilterButtons = ({ difficultyFilter, handleFilterChange, theme, 
         },
         text: {
           normal: getThemeColor("#f8d775", "#664d03"),
-          active: "#664d03",
+          active: "#f8d775",
         }
       },
       Hard: {
@@ -513,7 +517,7 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     resizeMode: "contain",
-    borderRadius: 100,
+    // borderRadius: 100,
     marginTop: 20
   },
   searchContainer: {

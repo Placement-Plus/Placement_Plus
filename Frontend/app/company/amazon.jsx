@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, Alert, TextInput } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import companyLogo from "@/assets/images/amazon.png";
+import companyLogo from "@/assets/companyImages/amazon2.png";
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js";
 
@@ -427,7 +427,7 @@ const ScrollableFilterButtons = ({ difficultyFilter, handleFilterChange, theme, 
         },
         text: {
           normal: getThemeColor("#f8d775", "#664d03"),
-          active: "#664d03",
+          active: "#f8d775",
         }
       },
       Hard: {
@@ -499,10 +499,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
   },
-  themeToggle: {
-    marginRight: 15,
-    padding: 5,
-  },
   header: {
     fontSize: 30,
     fontWeight: "bold",
@@ -514,7 +510,7 @@ const styles = StyleSheet.create({
     height: 50,
     resizeMode: "contain",
     borderRadius: 100,
-    marginTop: 20
+    marginTop: 25
   },
   searchContainer: {
     flexDirection: "row",
@@ -616,8 +612,8 @@ const styles = StyleSheet.create({
   },
   col1: { flex: 0.5, alignItems: "center", justifyContent: "center" },
   col2: { flex: 2, alignItems: "flex-start", paddingLeft: 10 },
-  col3: { flex: 1, alignItems: "center", paddingRight: 15 },
-  col4: { flex: 1.2, alignItems: "center", justifyContent: "center" },
+  col3: { flex: 1.2, alignItems: "center", paddingRight: 13 },
+  col4: { flex: 1.3, alignItems: "center", justifyContent: "center" },
 
   // Empty state styles
   emptyContainer: {

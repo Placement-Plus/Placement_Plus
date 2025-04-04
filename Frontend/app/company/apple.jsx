@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, Alert, TextInput } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import companyLogo from "@/assets/images/amazon.png";
+import companyLogo from "@/assets/companyImages/apple.png";
+import companyLogoWhite from "@/assets/companyImages/apple-white.png";
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js";
 
@@ -67,10 +68,6 @@ const CodingProblems = () => {
       backgroundColor: diffStyle.backgroundColor,
       color: diffStyle.color,
     };
-  };
-
-  const toggleTheme = () => {
-    setTheme(theme === 'dark' ? 'light' : 'dark');
   };
 
   const handleOpenLink = (url) => {
@@ -169,7 +166,11 @@ const CodingProblems = () => {
           { color: getThemeColor(themeColors.darkPurple, themeColors.lightPurple) }
         ]}>Coding Problems</Text>
         <View style={styles.headerRight}>
-          <Image source={companyLogo} style={styles.logo} />
+          {theme === 'dark' ? (
+            <Image source={companyLogoWhite} style={[styles.logo, { width: 60, height: 60 }]} />
+          ) : (
+            <Image source={companyLogo} style={[styles.logo, { width: 60, height: 60, marginTop: 25 }]} />
+          )}
         </View>
       </View>
 
@@ -427,7 +428,7 @@ const ScrollableFilterButtons = ({ difficultyFilter, handleFilterChange, theme, 
         },
         text: {
           normal: getThemeColor("#f8d775", "#664d03"),
-          active: "#664d03",
+          active: "#f8d775",
         }
       },
       Hard: {
@@ -510,8 +511,8 @@ const styles = StyleSheet.create({
     marginTop: 15
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 70,
+    height: 70,
     resizeMode: "contain",
     borderRadius: 100,
     marginTop: 20

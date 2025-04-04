@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, Alert, TextInput } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import companyLogo from "@/assets/images/amazon.png";
+import companyLogo from "@/assets/companyImages/Google.png";
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js";
 
@@ -423,7 +423,7 @@ const ScrollableFilterButtons = ({ difficultyFilter, handleFilterChange, theme, 
         },
         text: {
           normal: getThemeColor("#f8d775", "#664d03"),
-          active: "#664d03",
+          active: "#f8d775",
         }
       },
       Hard: {
@@ -506,11 +506,11 @@ const styles = StyleSheet.create({
     marginTop: 15
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 80,
+    height: 70,
     resizeMode: "contain",
     borderRadius: 100,
-    marginTop: 20
+    marginTop: 25
   },
   searchContainer: {
     flexDirection: "row",
