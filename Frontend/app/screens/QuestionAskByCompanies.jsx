@@ -107,7 +107,7 @@ const companies = [
   },
   {
 
-    name: "GamesKraft",
+    name: "Gameskraft",
     dark: {
       logo: gameskraftLogo
     },
@@ -167,7 +167,8 @@ const PastYearCompanies = () => {
         useNativeDriver: true,
       })
     ]).start(() => {
-      router.push(`/company/${companyName.toLowerCase().replace(/ /g, "-")}`);
+      // router.push(`/company/${companyName.toLowerCase().replace(/ /g, "-")}`);
+      router.push(`screens/${companyName}`);
     });
 
   };

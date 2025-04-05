@@ -1,9 +1,140 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, Alert, TextInput } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import companyLogo from "@/assets/companyImages/flipkart-bg.png";
+import companyLogo from "@/assets/companyImages/Microsoft_Logo_512px.png";
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js";
+import { useLocalSearchParams } from 'expo-router'
+
+import microsoftLogo from "@/assets/companyImages/Microsoft_Logo_512px.png";
+import appleLogo from "@/assets/companyImages/apple-white.png";
+import appleLogoBlack from "@/assets/companyImages/apple.png";
+import googleLogo from "@/assets/companyImages/Google-new.png";
+import amazonLogo from "@/assets/companyImages/amazon2.png";
+import netflixLogo from "@/assets/companyImages/Netflix_Symbol_RGB.png";
+import metaLogo from "@/assets/companyImages/meta-new.webp";
+import uberLogo from "@/assets/companyImages/uber-white-without-back.png";
+import uberLogoBlack from "@/assets/companyImages/uber.png";
+import nvidiaLogo from "@/assets/companyImages/Nvidia-white.jpg";
+import nvidiaLogoBlack from "@/assets/companyImages/Nvidia-new.png";
+import flipkartLogo from "@/assets/companyImages/flipkart-bg.png";
+import gameskraftLogo from "@/assets/companyImages/gameskraft-bg.png";
+import morganStanleyLogo from "@/assets/companyImages/morganStanley.jpg"
+import techMahindraLogo from "@/assets/companyImages/tech-mahindra-new.png"
+
+const companies = [
+    {
+        name: "Microsoft",
+        dark: {
+            logo: microsoftLogo
+        },
+        light: {
+            logo: microsoftLogo
+        }
+    },
+    {
+        name: "Apple",
+        dark: {
+            logo: appleLogo
+        },
+        light: {
+            logo: appleLogoBlack
+        }
+    },
+    {
+        name: "Google",
+        dark: {
+            logo: googleLogo
+        },
+        light: {
+            logo: googleLogo
+        }
+    },
+    {
+        name: "Amazon",
+        dark: {
+            logo: amazonLogo
+        },
+        light: {
+            logo: amazonLogo
+        }
+    },
+    {
+        name: "Flipkart",
+        dark: {
+            logo: flipkartLogo
+        },
+        light: {
+            logo: flipkartLogo
+        }
+    },
+    {
+        name: "Netflix",
+        dark: {
+            logo: netflixLogo
+        },
+        light: {
+            logo: netflixLogo
+        }
+    },
+    {
+        name: "Meta",
+        dark: {
+            logo: metaLogo
+        },
+        light: {
+            logo: metaLogo
+        }
+    },
+    {
+        name: "Uber",
+        dark: {
+            logo: uberLogo
+        },
+        light: {
+            logo: uberLogoBlack
+        }
+    },
+    {
+        name: "Nvidia",
+        dark: {
+            logo: nvidiaLogo
+        },
+        light: {
+            logo: nvidiaLogoBlack
+        }
+    },
+    {
+
+        name: "Gameskraft",
+        dark: {
+            logo: gameskraftLogo
+        },
+        light: {
+            logo: gameskraftLogo
+        }
+    },
+    {
+
+        name: "Morgan Stanley",
+        dark: {
+            logo: morganStanleyLogo
+        },
+        light: {
+            logo: morganStanleyLogo
+        }
+    },
+    {
+
+        name: "Tech Mahindra",
+        dark: {
+            logo: techMahindraLogo
+        },
+        light: {
+            logo: techMahindraLogo
+        }
+    }
+];
 
 const CodingProblems = () => {
     const [problems, setProblems] = useState([]);
@@ -12,6 +143,7 @@ const CodingProblems = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [difficultyFilter, setDifficultyFilter] = useState("All");
     const { theme } = useUser()
+    const { company } = useLocalSearchParams()
 
     const themeColors = {
         darkBackground: "#1a012c",
@@ -24,7 +156,6 @@ const CodingProblems = () => {
         lightPurple: "#6A0DAD",
     };
 
-    // Get current theme color
     const getThemeColor = (darkValue, lightValue) => theme === 'dark' ? darkValue : lightValue;
 
     const getDifficultyStyle = (difficulty) => {
@@ -74,7 +205,8 @@ const CodingProblems = () => {
     };
 
     useEffect(() => {
-        getProblem();
+        if (company)
+            getProblem(company);
     }, []);
 
     useEffect(() => {
@@ -102,13 +234,16 @@ const CodingProblems = () => {
         setFilteredProblems(filtered);
     };
 
-    const getProblem = async () => {
+    const getProblem = async (companyName) => {
+        if (companyName === 'Tech Mahindra')
+            companyName = "TechMahindra"
+
         setIsLoading(true);
         try {
             const accessToken = await getAccessToken();
             const refreshToken = await getRefreshToken();
 
-            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/questions/get-company-questions/c/Flipkart`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/questions/get-company-questions/c/${companyName}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -165,7 +300,12 @@ const CodingProblems = () => {
                     { color: getThemeColor(themeColors.darkPurple, themeColors.lightPurple) }
                 ]}>Coding Problems</Text>
                 <View style={styles.headerRight}>
-                    <Image source={companyLogo} style={styles.logo} />
+                    {company && companies.some(c => c.name === company) && (
+                        <Image
+                            source={companies.find(c => c.name === company)[theme].logo}
+                            style={styles.logo}
+                        />
+                    )}
                 </View>
             </View>
 
@@ -509,8 +649,7 @@ const styles = StyleSheet.create({
         width: 50,
         height: 50,
         resizeMode: "contain",
-        borderRadius: 100,
-        marginTop: 25
+        marginTop: 20,
     },
     searchContainer: {
         flexDirection: "row",

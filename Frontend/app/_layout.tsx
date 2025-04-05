@@ -89,6 +89,7 @@ export default function RootLayout() {
 					<Stack.Screen name="screens/StudentPlacements" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/PlacementPolicies" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/UploadResume" options={{ headerShown: false }} />
+					<Stack.Screen name="screens/[company]" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/ChatBot" options={{ headerShown: false }} />
 					<Stack.Screen name="company/google" options={{ headerShown: false }} />
 					<Stack.Screen name="company/microsoft" options={{ headerShown: false }} />
