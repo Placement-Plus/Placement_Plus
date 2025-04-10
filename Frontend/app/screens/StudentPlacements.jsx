@@ -175,7 +175,7 @@ const PlacementDashboard = () => {
 
     return (
         <SafeAreaView style={[styles.container, { backgroundColor: backgroundColor }]}>
-            <Text style={[styles.title, { color: textColor }]}>Student Placement Dashboard</Text>
+            {/* <Text style={[styles.title, { color: textColor }]}>Student Placement Dashboard</Text> */}
 
             {/* Filters Container */}
             <View style={[styles.filtersContainer, { backgroundColor: cardBackgroundColor }]}>

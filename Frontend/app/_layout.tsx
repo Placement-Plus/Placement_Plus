@@ -22,7 +22,6 @@ Notifications.setNotificationHandler({
 
 export default function RootLayout() {
 	const colorScheme = useColorScheme();
-	const notificationListener = useRef<Notifications.Subscription | null>(null);
 	const [loaded] = useFonts({
 		SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
 	});
@@ -79,7 +78,7 @@ export default function RootLayout() {
 					<Stack.Screen name="screens/Admin profile/ChangePassword" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/PastYearCompanies" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/CurrentYearPlacement" options={{ headerShown: false }} />
-					<Stack.Screen name="screens/ConnectIWithAlumni" options={{ headerShown: false }} />
+					<Stack.Screen name="screens/ConnectWithAlumni" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/QuestionAskByCompanies" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/InterviewPrep" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/FundamentalSubject" options={{ headerShown: false }} />

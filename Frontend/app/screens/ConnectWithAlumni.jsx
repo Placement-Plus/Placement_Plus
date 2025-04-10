@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import {
 	View,
 	Text,
@@ -16,7 +16,8 @@ import {
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js'
 import { useUser } from '../../context/userContext.js';
-import { router } from 'expo-router';
+import { useRouter } from 'expo-router';
+import { getFileFromAppwrite } from '../../utils/appwrite.js';
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.85;
@@ -28,12 +29,15 @@ const AlumniPage = () => {
 	const scrollX = useRef(new Animated.Value(0)).current;
 	const [alumniData, setAlumniData] = useState([])
 	const { theme } = useUser()
+	const router = useRouter()
+	const [isLoading, setIsLoading] = useState(false)
 
 	useEffect(() => {
 		fetchAlumniData()
 	}, [])
 
 	const fetchAlumniData = async () => {
+		setIsLoading(true)
 		try {
 			const accessToken = await getAccessToken()
 			const refreshToken = await getRefreshToken()
@@ -47,11 +51,19 @@ const AlumniPage = () => {
 			})
 
 			const result = await response.json()
-			console.log(result);
-
-
 			if (result.statusCode === 200) {
-				setAlumniData(result?.data || [])
+				const alumniWithImages = await Promise.all(
+					result.data.map(async (alum) => {
+						if (alum?.profilePicId) {
+							const url = await getFileFromAppwrite(alum?.profilePicId);
+							return { ...alum, profilePicUrl: url };
+						} else
+							return alum
+					})
+				);
+				setAlumniData(alumniWithImages)
+				console.log(alumniWithImages);
+
 			} else {
 				alert(result?.message)
 			}
@@ -59,8 +71,11 @@ const AlumniPage = () => {
 		} catch (error) {
 			console.error('Failed to fetch alumni data:', error)
 			alert('Failed to fetch alumni data. Please try again later.')
+		} finally {
+			setIsLoading(false)
 		}
 	}
+
 
 	const onViewableItemsChanged = useRef(({ viewableItems }) => {
 		if (viewableItems.length > 0) {
@@ -125,6 +140,7 @@ const AlumniPage = () => {
 	);
 
 	const renderAlumniCard = ({ item, index }) => {
+
 		const inputRange = [
 			(index - 1) * CARD_WIDTH,
 			index * CARD_WIDTH,
@@ -158,16 +174,21 @@ const AlumniPage = () => {
 						{/* Alumni Header */}
 						<View style={styles.alumniHeader}>
 							<View style={styles.headerTextContainer}>
-								<Text style={styles.alumniName}>{item.name}</Text>
-								<View style={styles.roleContainer}>
-									<MaterialIcons name="work" size={14} color="#f0c5f1" />
-									<Text style={styles.roleText}>
-										{item.currentCompany.position} at {item.currentCompany.name}
-									</Text>
-								</View>
-								<View style={styles.batchContainer}>
-									<MaterialIcons name="school" size={14} color="#f0c5f1" />
-									<Text style={styles.batchText}>Batch of {item.batch}</Text>
+								{item?.profilePicUrl && (
+									<Image source={{ uri: item.profilePicUrl }} style={styles.profileImage} />
+								)}
+								<View style={styles.infoContainer}>
+									<Text style={styles.alumniName}>{item.name}</Text>
+									<View style={styles.roleContainer}>
+										<MaterialIcons name="work" size={14} color="#f0c5f1" />
+										<Text style={styles.roleText}>
+											{item.currentCompany.position} at {item.currentCompany.name}
+										</Text>
+									</View>
+									<View style={styles.batchContainer}>
+										<MaterialIcons name="school" size={14} color="#f0c5f1" />
+										<Text style={styles.batchText}>Batch of {item.batch}</Text>
+									</View>
 								</View>
 							</View>
 						</View>
@@ -319,36 +340,61 @@ const AlumniPage = () => {
 			marginBottom: 12,
 		},
 		headerTextContainer: {
-			marginLeft: 12,
+			marginHorizontal: 8,
+			paddingVertical: 8,
 			flex: 1,
+			flexDirection: 'row',
+			alignItems: 'center',
+			gap: 12,
+			borderRadius: 12,
 		},
+
+		profileImage: {
+			width: 80,
+			height: 80,
+			borderRadius: 100,
+			marginRight: 12,
+			borderWidth: 3,
+			borderColor: currentTheme === 'light' ? 'rgba(136, 19, 220, 0.8)' : 'rgba(255, 255, 255, 0.2)',
+		},
+
+		infoContainer: {
+			flex: 1,
+			paddingVertical: 4,
+		},
+
 		alumniName: {
-			fontSize: 20,
-			fontWeight: 'bold',
-			color: currentTheme === 'light' ? '#333333' : 'white',
+			fontSize: 22,
+			fontWeight: '700',
+			color: currentTheme === 'light' ? '#222' : '#fff',
+			marginBottom: 2,
 		},
+
 		roleContainer: {
 			flexDirection: 'row',
 			alignItems: 'center',
 			marginTop: 4,
 		},
+
 		roleText: {
-			fontSize: 14,
+			fontSize: 15,
 			color: currentTheme === 'light' ? '#6A0DAD' : '#f0c5f1',
-			marginLeft: 4,
+			marginLeft: 6,
 			fontWeight: '500',
 		},
+
 		batchContainer: {
 			flexDirection: 'row',
 			alignItems: 'center',
-			marginTop: 4,
 		},
+
 		batchText: {
 			fontSize: 14,
 			color: currentTheme === 'light' ? '#6A0DAD' : '#f0c5f1',
-			marginLeft: 4,
+			marginLeft: 6,
 			fontWeight: '400',
 		},
+
 		companySection: {
 			backgroundColor: currentTheme === 'light' ? 'rgba(106, 13, 173, 0.05)' : 'rgba(139, 8, 144, 0.15)',
 			borderRadius: 16,
@@ -533,7 +579,27 @@ const AlumniPage = () => {
 		},
 	});
 
-	const styles = getStyles(theme)
+	const styles = useMemo(() => getStyles(theme), [theme]);
+
+	if (isLoading) {
+		return (
+			<View style={styles.container}>
+				<StatusBar barStyle="light-content" backgroundColor="#120023" />
+				<View style={styles.header}>
+					<Text style={styles.logoText}>Loading...</Text>
+				</View>
+			</View>
+		)
+	}
+
+	{
+		!isLoading && alumniData.length === 0 && (
+			<Text style={{ textAlign: 'center', marginTop: 40, color: '#888' }}>
+				No alumni data found.
+			</Text>
+		)
+	}
+
 
 	return (
 		<SafeAreaView style={styles.container}>

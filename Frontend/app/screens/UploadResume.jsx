@@ -38,6 +38,7 @@ const ResumeUploadScreen = () => {
     };
 
     const selectResume = async () => {
+        setResumeFile(null)
         try {
             const result = await DocumentPicker.getDocumentAsync({
                 type: "application/pdf",
@@ -48,17 +49,21 @@ const ResumeUploadScreen = () => {
                 return;
             }
 
+            if (result.canceled || !result.assets?.length) {
+                Alert.alert('Error', "No files selected. Please try again")
+                return
+            }
+
             const { uri, name, mimeType } = result?.assets[0];
 
             const resume = {
                 uri,
                 name,
                 type: mimeType || 'application/pdf',
+                size: result?.assets[0]?.size || 0,
             };
 
-            // setResumeFile(resume)
-            await uploadResume(resume)
-            // await checkResumeScore(resume)
+            setResumeFile(resume)
 
         } catch (error) {
             console.error("Error picking document:", error);
@@ -88,23 +93,42 @@ const ResumeUploadScreen = () => {
         formData.append("resume", {
             uri: resume.uri,
             name: resume.name,
-            type: resume.type,
+            type: 'application/pdf',
         });
 
-        try {
-            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/upload-resume`, {
-                method: 'PATCH',
-                body: formData,
-                headers: {
-                    "Authorization": `Bearer ${accessToken}`,
-                    "x-refresh-token": refreshToken
-                },
-            });
+        console.log([...formData.entries()]);
 
-            const result = await response.json();
+
+        try {
+            // const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/upload-resume`, {
+            //     method: 'PATCH',
+            //     body: formData,
+            //     headers: {
+            //         "Authorization": `Bearer ${accessToken}`,
+            //         "x-refresh-token": refreshToken
+            //     },
+            // });
+            const response = await FileSystem.uploadAsync(
+                `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/upload-resume`,
+                resume.uri,
+                {
+                    fieldName: "resume",
+                    httpMethod: "PATCH",
+                    uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                        "x-refresh-token": refreshToken,
+                    },
+                }
+            );
+
+            const result = JSON.parse(response.body);
+            console.log(result);
 
             if (result.statusCode === 200) {
                 Alert.alert("Success", "Resume uploaded successfully!");
+            } else {
+                Alert.alert('Error', result?.message || "Something went wrong. please try again later")
             }
         } catch (error) {
             Alert.alert(
@@ -121,7 +145,6 @@ const ResumeUploadScreen = () => {
         vertical: Math.min(getResponsiveSize(16, 'height'), 20)
     };
 
-    // Get theme color based on current theme
     const themeColor = theme === 'light' ? '#6A0DAD' : '#C92EFF';
     const backgroundColor = theme === 'light' ? '#F5F5F5' : '#14011F';
     const textColor = theme === 'light' ? '#333333' : '#fff';
@@ -222,16 +245,28 @@ const ResumeUploadScreen = () => {
                                         {(resumeFile.size / 1024).toFixed(1)} KB
                                     </Text>
                                 </View>
-                                <TouchableOpacity
-                                    style={[styles.replaceButton, {
-                                        backgroundColor: theme === 'light'
-                                            ? 'rgba(106, 13, 173, 0.1)'
-                                            : 'rgba(255, 255, 255, 0.1)'
-                                    }]}
-                                    onPress={selectResume}
-                                >
-                                    <Text style={[styles.replaceButtonText, { color: textColor }]}>Replace</Text>
-                                </TouchableOpacity>
+                                <View style={styles.buttonContainer}>
+                                    <TouchableOpacity
+                                        style={[styles.replaceButton, {
+                                            backgroundColor: theme === 'light'
+                                                ? 'rgba(106, 13, 173, 0.1)'
+                                                : 'rgba(255, 255, 255, 0.1)'
+                                        }]}
+                                        onPress={selectResume}
+                                    >
+                                        <Text style={[styles.replaceButtonText, { color: textColor }]}>Replace</Text>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={[styles.replaceButton, {
+                                            backgroundColor: theme === 'light'
+                                                ? 'rgba(106, 13, 173, 0.1)'
+                                                : 'rgba(255, 255, 255, 0.1)'
+                                        }]}
+                                        onPress={uploadResume.bind(null, resumeFile)}
+                                    >
+                                        <Text style={[styles.replaceButtonText, { color: textColor }]}>Upload</Text>
+                                    </TouchableOpacity>
+                                </View>
                             </View>
                         </LinearGradient>
                     )}
@@ -366,19 +401,15 @@ const styles = StyleSheet.create({
     replaceButtonText: {
         fontSize: 14,
         fontWeight: '500',
+        textAlign: 'center'
     },
-    // Theme toggle button - added for demonstration
-    themeToggle: {
-        padding: 12,
-        borderRadius: 20,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    themeToggleText: {
-        color: '#fff',
-        fontWeight: 'bold',
-        fontSize: 16,
-    },
+    buttonContainer: {
+        flex: 0.5,
+        flexDirection: 'column',
+        rowGap: 10,
+        justifyContent: 'flex-end',
+        alignContent: 'center'
+    }
 });
 
 export default ResumeUploadScreen;

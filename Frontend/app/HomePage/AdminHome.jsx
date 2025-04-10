@@ -25,8 +25,8 @@ import pastYearCompany from "@/assets/homepageImages/pastyearcompany-Photoroom.p
 import placementStat from "@/assets/homepageImages/placementstat-Photoroom.png";
 import interviewPreparation from "@/assets/homepageImages/questionaskbycompany-Photoroom.png";
 import upcomingCompany from "@/assets/homepageImages/upcomingcompany-Photoroom.png";
-import branchStat from "@/assets/homepageImages/branchstat-Photoroom.png";
-import placementPolicies from "@/assets/homepageImages/placementpolicies-Photoroom.png";
+import ExportData from "@/assets/homepageImages/import-export.png";
+import DownloadDatabase from "@/assets/homepageImages/download-folder.png";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.28;
@@ -36,41 +36,41 @@ const menuItems = [
     id: 0,
     title: "Add Past Recruiter",
     icon: pastYearCompany,
-    route: "/screens/PastYearCompanies",
+    // route: "/screens/PastYearCompanies",
     color: "#4F46E5",
   },
   {
     id: 1,
     title: "Add placement Data",
     icon: placementStat,
-    route: "/screens/BranchWisePlacement",
+    // route: "/screens/BranchWisePlacement",
     color: "#EC4899",
   },
   {
     id: 3,
     title: " Add Material for Interview Preparation",
     icon: interviewPreparation,
-    route: "/screens/InterviewPrep",
+    // route: "/screens/InterviewPrep",
     color: "#F59E0B",
   },
   {
     id: 4,
     title: " Add Upcoming Companies",
     icon: upcomingCompany,
-    route: "/screens/UpcomingCompanies",
+    // route: "/screens/UpcomingCompanies",
     color: "#8B5CF6",
   },
   {
     id: 5,
     title: "Download Placement Data",
-    icon: upcomingCompany,
+    icon: ExportData,
     route: "/screens/Admin/DownloadPlacementData",
     color: "#8B5CF6",
   },
   {
     id: 6,
     title: "Download Student Data",
-    icon: upcomingCompany,
+    icon: DownloadDatabase,
     route: "/screens/Admin/DownloadStudentData",
     color: "#8B5CF6",
   },

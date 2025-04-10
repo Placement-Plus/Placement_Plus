@@ -338,6 +338,7 @@ const PlacementDashboard = () => {
             }}
             bezier
             style={styles.chart}
+            segments={4}
           />
         </View>
 

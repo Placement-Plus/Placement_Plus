@@ -53,7 +53,7 @@ const menuItems = [
     id: 2,
     title: "Connect with Alumni",
     icon: alumni,
-    route: "/screens/ConnectIWithAlumni",
+    route: "/screens/ConnectWithAlumni",
     color: "#10B981",
   },
   {
@@ -168,9 +168,10 @@ const PlacementPlus = () => {
   };
 
   const handlePress = (route) => {
+    console.log(route);
+
     router.push(route);
   };
-
 
   const getDynamicStyles = (currentTheme) => StyleSheet.create({
     container: {

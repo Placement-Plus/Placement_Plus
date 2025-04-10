@@ -28,6 +28,9 @@ const SignupSchema = Yup.object().shape({
 	mobileNo: Yup.string().matches(/^\d{10}$/, 'Mobile number must be 10 digits').required('Mobile number is required'),
 	CGPA: Yup.number().min(0, 'CGPA must be positive').max(10, 'CGPA cannot exceed 10').required('CGPA is required'),
 	batch: Yup.string().matches(/^\d{4}$/, 'Enter a valid year').required('Batch year is required'),
+	branch: Yup.string().required("Branch is required"),
+	semester: Yup.string().required("Semester is required"),
+	course: Yup.string().required("Course is required"),
 });
 
 const InputField = ({
@@ -126,78 +129,98 @@ const SignupScreen = () => {
 
 			const { uri, name, mimeType } = result?.assets[0];
 
-			setResume({
+			const resume = {
 				uri,
 				name,
 				type: mimeType || 'application/pdf',
-			});
-
+			};
 			setErrors(prev => ({ ...prev, resume: null }));
+			console.log("resume:", resume);
+
+
+			setResume(resume);
 		} catch (error) {
-			console.error("Error picking document:", error);
+			console.error("Error picking document:", error.message);
 			setErrors(prev => ({ ...prev, resume: "Failed to upload resume" }));
+		} finally {
+			console.log("Resume added successfully");
+
 		}
 	};
 
 	const handleRegister = async () => {
 		setLoading(true);
 
-		await SignupSchema.validate(formData, { abortEarly: false });
-
-		if (!resume) {
-			setErrors(prev => ({ ...prev, resume: "Resume is required" }));
-			scrollViewRef.current?.scrollToEnd();
-			setLoading(false);
-			return;
-		}
-
-		const userData = new FormData();
-
-		Object.entries(formData).forEach(([key, value]) => {
-			userData.append(key, value);
-		});
-
-		let resumeFile = resume;
-		if (resume.uri.startsWith("data:application/pdf;base64,")) {
-			const fileUri = `${FileSystem.cacheDirectory}${resume.name}`;
-
-			await FileSystem.writeAsStringAsync(fileUri, resume.uri.split(",")[1], {
-				encoding: FileSystem.EncodingType.Base64,
-			});
-
-			resumeFile = {
-				uri: fileUri,
-				name: resume.name,
-				type: "application/pdf",
-			};
-		}
-
-		userData.append("resume", resumeFile);
-
-		if (pushToken)
-			userData.append("pushToken", pushToken)
-
 		try {
 
-			const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/register`, {
-				method: 'POST',
-				body: userData,
-				headers: {
-					"Content-Type": "multipart/form-data",
-				},
-			});
+			await SignupSchema.validate(formData, { abortEarly: false });
 
-			const result = await response.json();
-
-			if (!response.ok) {
-				throw new Error(result.message || 'Registration failed');
+			if (!resume) {
+				setErrors(prev => ({ ...prev, resume: "Resume is required" }));
+				scrollViewRef.current?.scrollToEnd();
+				setLoading(false);
+				return;
 			}
 
-			await storeAccessToken(result?.data?.accessToken)
-			await storeRefreshToken(result?.data?.refreshToken)
-			login(result?.data?.createdUser)
+			const userData = new FormData();
 
-			router.replace("/HomePage/Home")
+			Object.entries(formData).forEach(([key, value]) => {
+				userData.append(key, value);
+			});
+
+			let resumeFile = resume;
+			if (resume.uri.startsWith("data:application/pdf;base64,")) {
+				const fileUri = `${FileSystem.cacheDirectory}${resume.name}`;
+
+				await FileSystem.writeAsStringAsync(fileUri, resume.uri.split(",")[1], {
+					encoding: FileSystem.EncodingType.Base64,
+				});
+
+				resumeFile = {
+					uri: fileUri,
+					name: resume.name,
+					type: "application/pdf",
+				};
+			}
+
+			userData.append("resume", resumeFile);
+			// userData.append("resume", "67f4171d00375059c350")
+
+			console.log([...userData.entries()]);
+
+			// const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/register`, {
+			// 	method: 'POST',
+			// 	body: userData,
+			// });
+
+			const response = await FileSystem.uploadAsync(
+				`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/register`,
+				resumeFile.uri,
+				{
+					fieldName: "resume",
+					httpMethod: "POST",
+					uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+					parameters: formData,
+				}
+			);
+
+			const result = JSON.parse(response.body);
+			console.log(result);
+
+			// if (!response.ok) {
+			// 	throw new Error(result.message || 'Registration failed');
+			// }
+
+			if (result.statusCode === 200) {
+				await storeAccessToken(result?.data?.accessToken)
+				await storeRefreshToken(result?.data?.refreshToken)
+				login(result?.data?.createdUser)
+
+				router.replace("/HomePage/Home")
+			} else {
+				Alert.alert('Error', result?.message || "Something went wrong. Please try again later")
+				return
+			}
 
 		} catch (error) {
 			if (error instanceof Yup.ValidationError) {
