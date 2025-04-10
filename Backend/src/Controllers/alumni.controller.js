@@ -1,6 +1,7 @@
 import { Alumni } from "../Models/alumni.model.js";
 import ApiError from '../Utils/ApiError.js'
 import ApiResponse from '../Utils/ApiResponse.js'
+import { uploadImageonAppwrite } from "../Utils/appwrite.js";
 import asyncHandler from '../Utils/AsyncHandler.js'
 
 const generateAccesandRefreshToken = async (alumniId) => {
@@ -34,8 +35,20 @@ const registerAlumni = asyncHandler(async (req, res) => {
     if (existedAlumni)
         throw new ApiError(400, "Alumni with same email already exists");
 
+    const profilePicLocalPath = req.files?.profilePic[0]?.path
+    // console.log("Files:", req.files);
+    if (!profilePicLocalPath)
+        throw new ApiError(400, "Profile pic is required")
+    console.log(profilePicLocalPath);
+
+
+    const profilePic = await uploadImageonAppwrite(profilePicLocalPath, `${name}.png`)
+    if (!profilePic)
+        throw new ApiError(500, "Something went wrong while uploading profile pic")
+
+
     const alumni = await Alumni.create(
-        [{ name, email, password, linkedInId, currentCompany, previousCompany, batch }],
+        [{ name, email, password, linkedInId, currentCompany, previousCompany, batch, profilePicId: profilePic.$id }],
     );
     if (!alumni)
         throw new ApiError(500, "Failed to create alumni. Please try again later");

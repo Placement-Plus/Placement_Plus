@@ -40,9 +40,6 @@ const registerUser = asyncHandler(async (req, res) => {
     if (email.trim().substring(0, 9) !== String(rollNo))
         throw new ApiError(400, "Email should contain roll no")
 
-    // if (pushToken)
-    //     console.log(pushToken);
-
 
     const existedUser = await User.findOne({
         $or: [{ email, rollNo }]
@@ -51,12 +48,13 @@ const registerUser = asyncHandler(async (req, res) => {
     if (existedUser)
         throw new ApiError(400, "User with same email or roll number already exists")
 
-    const resumeLocalPath = req.files?.resume[0]?.path
     // console.log("Files:", req.files);
+
+    const resumeLocalPath = req.files?.resume?.[0]?.path
     if (!resumeLocalPath)
         throw new ApiError(400, "Resume is required")
 
-    const resume = await uploadResumeOnAppwrite(resumeLocalPath)
+    const resume = await uploadResumeOnAppwrite(resumeLocalPath, req.user.name)
     if (!resume)
         throw new ApiError(500, "Something went wrong while uploading resume")
 
@@ -80,18 +78,6 @@ const registerUser = asyncHandler(async (req, res) => {
     const createdUser = await User.findById(user._id).select(" -password -refreshToken")
     if (!createdUser)
         throw new ApiError(500, "Something went wrong while creating user")
-
-    if (createdUser.notificationPushToken) {
-        console.log("Sending notification");
-
-        await fetch("http://localhost:5000/api/v1/notifications/send-welcome-notification", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ pushToken, message: `Welcome ${name} to Placement Plus! 🚀` }),
-        });
-
-        console.log("Notification sent");
-    }
 
     return res.status(201).json(
         new ApiResponse(
@@ -186,16 +172,13 @@ const changePassword = asyncHandler(async (req, res) => {
 
 const uploadResume = asyncHandler(async (req, res) => {
 
-    const resumeLocalPath = req.files?.resume[0]?.path
+    const resumeLocalPath = req.files?.resume?.[0]?.path || null
     if (!resumeLocalPath)
         throw new ApiError(400, "Resume is required")
 
-    const resume = await uploadResumeOnAppwrite(resumeLocalPath, req?.user?.name)
+    const resume = await uploadResumeOnAppwrite(resumeLocalPath, req?.user?.name, req?.user?.resumeLink)
     if (!resume)
         throw new ApiError(500, "Something went wrong while uploading resume")
-
-    console.log(req.user);
-
 
     const user = await User.findByIdAndUpdate(req.user._id,
         {

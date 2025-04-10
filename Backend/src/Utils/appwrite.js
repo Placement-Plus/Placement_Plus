@@ -1,4 +1,4 @@
-import { ID, Permission, Role } from "appwrite";
+import { ID } from "appwrite";
 import { storage } from "../AppWrite/appwriteConfig.js";
 import fs from "fs";
 import dotenv from "dotenv";
@@ -9,10 +9,21 @@ dotenv.config({
     path: "./.env",
 });
 
-const uploadResumeOnAppwrite = async (filePath, username) => {
+const uploadResumeOnAppwrite = async (filePath, username, previousFileId = null) => {
     try {
         if (!fs.existsSync(filePath)) {
             throw new ApiError(404, "Resume does not exist");
+        }
+        console.log("Previous File ID:", previousFileId);
+
+
+        if (previousFileId) {
+            try {
+                await storage.deleteFile(process.env.APPWRITE_BUCKET_ID, previousFileId);
+                console.log("🗑️ Previous resume deleted:", previousFileId);
+            } catch (deleteErr) {
+                console.warn("⚠️ Failed to delete previous resume:", deleteErr.message);
+            }
         }
 
         const response = await storage.createFile(
@@ -21,10 +32,10 @@ const uploadResumeOnAppwrite = async (filePath, username) => {
             InputFile.fromPath(filePath, `${username} - resume.pdf`),
         );
 
-        console.log("Upload Success:", response);
+        console.log("✅ Upload Success:", response);
         return response;
     } catch (error) {
-        console.error("Appwrite Upload Error:", error.message);
+        console.error("❌ Appwrite Upload Error:", error.message);
         return null;
     } finally {
         if (fs.existsSync(filePath)) {
@@ -43,6 +54,30 @@ const uploadFileOnAppwrite = async (filePath, subjectName) => {
             process.env.APPWRITE_STUDY_MATERIAL_BUCKET_ID,
             ID.unique(),
             InputFile.fromPath(filePath, `${subjectName}.pdf`),
+        );
+
+        console.log("Upload Success:", response);
+        return response;
+    } catch (error) {
+        console.error("Appwrite Upload Error:", error.message);
+        return null;
+    } finally {
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+    }
+};
+
+const uploadImageonAppwrite = async (filePath, originalName = "profilepic.png") => {
+    try {
+        if (!fs.existsSync(filePath)) {
+            throw new ApiError(404, "Profile pic does not exist");
+        }
+
+        const response = await storage.createFile(
+            process.env.APPWRITE_STUDY_MATERIAL_BUCKET_ID,
+            ID.unique(),
+            InputFile.fromPath(filePath, originalName),
         );
 
         console.log("Upload Success:", response);
@@ -84,4 +119,4 @@ const downloadResume = async (fileId) => {
     }
 }
 
-export { uploadResumeOnAppwrite, getFileFromAppwrite, downloadResume, uploadFileOnAppwrite, getResumeFromAppwrite };
+export { uploadResumeOnAppwrite, getFileFromAppwrite, downloadResume, uploadFileOnAppwrite, getResumeFromAppwrite, uploadImageonAppwrite };

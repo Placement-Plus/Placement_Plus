@@ -23,6 +23,10 @@ const alumniSchema = new Schema(
             required: true,
             unique: true
         },
+        profilePicId: {
+            type: String,
+            required: true
+        },
         batch: {
             type: Number,
             required: true
