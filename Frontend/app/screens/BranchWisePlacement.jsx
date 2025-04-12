@@ -14,7 +14,7 @@ import { LineChart } from 'react-native-chart-kit';
 import { Feather } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js'
 import { useUser } from '../../context/userContext.js';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const PlacementDashboard = () => {
   const [selectedBranch, setSelectedBranch] = useState('All Branches');
@@ -52,7 +52,7 @@ const PlacementDashboard = () => {
         return;
       }
 
-      const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/placement-statistics/get-placement-statistics`, {
+      const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/placement-statistics/get-placement-statistics`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',

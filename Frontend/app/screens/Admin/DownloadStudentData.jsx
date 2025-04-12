@@ -20,7 +20,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { encode } from 'base64-arraybuffer';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const getAllBranches = (companyData) => {
     const branchesSet = new Set();
@@ -65,7 +65,7 @@ export default function CompanyDataPage() {
             const accessToken = await getAccessToken()
             const refreshToken = await getRefreshToken()
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/companies/list-all-company-for-admin`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/companies/list-all-company-for-admin`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
@@ -108,7 +108,7 @@ export default function CompanyDataPage() {
                 return;
             }
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/export-student-data-to-excel/c/${companyId}`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/export-student-data-to-excel/c/${companyId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,

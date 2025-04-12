@@ -19,7 +19,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import * as FileSystem from "expo-file-system";
 import { useUser } from '../../context/userContext.js';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const ResumeUploadScreen = () => {
     const { width, height } = useWindowDimensions();
@@ -103,7 +103,7 @@ const ResumeUploadScreen = () => {
         try {
     
             const response = await FileSystem.uploadAsync(
-                `http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/upload-resume`,
+                `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/upload-resume`,
                 resume.uri,
                 {
                     fieldName: "resume",

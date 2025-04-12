@@ -18,7 +18,7 @@ import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js'
 import { useUser } from '../../context/userContext.js';
 import { useRouter } from 'expo-router';
 import { getFileFromAppwrite } from '../../utils/appwrite.js';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const { width, height } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.85;
@@ -43,7 +43,7 @@ const AlumniPage = () => {
 			const accessToken = await getAccessToken()
 			const refreshToken = await getRefreshToken()
 
-			const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/alumnis/get-details`, {
+			const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/alumnis/get-details`, {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
@@ -710,7 +710,5 @@ const AlumniPage = () => {
 		</SafeAreaView>
 	);
 };
-
-
 
 export default AlumniPage;

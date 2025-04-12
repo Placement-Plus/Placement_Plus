@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage.js';
 import { router } from 'expo-router';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const ChangePasswordPage = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -58,7 +58,7 @@ const ChangePasswordPage = () => {
                 return
             }
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/change-password`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/change-password`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

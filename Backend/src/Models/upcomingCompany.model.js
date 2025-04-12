@@ -50,7 +50,7 @@ const upcomingCompanySchema = new mongoose.Schema({
     },
     mode: {
         type: String,
-        enum: ["Online", "Offline", "Hybrid"],
+        enum: ["On-Site", "Of-Site", "Hybrid"],
         required: true
     },
     opportunityType: {

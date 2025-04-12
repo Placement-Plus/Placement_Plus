@@ -11,7 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const ChangePasswordPage = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -57,7 +57,7 @@ const ChangePasswordPage = () => {
                 return
             }
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/change-password`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/change-password`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',

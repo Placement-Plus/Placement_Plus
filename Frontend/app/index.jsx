@@ -1,11 +1,88 @@
-import React from "react";
-import { View, Text, Image, Pressable, StyleSheet } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, Text, Image, Pressable, StyleSheet, ActivityIndicator } from "react-native";
 import { useRouter } from "expo-router";
-import { Ionicons, MaterialIcons, FontAwesome5 } from "@expo/vector-icons";
+import { Ionicons, FontAwesome5 } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
+import { useUser } from "../context/userContext";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const loadingMessages = [
+  "Checking login status",
+  "Loading app for you",
+  "Fetching data",
+  "Collecting resources",
+  "Setting things up",
+  "Almost there"
+];
 
 const RoleSelectionScreen = () => {
   const router = useRouter();
+  const { isLoggedIn, isAdminLoggedIn, isAlumniLoggedIn, loading, setLoading } = useUser();
+  const messages = [
+    "Checking login status...",
+    "Fetching your details...",
+    "Collecting resources...",
+    "Getting everything ready for you...",
+  ];
+  const [messageIndex, setMessageIndex] = useState(() => Math.floor(Math.random() * messages.length));
+
+
+  useEffect(() => {
+    if (loading) {
+      const interval = setInterval(() => {
+        setMessageIndex((prev) => (prev + 1) % messages.length);
+      }, 2000);
+      return () => clearInterval(interval);
+    }
+  }, [loading]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 4000);
+
+    const checkUserType = async () => {
+      const userType = await AsyncStorage.getItem("userType");
+      console.log("User type from AsyncStorage:", userType);
+
+      if (userType === "admin") {
+        router.replace("HomePage/AdminHome");
+      } else if (userType === "alumni") {
+        router.replace("Alumni/Home");
+      } else if (userType === "student") {
+        router.replace("HomePage/Home");
+      }
+    };
+
+    if (!isLoggedIn && !isAdminLoggedIn && !isAlumniLoggedIn) {
+      checkUserType();
+    }
+
+    return () => clearTimeout(timer);
+  }, [isLoggedIn, isAdminLoggedIn, isAlumniLoggedIn, loading]);
+
+  if (loading) {
+    return (
+      <LinearGradient
+        colors={['#0D021F', '#1D0442']}
+        style={styles.loadingContainer}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+      >
+        <View style={styles.logoContainer}>
+          <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
+          <Text style={styles.logoText}>Placement Plus</Text>
+        </View>
+
+        <ActivityIndicator size="large" color="#C92EFF" style={styles.loadingIndicator} />
+
+        <Text style={styles.loadingText}>
+          {messages[messageIndex]}<Text style={styles.loadingDots}>...</Text>
+        </Text>
+      </LinearGradient>
+    );
+  }
+
 
   return (
     <LinearGradient
@@ -14,19 +91,15 @@ const RoleSelectionScreen = () => {
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
     >
-      {/* Logo */}
       <View style={styles.logoContainer}>
         <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
         <Text style={styles.logoText}>Placement Plus</Text>
       </View>
 
-      {/* Title */}
       <Text style={styles.title}>
-        {/* Select Your <Text style={styles.highlight}>Role</Text> */}
         Let's Get <Text style={styles.highlight}>Started</Text>
       </Text>
 
-      {/* Role Buttons */}
       <Pressable
         style={styles.buttonContainer}
         onPress={() => router.push("Admin/login")}
@@ -44,7 +117,7 @@ const RoleSelectionScreen = () => {
 
       <Pressable
         style={styles.buttonContainer}
-        onPress={() => router.push("roles/alumni")}
+        onPress={() => router.push("Alumni/signup")}
       >
         <LinearGradient
           colors={['#C92EFF', '#8428B2']}
@@ -79,6 +152,12 @@ export default RoleSelectionScreen;
 
 const styles = StyleSheet.create({
   container: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 30,
+  },
+  loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
@@ -143,20 +222,20 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     letterSpacing: 1,
   },
-  backButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 50,
-    backgroundColor: "rgba(255, 255, 255, 0.1)",
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 30,
+  loadingIndicator: {
+    marginBottom: 20,
   },
-  backIcon: {
-    marginRight: 8,
-  },
-  backText: {
+  loadingText: {
     color: "white",
-    fontSize: 16,
+    fontSize: 18,
+    fontFamily: "sans-serif",
+    textAlign: "center",
+    textShadowColor: 'rgba(201, 46, 255, 0.4)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 5,
+  },
+  loadingDots: {
+    color: "#C92EFF",
+    fontWeight: "bold",
   }
 });

@@ -19,7 +19,7 @@ import * as Yup from 'yup';
 import * as FileSystem from "expo-file-system";
 import { storeAccessToken, storeRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js"
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const SignupSchema = Yup.object().shape({
 	name: Yup.string().required('Name is required'),
@@ -187,7 +187,7 @@ const SignupScreen = () => {
 			userData.append("resume", resumeFile);
 
 			const response = await FileSystem.uploadAsync(
-				`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/register`,
+				`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/register`,
 				resumeFile.uri,
 				{
 					fieldName: "resume",
@@ -207,7 +207,7 @@ const SignupScreen = () => {
 			if (result.statusCode === 200) {
 				await storeAccessToken(result?.data?.accessToken)
 				await storeRefreshToken(result?.data?.refreshToken)
-				login(result?.data?.createdUser)
+				await login(result?.data?.createdUser)
 
 				router.replace("/HomePage/Home")
 			} else {

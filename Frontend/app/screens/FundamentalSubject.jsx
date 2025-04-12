@@ -17,7 +17,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { useUser } from '../../context/userContext.js';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
     UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -84,7 +84,7 @@ const SubjectMaterials = ({ companyLogo }) => {
             const accessToken = await getAccessToken();
             const refreshToken = await getRefreshToken();
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/cs-fundamentals/get-all-pdf`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/cs-fundamentals/get-all-pdf`, {
                 method: 'GET',
                 headers: {
                     "Authorization": `Bearer ${accessToken}`,

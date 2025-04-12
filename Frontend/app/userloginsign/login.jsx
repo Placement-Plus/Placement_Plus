@@ -6,7 +6,8 @@ import * as Yup from "yup";
 import { LinearGradient } from "expo-linear-gradient";
 import { storeAccessToken, storeRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js"
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import { setUserType } from "../../utils/userTypeStorage.js";
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string()
@@ -95,7 +96,7 @@ const LoginScreen = () => {
 
 
     try {
-      const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/login`, {
+      const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -109,8 +110,7 @@ const LoginScreen = () => {
       if (result.statusCode === 200) {
         await storeAccessToken(result?.data?.accessToken)
         await storeRefreshToken(result?.data?.refreshToken)
-        login(result?.data?.user)
-
+        await login(result?.data?.user)
         router.replace("/HomePage/Home")
       } else {
         Alert.alert("Error", result?.message || "Something went wrong")

@@ -11,7 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage';
 import { router } from 'expo-router';
 import { useUser } from '../../../context/userContext.js';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const CompanyCard = ({ company, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -178,7 +178,7 @@ const AppliedCompaniesPage = () => {
             const accessToken = await getAccessToken();
             const refreshToken = await getRefreshToken();
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/companies/get-company-details`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/companies/get-company-details`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,

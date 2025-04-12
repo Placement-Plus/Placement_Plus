@@ -16,7 +16,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import { useUser } from '../../context/userContext.js';
 import { router } from 'expo-router';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 
 const imageMap = {
@@ -127,7 +127,7 @@ const App = () => {
 							<DetailItem
 								icon="users"
 								label="Eligible Batches"
-								value={item?.eligibleBatches?.join(', ')}
+								value={item?.eligibleBatch?.join(', ')}
 								theme={theme}
 							/>
 							<DetailItem
@@ -262,17 +262,13 @@ const App = () => {
 		fetchAllCompanies();
 	}, []);
 
-	useEffect(() => {
-		fetchAllCompanies()
-	}, [user])
-
 	const fetchAllCompanies = async () => {
 		try {
 
 			const accessToken = await getAccessToken()
 			const refreshToken = await getRefreshToken()
 
-			const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/companies/list-all-company`, {
+			const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/companies/list-all-company`, {
 				method: 'GET',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,
@@ -350,7 +346,7 @@ const App = () => {
 			const accessToken = await getAccessToken()
 			const refreshToken = await getRefreshToken()
 
-			const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/companies/apply-to-company/c/${currentCompany._id}`, {
+			const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/companies/apply-to-company/c/${currentCompany._id}`, {
 				method: 'PATCH',
 				headers: {
 					'Authorization': `Bearer ${accessToken}`,

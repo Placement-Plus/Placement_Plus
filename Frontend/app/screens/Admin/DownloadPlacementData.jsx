@@ -16,7 +16,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { encode } from 'base64-arraybuffer';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 export default function ExportPage() {
     const { theme, admin } = useUser()
@@ -30,7 +30,7 @@ export default function ExportPage() {
                 return;
             }
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/export-to-pdf`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/export-to-pdf`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,

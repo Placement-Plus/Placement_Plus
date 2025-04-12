@@ -14,7 +14,7 @@ import { Picker } from '@react-native-picker/picker';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import { FontAwesome } from '@expo/vector-icons';
 import { useUser } from '../../context/userContext.js';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const PlacementDashboard = () => {
 
@@ -55,7 +55,7 @@ const PlacementDashboard = () => {
                 return
             }
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/placements/get-all-student-placement`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/placements/get-all-student-placement`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,

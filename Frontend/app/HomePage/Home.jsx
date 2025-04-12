@@ -564,7 +564,7 @@ const PlacementPlus = () => {
               colors={['#C92EFF', '#9332FF']}
               style={styles.homeButtonGradient}
             >
-              <MaterialIcons name="home" size={30} color="#fff" />
+              <FontAwesome name="home" size={30} color="#fff" />
             </LinearGradient>
           </Pressable>
 

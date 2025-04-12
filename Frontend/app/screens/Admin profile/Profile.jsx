@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../../../context/userContext.js';
 import { router } from 'expo-router';
 import { getAccessToken, getRefreshToken, removeAccessToken, removeRefreshToken } from '../../../utils/tokenStorage.js';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const ProfileSettings = () => {
     const navigation = useNavigation();
@@ -38,7 +38,7 @@ const ProfileSettings = () => {
                 throw new Error('Missing authentication tokens');
             }
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/logout`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/logout`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

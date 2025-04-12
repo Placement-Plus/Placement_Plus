@@ -5,6 +5,7 @@ import asyncHandler from "../Utils/AsyncHandler.js";
 
 const addQuestion = asyncHandler(async (req, res) => {
     const { name, description, difficulty, link, companyName } = req.body;
+
     if (!name || !description || !difficulty || !companyName) {
         throw new ApiError(400, "All details are required");
     }

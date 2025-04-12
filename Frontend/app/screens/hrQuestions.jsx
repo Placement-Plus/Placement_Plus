@@ -14,7 +14,7 @@ import {
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import { useUser } from '../../context/userContext.js';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const HRQuestionsScreen = () => {
     const [questions, setQuestions] = useState([]);
@@ -34,7 +34,7 @@ const HRQuestionsScreen = () => {
             const accessToken = await getAccessToken()
             const refreshToken = await getRefreshToken()
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/hr-questions/get-all-questions`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/hr-questions/get-all-questions`, {
                 method: 'GET',
                 headers: {
                     "Authorization": `Bearer ${accessToken}`,

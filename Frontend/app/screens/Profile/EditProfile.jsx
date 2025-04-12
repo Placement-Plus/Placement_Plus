@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../../context/userContext.js';
 import * as yup from 'yup';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage.js';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const validationSchema = yup.object().shape({
     name: yup.string().required('Name is required'),
@@ -96,7 +96,7 @@ const EditProfileScreen = () => {
             if (!accessToken || !refreshToken)
                 throw new Error("Tokens are required");
 
-            const response = await fetch(`http:${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/update-details`, {
+            const response = await fetch(`http:${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/update-details`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -112,7 +112,7 @@ const EditProfileScreen = () => {
             const result = await response.json();
 
             if (result.statusCode === 200) {
-                login(result.data);
+                await login(result.data);
                 Alert.alert("Success", "Profile updated successfully", [{ text: "OK" }]);
             }
         } catch (error) {

@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, Alert, TextInput } from "react-native";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import companyLogo from "@/assets/companyImages/Microsoft_Logo_512px.png";
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js";
 import { useLocalSearchParams } from 'expo-router'
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 import microsoftLogo from "@/assets/companyImages/Microsoft_Logo_512px.png";
 import appleLogo from "@/assets/companyImages/apple-white.png";
@@ -244,7 +243,7 @@ const CodingProblems = () => {
             const accessToken = await getAccessToken();
             const refreshToken = await getRefreshToken();
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/questions/get-company-questions/c/${companyName}`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/questions/get-company-questions/c/${companyName}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,

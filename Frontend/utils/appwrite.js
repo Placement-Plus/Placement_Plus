@@ -1,10 +1,10 @@
 import { storage } from "./appwriteConfig.js"
-import { APPWRITE_STUDY_MATERIAL_BUCKET_ID } from "@env"
+// import { APPWRITE_STUDY_MATERIAL_BUCKET_ID } from "@env"
 
 const getFileFromAppwrite = async (profilePicId) => {
     try {
-        return storage.getFileView(APPWRITE_STUDY_MATERIAL_BUCKET_ID, profilePicId);
-        // return storage.getFileView("67d9c8b00014a09ab052", profilePicId);
+        // return storage.getFileView(APPWRITE_STUDY_MATERIAL_BUCKET_ID, profilePicId);
+        return storage.getFileView("67d9c8b00014a09ab052", profilePicId);
 
     } catch (error) {
         console.error("Appwrite Error:", error.message);

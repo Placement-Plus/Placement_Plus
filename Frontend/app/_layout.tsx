@@ -8,7 +8,6 @@ import "react-native-reanimated";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { UserProvider } from "../context/userContext.js";
 import * as Notifications from "expo-notifications";
-// import { registerForPushNotificationsAsync } from "../utils/notificationService.js"
 
 SplashScreen.preventAutoHideAsync();
 
@@ -31,28 +30,6 @@ export default function RootLayout() {
 			SplashScreen.hideAsync();
 		}
 	}, [loaded]);
-
-	// useEffect(() => {
-	// 	registerForPushNotificationsAsync().then((token) => {
-	// 		if (token) {
-	// 			console.log("Expo Push Token:", token);
-	// 			setPushToken(token)
-	// 		}
-	// 	});
-
-	// 	notificationListener.current = Notifications.addNotificationReceivedListener(
-	// 		(notification) => {
-	// 			console.log("Notification Received:", notification);
-	// 		}
-	// 	);
-
-	// 	return () => {
-	// 		if (notificationListener.current) {
-	// 			Notifications.removeNotificationSubscription(notificationListener.current);
-	// 		}
-	// 	};
-
-	// }, []);
 
 	if (!loaded) {
 		return null;
@@ -104,6 +81,9 @@ export default function RootLayout() {
 					<Stack.Screen name="company/nvidia" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/Admin/DownloadPlacementData" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/Admin/DownloadStudentData" options={{ headerShown: false }} />
+					<Stack.Screen name="screens/Admin/addQuestion" options={{ headerShown: false }} />
+					<Stack.Screen name="screens/Admin/addCompany" options={{ headerShown: false }} />
+					<Stack.Screen name="Alumni/signup" options={{ headerShown: false }} />
 					<Stack.Screen name="+not-found" />
 				</Stack>
 				<StatusBar style="auto" />

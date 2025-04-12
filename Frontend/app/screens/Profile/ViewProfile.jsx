@@ -5,7 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../../context/userContext.js';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const ProfileView = () => {
     const navigation = useNavigation();
@@ -50,7 +50,7 @@ const ProfileView = () => {
             if (!accessToken || !refreshToken)
                 throw new Error("Tokens are required");
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/view-resume`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/view-resume`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,
