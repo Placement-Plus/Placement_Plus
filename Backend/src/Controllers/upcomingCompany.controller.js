@@ -4,6 +4,7 @@ import { User } from '../Models/user.model.js'
 import asyncHandler from '../Utils/AsyncHandler.js'
 import { UpcomingCompany } from '../Models/upcomingCompany.model.js'
 import mongoose from 'mongoose'
+import { ApplicationStatus } from '../Models/applicationStatus.model.js'
 
 const getSlab = (lpa) => {
     if (lpa <= 8)
@@ -139,6 +140,13 @@ const applyToCompany = asyncHandler(async (req, res) => {
             { new: true, session }
         )
 
+        const newStatus = await ApplicationStatus.create([{
+            studentId: req.user._id,
+            companyId,
+        }], { session })
+        if (newStatus.length === 0 || !newStatus[0])
+            throw new ApiError(500, "Something went wrong while adding application")
+
         await session.commitTransaction()
         session.endSession()
 
@@ -242,10 +250,30 @@ const withdrawApplication = asyncHandler(async (req, res) => {
 
 })
 
+const getCompanyById = asyncHandler(async (req, res) => {
+
+    const { companyId } = req.params
+    if (!companyId)
+        throw new ApiError(400, "Company Id is required")
+
+    const company = await UpcomingCompany.findById(companyId)
+    if (!company === 0)
+        throw new ApiError(404, "No company found")
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            company,
+            "Companies fetched successfully"
+        )
+    )
+})
+
 export {
     addCompany,
     listAllCompany,
     applyToCompany,
     getAllAppliedCompany,
-    withdrawApplication
+    withdrawApplication,
+    getCompanyById
 }

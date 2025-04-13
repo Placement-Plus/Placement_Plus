@@ -170,11 +170,29 @@ const getAllAlumniDetails = asyncHandler(async (req, res) => {
     )
 })
 
+const getAlumniById = asyncHandler(async (req, res) => {
+    const { alumniId } = req.params
+    if (!alumniId)
+        throw new ApiError(400, "Alumni id is required")
+
+    const alumni = await Alumni.findById(alumniId).select("-password -refreshToken")
+    if (!alumni)
+        throw new ApiError(404, "Alumni not found")
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            alumni,
+            "Alumni details fetched successfully"
+        )
+    )
+})
+
 export {
     registerAlumni,
     loginAlumni,
     logoutAlumni,
     addPreviousCompany,
     changeCurrentCompanyDetails,
-    getAllAlumniDetails
+    getAllAlumniDetails,
+    getAlumniById
 }
