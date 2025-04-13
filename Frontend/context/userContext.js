@@ -47,8 +47,6 @@ export const UserProvider = ({ children }) => {
         setIsAdminLoggedIn(false)
         setIsAlumniLoggedIn(false)
         await AsyncStorage.setItem("userType", "student");
-        // console.log(await AsyncStorage.getItem("userType"));
-
         await AsyncStorage.setItem("userData", JSON.stringify(userData));
     };
 

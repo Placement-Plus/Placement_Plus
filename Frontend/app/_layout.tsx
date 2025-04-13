@@ -52,6 +52,7 @@ export default function RootLayout() {
 					<Stack.Screen name="screens/Profile/EditProfile" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/Profile/AppliedCompanies" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/Profile/ChangePassword" options={{ headerShown: false }} />
+					<Stack.Screen name="screens/Profile/ApplicationStatus" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/Admin profile/ChangePassword" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/PastYearCompanies" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/CurrentYearPlacement" options={{ headerShown: false }} />
@@ -67,18 +68,8 @@ export default function RootLayout() {
 					<Stack.Screen name="screens/UploadResume" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/[company]" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/ChatBot" options={{ headerShown: false }} />
-					<Stack.Screen name="company/google" options={{ headerShown: false }} />
-					<Stack.Screen name="company/microsoft" options={{ headerShown: false }} />
-					<Stack.Screen name="company/amazon" options={{ headerShown: false }} />
-					<Stack.Screen name="company/meta" options={{ headerShown: false }} />
-					<Stack.Screen name="company/apple" options={{ headerShown: false }} />
-					<Stack.Screen name="company/flipkart" options={{ headerShown: false }} />
-					<Stack.Screen name="company/gameskraft" options={{ headerShown: false }} />
-					<Stack.Screen name="company/morgan-stanley" options={{ headerShown: false }} />
-					<Stack.Screen name="company/tech-mahindra" options={{ headerShown: false }} />
-					<Stack.Screen name="company/uber" options={{ headerShown: false }} />
-					<Stack.Screen name="company/netflix" options={{ headerShown: false }} />
-					<Stack.Screen name="company/nvidia" options={{ headerShown: false }} />
+					<Stack.Screen name="screens/AlumniDetail" options={{ headerShown: false }} />
+					<Stack.Screen name="screens/CompanyDetail" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/Admin/DownloadPlacementData" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/Admin/DownloadStudentData" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/Admin/addQuestion" options={{ headerShown: false }} />

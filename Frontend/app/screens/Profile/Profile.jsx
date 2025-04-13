@@ -5,7 +5,6 @@ import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../../../context/userContext.js';
 import { router } from 'expo-router';
 import { getAccessToken, getRefreshToken, removeAccessToken, removeRefreshToken } from '../../../utils/tokenStorage.js';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const ProfileSettings = () => {
     const navigation = useNavigation();
@@ -62,7 +61,7 @@ const ProfileSettings = () => {
             // console.log(result);
 
             if (result.statusCode === 200) {
-                logout()
+                await logout()
                 await removeAccessToken()
                 await removeRefreshToken()
 
@@ -291,7 +290,7 @@ const ProfileSettings = () => {
                 <View style={styles.settingsGroup}>
                     <Text style={dynamicStyles.settingsGroupTitle}>Job Applications</Text>
 
-                    <TouchableOpacity
+                    {/* <TouchableOpacity
                         style={dynamicStyles.settingsItem}
                         onPress={() => router.push('/screens/Profile/AppliedCompanies')}
                     >
@@ -300,11 +299,11 @@ const ProfileSettings = () => {
                         </View>
                         <Text style={dynamicStyles.settingsItemText}>View Applied Companies</Text>
                         <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
 
                     <TouchableOpacity
                         style={dynamicStyles.settingsItem}
-                        onPress={() => navigateTo('ApplicationStatus')}
+                        onPress={() => router.push('/screens/Profile/ApplicationStatus')}
                     >
                         <View style={styles.settingsIconContainer}>
                             <FontAwesome name="list-alt" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />

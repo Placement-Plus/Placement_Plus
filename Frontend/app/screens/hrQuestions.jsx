@@ -14,7 +14,6 @@ import {
 import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import { useUser } from '../../context/userContext.js';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const HRQuestionsScreen = () => {
     const [questions, setQuestions] = useState([]);

@@ -135,12 +135,12 @@ const CompanyRegistrationScreen = () => {
     }, [formData.opportunityType]);
 
     const branches = [
-        { label: "Computer Science", value: "Computer Science" },
-        { label: "Mechanical", value: "Mechanical" },
-        { label: "Civil", value: "Civil" },
-        { label: "Electrical", value: "Electrical" },
+        { label: "Computer Science", value: "CSE" },
+        { label: "Mechanical", value: "ME" },
+        { label: "Civil", value: "CE" },
+        { label: "Electrical", value: "EE" },
         { label: "Electronics & Communication", value: "ECE" },
-        { label: "AI & Data Science", value: "AIDS" },
+        { label: "AI & Data Science", value: "AI-DS" },
         { label: "VLSI", value: "VLSI" },
     ];
 

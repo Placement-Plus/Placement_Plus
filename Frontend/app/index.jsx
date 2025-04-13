@@ -59,7 +59,7 @@ const RoleSelectionScreen = () => {
     }
 
     return () => clearTimeout(timer);
-  }, [isLoggedIn, isAdminLoggedIn, isAlumniLoggedIn, loading]);
+  }, []);
 
   if (loading) {
     return (
