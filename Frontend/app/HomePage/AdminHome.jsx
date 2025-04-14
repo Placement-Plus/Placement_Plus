@@ -50,7 +50,7 @@ const menuItems = [
     id: 3,
     title: " Add Material for Interview Preparation",
     icon: interviewPreparation,
-    // route: "/screens/InterviewPrep",
+    route: "/screens/Admin/addStudyMaterial",
     color: "#F59E0B",
   },
   {

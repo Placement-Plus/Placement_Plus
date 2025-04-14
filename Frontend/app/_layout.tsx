@@ -76,6 +76,7 @@ export default function RootLayout() {
 					<Stack.Screen name="screens/Admin/DownloadStudentData" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/Admin/addQuestion" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/Admin/addCompany" options={{ headerShown: false }} />
+					<Stack.Screen name="screens/Admin/addStudyMaterial" options={{ headerShown: false }} />
 					<Stack.Screen name="Alumni/signup" options={{ headerShown: false }} />
 					<Stack.Screen name="+not-found" />
 				</Stack>

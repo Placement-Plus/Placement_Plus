@@ -115,8 +115,8 @@ const AlumniDetail = () => {
 
     useEffect(() => {
         if (id) {
-            // fetchAlumniDetails(id);
-            setAlumni(dummyAlumniData); 
+            fetchAlumniDetails(id);
+            // setAlumni(dummyAlumniData); 
         }
     }, [id]);
 
