@@ -57,7 +57,9 @@ export default function RootLayout() {
 					<Stack.Screen name="screens/PastYearCompanies" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/CurrentYearPlacement" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/ConnectWithAlumni" options={{ headerShown: false }} />
+					<Stack.Screen name="screens/ForgotPassword" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/QuestionAskByCompanies" options={{ headerShown: false }} />
+					<Stack.Screen name="screens/NewPassword" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/InterviewPrep" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/FundamentalSubject" options={{ headerShown: false }} />
 					<Stack.Screen name="screens/hrQuestions" options={{ headerShown: false }} />

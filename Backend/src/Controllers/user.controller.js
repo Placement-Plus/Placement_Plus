@@ -4,6 +4,8 @@ import { User } from '../Models/user.model.js'
 import asyncHandler from '../Utils/AsyncHandler.js'
 import bcrypt from 'bcrypt'
 import { uploadResumeOnAppwrite, getResumeFromAppwrite } from '../Utils/appwrite.js'
+import { sendEmail } from '../Utils/NodeMailer.js'
+import crypto from "crypto"
 
 const generateAccesandRefreshToken = async (userId) => {
     try {
@@ -94,6 +96,8 @@ const loginUser = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Email is Required")
     if (!password)
         throw new ApiError(400, "Password is Required")
+    console.log(typeof password);
+
 
     const user = await User.findOne({ email }).select(" -refreshToken")
     if (!user)
@@ -242,6 +246,87 @@ const viewResume = asyncHandler(async (req, res) => {
     )
 })
 
+const sendOtpForReset = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+    if (!email) throw new ApiError(400, "Email is required");
+
+    const user = await User.findOne({ email });
+    if (!user) throw new ApiError(404, "User not found");
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    user.otp = await bcrypt.hash(otp, 10);
+    user.otpExpiry = Date.now() + 10 * 60 * 1000;
+    await user.save({ validateBeforeSave: false });
+
+    const message = `
+        <h3>Placement Plus - Password Reset OTP</h3>
+        <p>Your OTP for password reset is: <b>${otp}</b></p>
+        <p>This OTP is valid for 10 minutes.</p>
+    `;
+
+    await sendEmail(user.email, "Your OTP for Password Reset", message);
+
+    res.status(200).json(
+        new ApiResponse(200, {}, "OTP sent to your email")
+    );
+});
+
+const verifyOtp = asyncHandler(async (req, res) => {
+    const { email, otp } = req.body
+    if (!email || !otp)
+        throw new ApiError(400, "Email and OTP are required")
+
+    const user = await User.findOne({ email })
+
+    if (!user.otpExpiry || user.otpExpiry < Date.now()
+    ) {
+        throw new ApiError(400, "Expired OTP");
+    }
+
+    const isOTPValid = await bcrypt.compare(otp, user.otp)
+    user.otp = undefined
+    user.otpExpiry = undefined
+    await user.save({ validateBeforeSave: false })
+
+    if (!isOTPValid)
+        throw new ApiError(401, "Invalid OTP")
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {},
+            "OTP verified successfully"
+        )
+    )
+})
+
+const resetPassword = asyncHandler(async (req, res) => {
+    const { email, password } = req.body
+    if (!email || !password)
+        throw new ApiError(400, "Email and password is required")
+    // console.log(typeof password);
+
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    const user = await User.findOne({ email })
+    if (!user)
+        throw new ApiError(404, "User not found")
+
+    const updatedUser = await User.findOneAndUpdate({ email }, { password: hashedPassword })
+    if (!updatedUser)
+        throw new ApiError(500, "Something went wrong whie changing password")
+
+    return res.status(200).json(
+        new ApiResponse(
+            200,
+            {},
+            "Password changed successfully"
+        )
+    )
+})
+
+
 export {
     registerUser,
     loginUser,
@@ -250,5 +335,8 @@ export {
     changePassword,
     uploadResume,
     updateDeatils,
-    viewResume
+    viewResume,
+    sendOtpForReset,
+    verifyOtp,
+    resetPassword
 }

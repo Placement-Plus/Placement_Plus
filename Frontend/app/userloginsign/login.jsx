@@ -6,8 +6,6 @@ import * as Yup from "yup";
 import { LinearGradient } from "expo-linear-gradient";
 import { storeAccessToken, storeRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js"
-import { setUserType } from "../../utils/userTypeStorage.js";
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 
 const LoginSchema = Yup.object().shape({
   email: Yup.string()
@@ -227,11 +225,9 @@ const LoginScreen = () => {
               </LinearGradient>
             </Pressable>
 
-            <Link href="/forgot-password" asChild>
-              <Pressable style={styles.forgotContainer}>
-                <Text style={styles.forgotText}>Forgot Password?</Text>
-              </Pressable>
-            </Link>
+            <Pressable style={styles.forgotContainer} onPress={() => router.push("/screens/ForgotPassword")}>
+              <Text style={styles.forgotText}>Forgot Password?</Text>
+            </Pressable>
 
             <Text style={styles.signupText}>
               Don't have an account?
