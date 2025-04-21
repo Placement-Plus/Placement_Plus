@@ -5,13 +5,13 @@ const sendEmail = async (to, subject, html) => {
         host: 'smtp.ethereal.email',
         port: 587,
         auth: {
-            user: 'travon.morar50@ethereal.email',
-            pass: 'QWg9bP84mEBbxPBYes'
+            user: 'jarret.kessler95@ethereal.email',
+            pass: 'KGm5xUAQMeFBMVXBjE'
         }
     });
 
     await transporter.sendMail({
-        from: `"Your App" <${process.env.EMAIL_USER}>`,
+        from: `"Your App" <jarret.kessler95@ethereal.email>`,
         to,
         subject,
         html,
