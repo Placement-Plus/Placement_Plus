@@ -2,64 +2,63 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcrypt"
 import jwt from 'jsonwebtoken'
 
-const alumniSchema = new Schema(
-    {
+const alumniSchema = new Schema({
+    name: {
+        type: String,
+        required: true
+    },
+    email: {
+        type: String,
+        unique: true,
+        required: true,
+        trim: true
+    },
+    password: {
+        type: String,
+        required: true
+    },
+    linkedInId: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    profilePicId: {
+        type: String,
+        required: true
+    },
+    batch: {
+        type: Number,
+        required: true
+    },
+    previousCompany: [{
+        name: {
+            type: String,
+            trim: true
+        },
+        Position: {
+            type: String
+        },
+        Duration: {
+            type: Number
+        },
+        Experience: {
+            type: String
+        }
+    }],
+    currentCompany: {
         name: {
             type: String,
             required: true
         },
-        email: {
-            type: String,
-            unique: true,
-            required: true,
-            trim: true
-        },
-        password: {
+        position: {
             type: String,
             required: true
-        },
-        linkedInId: {
-            type: String,
-            required: true,
-            unique: true
-        },
-        profilePicId: {
-            type: String,
-            required: true
-        },
-        batch: {
-            type: Number,
-            required: true
-        },
-        previousCompany: [{
-            name: {
-                type: String,
-                trim: true
-            },
-            Position: {
-                type: String
-            },
-            Duration: {
-                type: Number
-            },
-            Experience: {
-                type: String
-            }
-        }],
-        currentCompany: {
-            name: {
-                type: String,
-                required: true
-            },
-            position: {
-                type: String,
-                required: true
-            }
-        },
-        refreshToken: {
-            type: String
         }
+    },
+    refreshToken: {
+        type: String
     }
+}
 )
 
 alumniSchema.pre("save", async function (next) {

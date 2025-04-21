@@ -260,18 +260,18 @@ const LoginScreen = () => {
                             </LinearGradient>
                         </Pressable>
 
-                        <Link href="/forgot-password" asChild>
+                        {/* <Link href="/forgot-password" asChild>
                             <Pressable style={styles.forgotContainer}>
                                 <Text style={styles.forgotText}>Forgot Password?</Text>
                             </Pressable>
-                        </Link>
+                        </Link> */}
 
-                        <Text style={styles.signupText}>
+                        {/* <Text style={styles.signupText}>
                             Don't have an account?
                             <Link href="userloginsign/Signup">
                                 <Text style={styles.highlight}> Sign up</Text>
                             </Link>
-                        </Text>
+                        </Text> */}
                     </View>
                 </KeyboardAvoidingView>
             </LinearGradient>
