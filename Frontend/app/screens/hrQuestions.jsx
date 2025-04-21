@@ -10,10 +10,13 @@ import {
     StatusBar,
     FlatList,
     TextInput,
+    Pressable
 } from 'react-native';
-import FontAwesome from '@expo/vector-icons/FontAwesome';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import { useUser } from '../../context/userContext.js';
+import CustomAlert from '../../components/CustomAlert.jsx';
+import { router } from 'expo-router';
 
 const HRQuestionsScreen = () => {
     const [questions, setQuestions] = useState([]);
@@ -22,6 +25,12 @@ const HRQuestionsScreen = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [activeFilter, setActiveFilter] = useState('All');
     const { theme } = useUser()
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     useEffect(() => {
         fetchQuestions();
@@ -48,7 +57,18 @@ const HRQuestionsScreen = () => {
             }
 
             if (result.statusCode !== 200) {
-                Alert.alert("Error", result?.message || "Something wnet worng. Please try again later")
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again later",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
                 return
             }
             setQuestions(result.data);
@@ -56,6 +76,18 @@ const HRQuestionsScreen = () => {
         } catch (error) {
             console.error('Error fetching questions:', error);
             setLoading(false);
+            setAlertConfig({
+                header: "Error",
+                message: error?.message || "Something went wrong. Please try again later",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
         }
     };
 
@@ -108,15 +140,22 @@ const HRQuestionsScreen = () => {
             <StatusBar barStyle={theme === 'light' ? "dark-content" : "light-content"} backgroundColor={theme === 'light' ? '#F5F5F5' : '#1a012c'} />
 
             <View style={styles.headerContainer}>
+                <Pressable onPress={() => router.back()} style={{ marginRight: 10 }}>
+                    <Ionicons name="arrow-back" size={30} color="#C92EFF" />
+                </Pressable>
                 <Text style={[
                     styles.header,
                     { color: themeColor }
                 ]}>HR Knowledge Base</Text>
-                {/* <Image
-                    source={require('@/assets/images/logo.png')}  // Replace with your actual logo path
-                    style={styles.logo}
-                /> */}
             </View>
+
+            <CustomAlert
+                visible={alertVisible}
+                header={alertConfig.header}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={() => setAlertVisible(false)}
+            />
 
             <View style={styles.searchFilterContainer}>
                 <View style={[
@@ -314,7 +353,7 @@ const styles = StyleSheet.create({
     },
     headerContainer: {
         flexDirection: "row",
-        justifyContent: "space-between",
+        justifyContent: "flex-start",
         alignItems: "center",
         width: "100%",
         marginBottom: 15,
@@ -324,12 +363,6 @@ const styles = StyleSheet.create({
         fontSize: 30,
         fontWeight: "bold",
         fontFamily: "sans-serif",
-    },
-    logo: {
-        width: 80,
-        height: 80,
-        resizeMode: "contain",
-        borderRadius: 100,
     },
     searchFilterContainer: {
         marginBottom: 15,

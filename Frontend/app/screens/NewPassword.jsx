@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import { SimpleLineIcons, Feather, MaterialIcons } from "@expo/vector-icons";
-import * as Yup from "yup";
 import { LinearGradient } from "expo-linear-gradient";
+import CustomAlert from "../../components/CustomAlert.jsx";
 
 const ResetPasswordScreen = () => {
     const router = useRouter();
@@ -16,7 +16,12 @@ const ResetPasswordScreen = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
     const [touchedFields, setTouchedFields] = useState({});
-
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     const handleBlur = (field) => {
         setTouchedFields({
@@ -68,16 +73,48 @@ const ResetPasswordScreen = () => {
 
             if (result.statusCode === 200) {
                 setIsSuccess(true);
+                setAlertConfig({
+                    header: "Success",
+                    message: "Resume uploaded successfully!",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => {
+                                setAlertVisible(false)
+                            },
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
                 // router.replace("userloginsign/login")
             } else {
-                Alert.alert("Error", result?.message || "Something went wrong");
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again later",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
         } catch (error) {
-            Alert.alert(
-                "Password Reset Failed",
-                error?.message || "Something went wrong. Please try again.",
-                [{ text: "OK" }]
-            );
+            setAlertConfig({
+                header: "Upload Error",
+                message: error?.message || "Something went wrong. Please try again later",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
             console.error('Error:', error.message);
         } finally {
             setIsLoading(false);
@@ -90,6 +127,13 @@ const ResetPasswordScreen = () => {
                 colors={['#0D021F', '#1E0442']}
                 style={styles.container}
             >
+                <CustomAlert
+                    visible={alertVisible}
+                    header={alertConfig.header}
+                    message={alertConfig.message}
+                    buttons={alertConfig.buttons}
+                    onClose={() => setAlertVisible(false)}
+                />
                 <KeyboardAvoidingView
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={styles.keyboardView}

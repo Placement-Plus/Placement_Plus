@@ -16,6 +16,7 @@ import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import { useUser } from '../../context/userContext.js';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { getFileFromAppwrite } from '../../utils/appwrite.js';
+import CustomAlert from '../../components/CustomAlert.jsx';
 
 const dummyAlumniData = {
     id: "12345abcde",
@@ -112,6 +113,12 @@ const AlumniDetail = () => {
     const router = useRouter();
     const { id } = useLocalSearchParams();
     const [isLoading, setIsLoading] = useState(false);
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     useEffect(() => {
         if (id) {
@@ -146,11 +153,33 @@ const AlumniDetail = () => {
 
                 setAlumni(alumniData);
             } else {
-                alert(result?.message || 'Failed to load alumni details');
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
         } catch (error) {
             console.error('Failed to fetch alumni details:', error);
-            alert('Failed to fetch alumni details. Please try again later.');
+            setAlertConfig({
+                header: "Failed to fetch data",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
         } finally {
             setIsLoading(false);
         }
@@ -464,6 +493,13 @@ const AlumniDetail = () => {
             <SafeAreaView style={styles.container}>
                 <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
                 <View style={styles.header}>
+                    <CustomAlert
+                        visible={alertVisible}
+                        header={alertConfig.header}
+                        message={alertConfig.message}
+                        buttons={alertConfig.buttons}
+                        onClose={() => setAlertVisible(false)}
+                    />
                     <TouchableOpacity
                         style={styles.backButton}
                         onPress={() => router.back()}
@@ -503,6 +539,14 @@ const AlumniDetail = () => {
                 <Text style={styles.headerTitle}>Alumni Profile</Text>
                 <View style={{ width: 24 }} />
             </View>
+
+            <CustomAlert
+                visible={alertVisible}
+                header={alertConfig.header}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={() => setAlertVisible(false)}
+            />
 
             <ScrollView showsVerticalScrollIndicator={false}>
                 <View style={styles.contentContainer}>

@@ -17,7 +17,7 @@ import { Feather, FontAwesome, MaterialIcons, Ionicons } from "@expo/vector-icon
 import { MultiSelect } from 'react-native-element-dropdown';
 import { LinearGradient } from "expo-linear-gradient";
 import { getAccessToken, getRefreshToken } from "../../../utils/tokenStorage.js";
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import CustomAlert from "../../../components/CustomAlert.jsx";
 
 const InputField = ({
     icon,
@@ -97,6 +97,12 @@ const CompanyRegistrationScreen = () => {
     const scrollViewRef = useRef(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     const [formData, setFormData] = useState({
         companyName: "",
@@ -109,7 +115,7 @@ const CompanyRegistrationScreen = () => {
         minCGPA: "",
         location: "",
         schedule: "",
-        scheduleMode: "On-campus",
+        scheduleMode: "On-Site",
         opportunityType: "Full Time",
         extraDetails: "",
         pocName: "",
@@ -428,41 +434,65 @@ const CompanyRegistrationScreen = () => {
             })
 
             const result = await response.json()
-            console.log(result);
+            // console.log(result);
 
             if (result.statusCode === 200) {
-                Alert.alert(
-                    "Success",
-                    "Company added successfully!",
-                    [{
-                        text: "OK", onPress: () => setFormData({
-                            companyName: "",
-                            eligibleBranches: [],
-                            eligibleBatches: [],
-                            stipend: "",
-                            CTC: "",
-                            role: "",
-                            hiringProcess: "",
-                            minCGPA: "",
-                            location: "",
-                            schedule: "",
-                            scheduleMode: "On-campus",
-                            opportunityType: "Full Time",
-                            extraDetails: "",
-                            pocName: "",
-                            pocContact: "",
-                        })
-                    }]
-                );
+                setAlertConfig({
+                    header: "Success",
+                    message: "Uploaded successfully",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
+                setFormData({
+                    companyName: "",
+                    eligibleBranches: [],
+                    eligibleBatches: [],
+                    stipend: "",
+                    CTC: "",
+                    role: "",
+                    hiringProcess: "",
+                    minCGPA: "",
+                    location: "",
+                    schedule: "",
+                    scheduleMode: "On-Site",
+                    opportunityType: "Full Time",
+                    extraDetails: "",
+                    pocName: "",
+                    pocContact: "",
+                })
             } else {
-                Alert.alert(
-                    "Error",
-                    "Something went wrong. please try again later",
-                );
-                return;
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
             }
         } catch (error) {
-            Alert.alert("Error", "There was a problem submitting your registration. Please try again.");
+            setAlertConfig({
+                header: "Error",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true)
         } finally {
             setIsSubmitting(false);
         }
@@ -830,6 +860,15 @@ const CompanyRegistrationScreen = () => {
                 barStyle="light-content"
                 backgroundColor="#1a012c"
             />
+
+            <CustomAlert
+                visible={alertVisible}
+                header={alertConfig.header}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={() => setAlertVisible(false)}
+            />
+
             <ScrollView
                 ref={scrollViewRef}
                 contentContainerStyle={styles.scrollContainer}

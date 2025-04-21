@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Animated, StatusBar, Dimensions } from "react-native";
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Animated, StatusBar, Dimensions, Pressable } from "react-native";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { useUser } from "../../context/userContext.js";
@@ -194,11 +194,13 @@ const PastYearCompanies = () => {
         }
       ]}>
         <View style={styles.logoContainer}>
-          <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
+          <Pressable onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </Pressable>
           <Text style={[
             styles.logoText,
             { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-          ]}>Placement Plus</Text>
+          ]}>DSA Preparation</Text>
         </View>
         <View style={styles.headerButtons}>
           <TouchableOpacity style={styles.profileButton} onPress={() => router.push('screens/Profile/Profile')}>
@@ -344,6 +346,7 @@ const styles = StyleSheet.create({
   logoText: {
     fontSize: 20,
     fontWeight: "bold",
+    marginLeft: 10
   },
   headerButtons: {
     flexDirection: "row",

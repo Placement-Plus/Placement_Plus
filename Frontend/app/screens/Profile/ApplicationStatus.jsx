@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage.js';
 import { router } from 'expo-router';
 import { useUser } from '../../../context/userContext.js';
+import CustomAlert from '../../../components/CustomAlert.jsx';
 
 const CompanyCard = ({ application, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
@@ -163,11 +164,11 @@ const CompanyCard = ({ application, theme }) => {
                         <View style={[styles.additionalInfoSection, { borderTopColor: borderColor }]}>
                             <Text style={[styles.sectionTitle, { color: themeColor }]}>Point of Contact</Text>
                             <Text style={[styles.infoText, { color: textColor }]}>
-                                <Text style={[styles.infoLabel, { color: themeColor }]}>Name: </Text> 
+                                <Text style={[styles.infoLabel, { color: themeColor }]}>Name: </Text>
                                 {company.pocDetails.name}
                             </Text>
                             <Text style={[styles.infoText, { color: textColor }]}>
-                                <Text style={[styles.infoLabel, { color: themeColor }]}>Contact No: </Text> 
+                                <Text style={[styles.infoLabel, { color: themeColor }]}>Contact No: </Text>
                                 {company.pocDetails.contactNo}
                             </Text>
                         </View>
@@ -182,6 +183,12 @@ const ApplicationsStatusPage = () => {
     const [applications, setApplications] = useState([]);
     const [loading, setLoading] = useState(true);
     const { theme } = useUser();
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     // Theme variables
     const backgroundColor = theme === 'light' ? '#F5F5F5' : '#1a012c';
@@ -209,11 +216,33 @@ const ApplicationsStatusPage = () => {
             if (result.statusCode === 200) {
                 setApplications(result.data);
             } else {
-                Alert.alert('Error', result.message || 'Failed to fetch applications');
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
             }
         } catch (error) {
             console.error('Error: ', error?.message);
-            Alert.alert('Error', 'Failed to fetch applications. Please try again.');
+            setAlertConfig({
+                header: "Error",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true)
         } finally {
             setLoading(false);
         }
@@ -234,6 +263,14 @@ const ApplicationsStatusPage = () => {
                     <Ionicons name="refresh" size={24} color={themeColor} />
                 </TouchableOpacity>
             </View>
+
+            <CustomAlert
+                visible={alertVisible}
+                header={alertConfig.header}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={() => setAlertVisible(false)}
+            />
 
             <ScrollView
                 contentContainerStyle={styles.scrollViewContent}

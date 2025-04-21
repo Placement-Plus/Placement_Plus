@@ -4,6 +4,7 @@ import { useRouter } from "expo-router";
 import { SimpleLineIcons, Feather, MaterialIcons } from "@expo/vector-icons";
 import * as Yup from "yup";
 import { LinearGradient } from "expo-linear-gradient";
+import CustomAlert from "../../components/CustomAlert.jsx";
 
 const ForgotPasswordSchema = Yup.object().shape({
     email: Yup.string()
@@ -32,6 +33,13 @@ const ForgotPasswordScreen = () => {
     const [timeLeft, setTimeLeft] = useState(600);
     const [verificationFailed, setVerificationFailed] = useState(false);
     const timerRef = useRef(null);
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
+
 
     useEffect(() => {
         if (emailSent && timeLeft > 0) {
@@ -128,14 +136,32 @@ const ForgotPasswordScreen = () => {
                 setTimeLeft(600);
                 setVerificationFailed(false);
             } else {
-                Alert.alert("Error", result?.message || "Something went wrong");
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again later",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
         } catch (error) {
-            Alert.alert(
-                "Request Failed",
-                error?.message || "Something went wrong. Please try again.",
-                [{ text: "OK" }]
-            );
+            setAlertConfig({
+                header: "Upload Error",
+                message: error?.message || "Something went wrong. Please try again later",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
             console.error('Error:', error.message);
         } finally {
             setIsLoading(false);
@@ -168,15 +194,33 @@ const ForgotPasswordScreen = () => {
                 router.replace(`/screens/NewPassword?email=${email}`);
             } else {
                 setVerificationFailed(true);
-                Alert.alert("Error", result?.message || "Invalid OTP. Please try again.");
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again later",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
         } catch (error) {
             setVerificationFailed(true);
-            Alert.alert(
-                "Verification Failed",
-                error?.message || "Something went wrong. Please try again.",
-                [{ text: "OK" }]
-            );
+            setAlertConfig({
+                header: "Fetch Error",
+                message: error?.message || "Something went wrong. Please try again later",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
             console.error('Error:', error.message);
         } finally {
             setIsVerifying(false);
@@ -201,16 +245,45 @@ const ForgotPasswordScreen = () => {
             if (result.statusCode === 200) {
                 setTimeLeft(600);
                 setOtp("");
-                Alert.alert("Success", "OTP has been resent to your email");
+                setAlertConfig({
+                    header: "Success",
+                    message: "OTP resend to your mail",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             } else {
-                Alert.alert("Error", result?.message || "Something went wrong");
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again later",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
         } catch (error) {
-            Alert.alert(
-                "Request Failed",
-                error?.message || "Something went wrong. Please try again.",
-                [{ text: "OK" }]
-            );
+            setAlertConfig({
+                header: "Error",
+                message: error?.message || "Something went wrong. Please try again later",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
             console.error('Error:', error.message);
         } finally {
             setIsLoading(false);
@@ -234,6 +307,14 @@ const ForgotPasswordScreen = () => {
                     >
                         <Feather name="arrow-left" size={24} color="white" />
                     </Pressable>
+
+                    <CustomAlert
+                        visible={alertVisible}
+                        header={alertConfig.header}
+                        message={alertConfig.message}
+                        buttons={alertConfig.buttons}
+                        onClose={() => setAlertVisible(false)}
+                    />
 
                     <View style={styles.contentContainer}>
                         <Text style={styles.title}>

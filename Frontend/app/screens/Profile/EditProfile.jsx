@@ -16,7 +16,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../../context/userContext.js';
 import * as yup from 'yup';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage.js';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import CustomAlert from '../../../components/CustomAlert.jsx';
 
 const validationSchema = yup.object().shape({
     name: yup.string().required('Name is required'),
@@ -45,6 +45,12 @@ const validationSchema = yup.object().shape({
 const EditProfileScreen = () => {
     const navigation = useNavigation();
     const { user, login, theme } = useUser();
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     const themeColors = {
         primary: theme === 'light' ? '#6A0DAD' : '#C92EFF',
@@ -113,10 +119,45 @@ const EditProfileScreen = () => {
 
             if (result.statusCode === 200) {
                 await login(result.data);
-                Alert.alert("Success", "Profile updated successfully", [{ text: "OK" }]);
+                setAlertConfig({
+                    header: "Success",
+                    message: "Profile updated successfully",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
+            } else {
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
             }
         } catch (error) {
-            Alert.alert("Error", error?.message || "Something went wrong", [{ text: "OK" }]);
+            console.error('Error updating profile:', error?.message);
+            setAlertConfig({
+                header: "Error",
+                message: result?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
         }
     };
 
@@ -151,6 +192,14 @@ const EditProfileScreen = () => {
                         <Text style={[styles.saveButtonText, { color: themeColors.primary }]}>Save</Text>
                     </TouchableOpacity>
                 </View>
+
+                <CustomAlert
+                    visible={alertVisible}
+                    header={alertConfig.header}
+                    message={alertConfig.message}
+                    buttons={alertConfig.buttons}
+                    onClose={() => setAlertVisible(false)}
+                />
 
                 <ScrollView style={styles.scrollView}>
                     <View style={[styles.card, {

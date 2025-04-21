@@ -20,7 +20,7 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { encode } from 'base64-arraybuffer';
 import * as IntentLauncher from 'expo-intent-launcher';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import { router } from 'expo-router';
 
 const getAllBranches = (companyData) => {
     const branchesSet = new Set();
@@ -211,7 +211,7 @@ export default function CompanyDataPage() {
         },
         header: {
             flexDirection: "row",
-            justifyContent: "space-between",
+            justifyContent: "flex-start",
             alignItems: "center",
             paddingHorizontal: 16,
             paddingTop: Platform.OS === 'android' ? 10 : 10,
@@ -223,6 +223,7 @@ export default function CompanyDataPage() {
             color: currentTheme === 'light' ? "#6A0DAD" : "white",
             fontSize: 24,
             fontWeight: "bold",
+            marginLeft: 20
         },
         subtitle: {
             color: currentTheme === 'light' ? "#666666" : "#BBB",
@@ -504,6 +505,9 @@ export default function CompanyDataPage() {
             />
 
             <View style={dynamicStyles.header}>
+                <Pressable onPress={() => router.back()}>
+                    <Ionicons name="arrow-back" size={24} color="#fff" />
+                </Pressable>
                 <Text style={dynamicStyles.headerText}>Company Opportunities</Text>
             </View>
 

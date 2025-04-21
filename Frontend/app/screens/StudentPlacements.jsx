@@ -8,19 +8,27 @@ import {
     TouchableOpacity,
     SafeAreaView,
     ActivityIndicator,
-    Image
+    Pressable,
+    StatusBar
 } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
-import { FontAwesome } from '@expo/vector-icons';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../context/userContext.js';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import CustomAlert from '../../components/CustomAlert.jsx';
+import { router } from 'expo-router';
 
 const PlacementDashboard = () => {
 
     const [placementData, setPlacementData] = useState([])
     const [loading, setLoading] = useState(false)
     const { theme } = useUser()
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     // State for filters
     const [selectedBranch, setSelectedBranch] = useState('');
@@ -70,17 +78,38 @@ const PlacementDashboard = () => {
             }
 
             const result = await response.json()
-            console.log(result);
+            // console.log(result);
 
             if (result?.statusCode === 200) {
                 setPlacementData(result?.data)
             } else {
-                console.log(result.message)
-                Alert.alert("Error", result?.message)
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again later",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
         } catch (error) {
             console.log(error.message)
-            Alert.alert("Error", error?.message)
+            setAlertConfig({
+                header: "Fetch error",
+                message: error?.message || "Something went wrong. Please try again later",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
         } finally {
             setLoading(false)
         }
@@ -166,10 +195,17 @@ const PlacementDashboard = () => {
 
     if (loading) {
         return (
-            <View style={[{ flex: 1, justifyContent: 'center', alignItems: 'center' },
-            { backgroundColor: backgroundColor }
-            ]}>
-                <ActivityIndicator size="large" color={themeColor} />
+            <View style={{
+                flex: 1,
+                backgroundColor: theme === 'light' ? '#F5F5F5' : '#120023',
+                justifyContent: 'center',
+                alignItems: 'center',
+            }}>
+                <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
+                <ActivityIndicator size="large" color="#6A0DAD" />
+                <Text style={{ color: theme === 'light' ? '#333' : '#fff', marginTop: 12 }}>
+                    Loading Placement Data...
+                </Text>
             </View>
         )
     }
@@ -178,9 +214,20 @@ const PlacementDashboard = () => {
         <SafeAreaView style={[styles.container, { backgroundColor: backgroundColor }]}>
             {/* <Text style={[styles.title, { color: textColor }]}>Student Placement Dashboard</Text> */}
 
+            <CustomAlert
+                visible={alertVisible}
+                header={alertConfig.header}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={() => setAlertVisible(false)}
+            />
+
             {/* Filters Container */}
             <View style={[styles.filtersContainer, { backgroundColor: cardBackgroundColor }]}>
                 {/* Search Input */}
+                {/* <Pressable onPress={() => router.back()} >
+                    <Ionicons name="arrow-back" size={30} color="white" />
+                </Pressable>
                 <View style={[styles.searchContainer, {
                     backgroundColor: inputBackgroundColor,
                     borderColor: cardBorderColor
@@ -193,6 +240,26 @@ const PlacementDashboard = () => {
                         style={[styles.searchInput, { color: textColor }]}
                         placeholderTextColor={secondaryTextColor}
                     />
+                </View> */}
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                    <Pressable onPress={() => router.back()} style={{ marginRight: 10, marginBottom: 10 }}>
+                        <Ionicons name="arrow-back" size={30} color="white" />
+                    </Pressable>
+
+                    <View style={[styles.searchContainer, {
+                        backgroundColor: inputBackgroundColor,
+                        borderColor: cardBorderColor,
+                        flex: 1
+                    }]}>
+                        <FontAwesome name="search" size={18} color={themeColor} style={styles.searchIcon} />
+                        <TextInput
+                            placeholder="Search by Name, Roll No, or Company"
+                            value={searchQuery}
+                            onChangeText={setSearchQuery}
+                            style={[styles.searchInput, { color: textColor }]}
+                            placeholderTextColor={secondaryTextColor}
+                        />
+                    </View>
                 </View>
 
                 {/* Branch Picker */}

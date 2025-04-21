@@ -20,6 +20,7 @@ import * as DocumentPicker from 'expo-document-picker';
 import { getAccessToken, getRefreshToken } from "../../../utils/tokenStorage.js";
 import * as FileSystem from "expo-file-system";
 import { useUser } from '../../../context/userContext.js';
+import CustomAlert from '../../../components/CustomAlert.jsx';
 
 const CustomDropdown = ({ options, selectedValue, onSelect, placeholder, style, zIndex, theme }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -78,6 +79,12 @@ const StudyMaterialUploadScreen = () => {
     const [description, setDescription] = useState("");
     const [selectedSubject, setSelectedSubject] = useState(null);
     const [fileName, setFileName] = useState("")
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     const subjects = [
         { label: 'Operating System', value: 'Operating System' },
@@ -184,20 +191,49 @@ const StudyMaterialUploadScreen = () => {
             const result = JSON.parse(response.body);
 
             if (result.statusCode === 201 || result.statusCode === 200) {
-                Alert.alert("Success", "Uploaded successfully!");
+                setAlertConfig({
+                    header: "Success",
+                    message: "Uploaded successfully",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
                 setPdfFile(null);
                 setSelectedSubject(null);
                 setDescription("");
                 setFileName("")
             } else {
-                Alert.alert('Error', result?.message || "Something went wrong. Please try again later");
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
             }
         } catch (error) {
-            Alert.alert(
-                "Error",
-                error.message || "Something went wrong. Please try again.",
-                [{ text: "OK" }]
-            );
+            setAlertConfig({
+                header: "Error",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true)
             console.error('Error:', error.message);
         }
     };
@@ -238,6 +274,14 @@ const StudyMaterialUploadScreen = () => {
                 <Text style={[styles.headerText, { color: textColor }]}>Upload Study Material</Text>
                 <View style={{ width: 40 }} />
             </View>
+
+            <CustomAlert
+                visible={alertVisible}
+                header={alertConfig.header}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={() => setAlertVisible(false)}
+            />
 
             <ScrollView
                 style={styles.scrollView}

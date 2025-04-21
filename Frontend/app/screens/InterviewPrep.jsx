@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   StatusBar,
-  Image,
+  Pressable,
 } from "react-native";
 import { useRouter } from "expo-router";
 import {
@@ -165,18 +165,15 @@ const PreparationHub = () => {
         }
       ]}>
         <View style={styles.headerContent}>
+          <Pressable onPress={() => router.back()} >
+            <Ionicons name="arrow-back" size={30} color="white" />
+          </Pressable>
           <View>
             <Text style={[
               styles.greeting,
               { color: theme === 'light' ? '#333333' : 'white' }
             ]}>
-              Hello, Candidate
-            </Text>
-            <Text style={[
-              styles.subtitle,
-              { color: theme === 'light' ? '#6A0DAD' : '#f0c5f1' }
-            ]}>
-              What would you like to prepare today?
+              Crack The Interview
             </Text>
           </View>
           <TouchableOpacity style={[

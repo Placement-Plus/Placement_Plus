@@ -5,13 +5,19 @@ import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../../../context/userContext.js';
 import { router } from 'expo-router';
 import { getAccessToken, getRefreshToken, removeAccessToken, removeRefreshToken } from '../../../utils/tokenStorage.js';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import CustomAlert from '../../../components/CustomAlert.jsx';
 
 const ProfileSettings = () => {
     const navigation = useNavigation();
     const [notificationsEnabled, setNotificationsEnabled] = useState(true);
     const { admin: loggedInAdmin, adminLogout, theme, toggleTheme } = useUser()
     const [darkModeEnabled, setDarkModeEnabled] = useState(theme === "dark");
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     const [admin, setAdmin] = useState({
         username: '',
@@ -64,31 +70,54 @@ const ProfileSettings = () => {
                     BackHandler.addEventListener('hardwareBackPress', () => true);
                 }, 100);
             } else {
-                Alert.alert('Error', result?.message || "Something went wrong. Please try again later")
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
-
         } catch (error) {
             console.error('Error logging out:', error?.message);
-            Alert.alert('Error', 'Failed to log out. Please try again.');
+            setAlertConfig({
+                header: "Error",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
         }
     };
 
     const confirmLogout = async () => {
-        Alert.alert(
-            "Log Out",
-            "Are you sure you want to log out?",
-            [
+        setAlertConfig({
+            header: "Log Out",
+            message: "Are you sure you want to log out?",
+            buttons: [
                 {
                     text: "Cancel",
+                    onPress: () => setAlertVisible(false),
                     style: "cancel"
                 },
                 {
-                    text: "Log Out",
+                    text: "Logout",
                     onPress: handleLogout,
                     style: "destructive"
-                }
+                },
             ]
-        );
+        });
+        setAlertVisible(true);
     };
 
     const handleToggleNotifications = () => {
@@ -226,6 +255,13 @@ const ProfileSettings = () => {
                     </View>
                 </View>
 
+                <CustomAlert
+                    visible={alertVisible}
+                    header={alertConfig.header}
+                    message={alertConfig.message}
+                    buttons={alertConfig.buttons}
+                    onClose={() => setAlertVisible(false)}
+                />
 
                 {/* Profile Settings */}
                 <View style={styles.settingsGroup}>
@@ -283,7 +319,7 @@ const ProfileSettings = () => {
 
                     <TouchableOpacity
                         style={dynamicStyles.settingsItem}
-                        onPress={() => navigateTo('Help')}
+                        onPress={() => router.push("/screens/Profile/HelpAndSupport")}
                     >
                         <View style={styles.settingsIconContainer}>
                             <Ionicons name="help-circle" size={22} color={theme === 'light' ? "#6a0dad" : "#fff"} />
@@ -294,7 +330,7 @@ const ProfileSettings = () => {
 
                     <TouchableOpacity
                         style={dynamicStyles.settingsItem}
-                        onPress={() => navigateTo('PrivacyPolicy')}
+                        onPress={() => router.push('/screens/Profile/PrivacyPolicy')}
                     >
                         <View style={styles.settingsIconContainer}>
                             <Ionicons name="shield-checkmark" size={22} color={theme === 'light' ? "#6a0dad" : "#fff"} />

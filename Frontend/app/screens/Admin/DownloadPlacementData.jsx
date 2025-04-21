@@ -16,7 +16,8 @@ import * as FileSystem from 'expo-file-system';
 import * as Sharing from 'expo-sharing';
 import { encode } from 'base64-arraybuffer';
 import * as IntentLauncher from 'expo-intent-launcher';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import { Ionicons } from '@expo/vector-icons';
+import { router } from 'expo-router';
 
 export default function ExportPage() {
     const { theme, admin } = useUser()
@@ -150,6 +151,7 @@ export default function ExportPage() {
             color: currentTheme === 'light' ? "#6A0DAD" : "white",
             fontSize: 24,
             fontWeight: "bold",
+            marginTop: 30
         },
         subtitle: {
             color: currentTheme === 'light' ? "#666666" : "#BBB",
@@ -209,6 +211,9 @@ export default function ExportPage() {
             />
 
             <View style={dynamicStyles.headerContainer}>
+                <Pressable onPress={() => router.back()}>
+                    <Ionicons name="arrow-back" size={24} color="#fff" />
+                </Pressable>
                 <Text style={dynamicStyles.headerText}>Export Placement Data</Text>
                 <Text style={dynamicStyles.subtitle}>Choose your export format</Text>
             </View>

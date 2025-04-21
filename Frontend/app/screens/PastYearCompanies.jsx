@@ -1,673 +1,669 @@
-import React, { useEffect, useState, useRef, useCallback } from "react";
-import { View, Text, StyleSheet, Image, TouchableOpacity, SafeAreaView, Dimensions, Animated, StatusBar } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import { BlurView } from "expo-blur";
-import { SharedElement } from "react-navigation-shared-element";
-import { useFonts, Poppins_400Regular, Poppins_600SemiBold, Poppins_700Bold } from "@expo-google-fonts/poppins";
-import LottieView from "lottie-react-native";
+import React, { useState, useEffect } from 'react';
+import {
+	View,
+	Text,
+	Image,
+	TouchableOpacity,
+	StyleSheet,
+	StatusBar,
+	ScrollView,
+	SafeAreaView,
+	TextInput,
+	ActivityIndicator,
+	Pressable
+} from 'react-native';
+import { FontAwesome, Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
+import { LinearGradient } from 'expo-linear-gradient';
+import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
+import { useUser } from '../../context/userContext.js';
+import { router } from 'expo-router';
+import CustomAlert from '../../components/CustomAlert.jsx';
 
-// Import company logos
-import microsoftLogo from "@/assets/images/microsoft.png";
-import appleLogo from "@/assets/images/apple.png";
-import googleLogo from "@/assets/images/google.png";
-import amazonLogo from "@/assets/images/amazon.png";
-import netflixLogo from "@/assets/images/netflix.png";
-import metaLogo from "@/assets/images/meta.png";
-import uberLogo from "@/assets/images/uber.png";
-import nvidiaLogo from "@/assets/images/nvidia.png";
-
-// Company data with enhanced properties
-const companies = [
-  {
-    id: "microsoft",
-    name: "Microsoft",
-    logo: microsoftLogo,
-    count: 23,
-    trendDirection: "up",
-    trendPercentage: 15,
-    primaryColor: "#00A4EF"
-  },
-  {
-    id: "apple",
-    name: "Apple",
-    logo: appleLogo,
-    count: 18,
-    trendDirection: "down",
-    trendPercentage: 7,
-    primaryColor: "#A2AAAD"
-  },
-  {
-    id: "google",
-    name: "Google",
-    logo: googleLogo,
-    count: 15,
-    trendDirection: "up",
-    trendPercentage: 12,
-    primaryColor: "#4285F4"
-  },
-  {
-    id: "amazon",
-    name: "Amazon",
-    logo: amazonLogo,
-    count: 14,
-    trendDirection: "up",
-    trendPercentage: 4,
-    primaryColor: "#FF9900"
-  },
-  {
-    id: "netflix",
-    name: "Netflix",
-    logo: netflixLogo,
-    count: 8,
-    trendDirection: "down",
-    trendPercentage: 10,
-    primaryColor: "#E50914"
-  },
-  {
-    id: "meta",
-    name: "Meta",
-    logo: metaLogo,
-    count: 12,
-    trendDirection: "up",
-    trendPercentage: 8,
-    primaryColor: "#0668E1"
-  },
-  {
-    id: "uber",
-    name: "Uber",
-    logo: uberLogo,
-    count: 7,
-    trendDirection: "up",
-    trendPercentage: 22,
-    primaryColor: "#000000"
-  },
-  {
-    id: "nvidia",
-    name: "Nvidia",
-    logo: nvidiaLogo,
-    count: 20,
-    trendDirection: "up",
-    trendPercentage: 45,
-    primaryColor: "#76B900"
-  },
-];
-
-const { width, height } = Dimensions.get('window');
-const ITEM_HEIGHT = 110;
-const LOADER_DURATION = 2000;
-
-const CompaniesScreen = ({ navigation }) => {
-  const [companies, setCompanies] = useState([])
-  const [selectedFilter, setSelectedFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filteredCompanies, setFilteredCompanies] = useState([]);
-  const [loopedCompanies, setLoopedCompanies] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [hasLoaded, setHasLoaded] = useState(false);
-  const scrollY = useRef(new Animated.Value(0)).current;
-  const flatListRef = useRef(null);
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.9)).current;
-
-  // Load custom fonts
-  const [fontsLoaded] = useFonts({
-    Poppins_400Regular,
-    Poppins_600SemiBold,
-    Poppins_700Bold,
-  });
-
-  // Initial loading animation
-  useEffect(() => {
-    if (fontsLoaded) {
-      // Simulate API loading with a delay
-      setTimeout(() => {
-        setIsLoading(false);
-
-        // Animate in the content
-        Animated.parallel([
-          Animated.timing(fadeAnim, {
-            toValue: 1,
-            duration: 600,
-            useNativeDriver: true,
-          }),
-          Animated.timing(scaleAnim, {
-            toValue: 1,
-            duration: 600,
-            useNativeDriver: true,
-          })
-        ]).start(() => {
-          setHasLoaded(true);
-        });
-      }, LOADER_DURATION);
-    }
-  }, [fontsLoaded]);
-
-  // Filter companies based on selected filter and search query
-  useEffect(() => {
-    if (!hasLoaded) return;
-
-    let data = [...companies];
-
-    // Apply filter
-    if (selectedFilter === "popular") {
-      data = data.filter(company => company.count > 15);
-    } else if (selectedFilter === "trending") {
-      data = data.filter(company => company.trendDirection === "up" && company.trendPercentage > 10);
-    }
-
-    // Apply search
-    if (searchQuery) {
-      const query = searchQuery.toLowerCase();
-      data = data.filter(company => company.name.toLowerCase().includes(query));
-    }
-
-    setFilteredCompanies(data);
-
-    // Create looped data for infinite scroll
-    const multipleData = [];
-    for (let i = 0; i < 5; i++) {
-      multipleData.push(...data.map(item => ({ ...item, key: `${item.id}-${i}` })));
-    }
-    setLoopedCompanies(multipleData);
-
-    // Initialize scroll position to middle for infinite loop effect
-    setTimeout(() => {
-      if (flatListRef.current) {
-        flatListRef.current.scrollToOffset({
-          offset: data.length * ITEM_HEIGHT * 2,
-          animated: false
-        });
-      }
-    }, 100);
-  }, [selectedFilter, searchQuery, hasLoaded]);
-
-  // Create smooth scroll handler with intelligent loop reset
-  const handleScroll = Animated.event(
-    [{ nativeEvent: { contentOffset: { y: scrollY } } }],
-    { useNativeDriver: true }
-  );
-
-  const handleScrollEnd = useCallback((event) => {
-    if (!filteredCompanies.length) return;
-
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const contentHeight = event.nativeEvent.contentSize.height;
-    const singleSetHeight = filteredCompanies.length * ITEM_HEIGHT;
-
-    // Reset to middle when reaching near ends for seamless looping
-    if (offsetY > contentHeight - height - singleSetHeight) {
-      flatListRef.current?.scrollToOffset({
-        offset: 2 * singleSetHeight,
-        animated: false
-      });
-    } else if (offsetY < singleSetHeight) {
-      flatListRef.current?.scrollToOffset({
-        offset: 3 * singleSetHeight,
-        animated: false
-      });
-    }
-  }, [filteredCompanies]);
-
-  const handleCompanyPress = useCallback((company) => {
-    // Navigation would occur here to a detail screen
-    console.log(`Selected ${company.name}`);
-    // Example: navigation.navigate('CompanyDetail', { company });
-  }, []);
-
-  // Render company item with enhanced animations
-  const renderCompanyItem = useCallback(({ item, index }) => {
-    const inputRange = [
-      (index - 2) * ITEM_HEIGHT,
-      (index - 1) * ITEM_HEIGHT,
-      index * ITEM_HEIGHT,
-      (index + 1) * ITEM_HEIGHT,
-      (index + 2) * ITEM_HEIGHT,
-    ];
-
-    // Enhanced scale animation with smoother curve
-    const scale = scrollY.interpolate({
-      inputRange,
-      outputRange: [0.85, 0.95, 1, 0.95, 0.85],
-      extrapolate: 'clamp',
-    });
-
-    // Enhanced opacity animation with smoother curve
-    const opacity = scrollY.interpolate({
-      inputRange,
-      outputRange: [0.5, 0.8, 1, 0.8, 0.5],
-      extrapolate: 'clamp',
-    });
-
-    // Translate animation for parallax effect
-    const translateY = scrollY.interpolate({
-      inputRange,
-      outputRange: [25, 10, 0, -10, -25],
-      extrapolate: 'clamp',
-    });
-
-    return (
-      <Animated.View
-        style={[
-          styles.companyItemContainer,
-          {
-            transform: [{ scale }, { translateY }],
-            opacity
-          }
-        ]}
-      >
-        <TouchableOpacity
-          style={styles.companyItem}
-          activeOpacity={0.8}
-          onPress={() => handleCompanyPress(item)}
-        >
-          <SharedElement id={`company.${item.id}.logo`}>
-            <Image source={item.logo} style={styles.companyLogo} />
-          </SharedElement>
-
-          <View style={styles.companyDetails}>
-            <Text style={styles.companyText}>{item.name}</Text>
-            <View style={styles.statsContainer}>
-              <Text style={styles.companyCount}>{item.count} placements</Text>
-              <View style={styles.trendContainer}>
-                <Ionicons
-                  name={item.trendDirection === "up" ? "trending-up" : "trending-down"}
-                  size={16}
-                  color={item.trendDirection === "up" ? "#4CAF50" : "#F44336"}
-                />
-                <Text
-                  style={[
-                    styles.trendText,
-                    { color: item.trendDirection === "up" ? "#4CAF50" : "#F44336" }
-                  ]}
-                >
-                  {item.trendPercentage}%
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          <View style={[styles.iconContainer, { backgroundColor: item.primaryColor + '20' }]}>
-            <Ionicons name="chevron-forward" size={24} color={item.primaryColor} />
-          </View>
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  }, [scrollY]);
-
-  // If fonts are still loading or initial animation is running
-  if (isLoading || !fontsLoaded) {
-    return (
-      <SafeAreaView style={styles.loaderContainer}>
-        <StatusBar barStyle="light-content" />
-        <LottieView
-          source={require('@/assets/animations/placement-loader.json')}
-          autoPlay
-          loop
-          style={styles.lottieLoader}
-        />
-        <Text style={styles.loaderText}>Placement Plus</Text>
-      </SafeAreaView>
-    );
-  }
-
-  return (
-    <SafeAreaView style={styles.container}>
-      <StatusBar barStyle="light-content" />
-
-      {/* Animated header with blur effect */}
-      <Animated.View
-        style={[
-          styles.header,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }]
-          }
-        ]}
-      >
-        <BlurView intensity={20} style={styles.blurContainer}>
-          <View style={styles.headerContent}>
-            <View style={styles.logoContainer}>
-              <Image source={require("@/assets/images/logo.png")} style={styles.logo} />
-              <Text style={styles.logoText}>Placement Plus</Text>
-            </View>
-            <TouchableOpacity style={styles.profileButton}>
-              <Ionicons name="person-circle" size={35} color="#fff" />
-            </TouchableOpacity>
-          </View>
-        </BlurView>
-      </Animated.View>
-
-      {/* Animated Content */}
-      <Animated.View
-        style={[
-          styles.content,
-          {
-            opacity: fadeAnim,
-            transform: [{ scale: scaleAnim }]
-          }
-        ]}
-      >
-        {/* Search bar */}
-        <View style={styles.searchContainer}>
-          <Ionicons name="search" size={20} color="#FFFFFF" style={styles.searchIcon} />
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Search companies..."
-            placeholderTextColor="rgba(255, 255, 255, 0.6)"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
-          {searchQuery ? (
-            <TouchableOpacity onPress={() => setSearchQuery("")}>
-              <Ionicons name="close-circle" size={20} color="#FFFFFF" />
-            </TouchableOpacity>
-          ) : null}
-        </View>
-
-        {/* Filter tabs with animated indicator */}
-        <View style={styles.filterContainer}>
-          <FilterTab
-            label="All"
-            isActive={selectedFilter === "all"}
-            onPress={() => setSelectedFilter("all")}
-          />
-          <FilterTab
-            label="Popular"
-            isActive={selectedFilter === "popular"}
-            onPress={() => setSelectedFilter("popular")}
-          />
-          <FilterTab
-            label="Trending"
-            isActive={selectedFilter === "trending"}
-            onPress={() => setSelectedFilter("trending")}
-          />
-        </View>
-
-        {/* Empty state if no companies match filter */}
-        {filteredCompanies.length === 0 && hasLoaded ? (
-          <View style={styles.emptyContainer}>
-            <LottieView
-              source={require('@/assets/animations/empty-state.json')}
-              autoPlay
-              loop
-              style={styles.emptyAnimation}
-            />
-            <Text style={styles.emptyText}>No companies found</Text>
-            <Text style={styles.emptySubtext}>Try adjusting your filters</Text>
-          </View>
-        ) : (
-          /* Optimized FlatList for smooth scrolling */
-          <View style={styles.carouselContainer}>
-            <Animated.FlatList
-              ref={flatListRef}
-              data={loopedCompanies}
-              renderItem={renderCompanyItem}
-              keyExtractor={(item) => item.key}
-              showsVerticalScrollIndicator={false}
-              snapToInterval={ITEM_HEIGHT}
-              decelerationRate={0.85}
-              onScroll={handleScroll}
-              onMomentumScrollEnd={handleScrollEnd}
-              contentContainerStyle={styles.listContainer}
-              snapToAlignment="center"
-              removeClippedSubviews={true}
-              maxToRenderPerBatch={5}
-              initialNumToRender={8}
-              windowSize={10}
-            />
-          </View>
-        )}
-      </Animated.View>
-
-      {/* Floating action button */}
-      {hasLoaded && (
-        <TouchableOpacity style={styles.floatingButton}>
-          <Ionicons name="add" size={24} color="#FFFFFF" />
-        </TouchableOpacity>
-      )}
-    </SafeAreaView>
-  );
+const imageMap = {
+	'Google.png': require('@/assets/companyImages/Google-new.png'),
+	'Microsoft.png': require('@/assets/companyImages/Microsoft.png'),
+	'Amazon.png': require('@/assets/companyImages/amazon2.png'),
+	// 'Adobe.png': require('@/assets/companyImages/adobe.png'),
+	// 'Samsung R&D.png': require('@/assets/companyImages/samsung.png'),
+	// 'Default.png': require('@/assets/companyImages/company-default.png')
+	'Meta.png': require('@/assets/companyImages/meta-new.webp'),
 };
 
-// Reusable filter tab component with animation
-const FilterTab = ({ label, isActive, onPress }) => {
-  return (
-    <TouchableOpacity
-      style={[styles.filterButton, isActive && styles.filterButtonActive]}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      <Text style={[styles.filterText, isActive && styles.filterTextActive]}>{label}</Text>
-      {isActive && <View style={styles.filterIndicator} />}
-    </TouchableOpacity>
-  );
-};
+const PastRecruiters = () => {
+	const [recruiters, setRecruiters] = useState([]);
+	const [filteredRecruiters, setFilteredRecruiters] = useState([]);
+	const [isLoading, setIsLoading] = useState(true);
+	const [searchQuery, setSearchQuery] = useState('');
+	const { theme } = useUser();
+	const [alertVisible, setAlertVisible] = useState(false)
+	const [alertConfig, setAlertConfig] = useState({
+		header: "",
+		message: "",
+		buttons: []
+	})
 
-// Text input component with proper imports
-const TextInput = Animated.createAnimatedComponent(require('react-native').TextInput);
+	useEffect(() => {
+		fetchPastRecruiters();
+	}, []);
+
+	useEffect(() => {
+		if (recruiters.length > 0) {
+			applyFilters();
+		}
+	}, [recruiters, searchQuery]);
+
+	const fetchPastRecruiters = async () => {
+		setIsLoading(true);
+		try {
+			const accessToken = await getAccessToken();
+			const refreshToken = await getRefreshToken();
+
+			const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/past-recruiter/get-all-recruiter`, {
+				method: 'GET',
+				headers: {
+					'Authorization': `Bearer ${accessToken}`,
+					'x-refresh-token': `${refreshToken}`
+				}
+			});
+
+			if (!response.ok) {
+				const error = await response.text()
+				console.log(error);
+
+				throw new Error(result?.message || 'Failed to fetch past recruiters');
+			}
+
+			const result = await response.json();
+
+			if (result.statusCode === 200) {
+				setRecruiters(result.data);
+				setFilteredRecruiters(result.data);
+			} else {
+				setAlertConfig({
+					header: "Error",
+					message: result?.message || "Something went wrong. Please try again.",
+					buttons: [
+						{
+							text: "OK",
+							onPress: () => setAlertVisible(false),
+							style: "default"
+						}
+					]
+				});
+				setAlertVisible(true);
+			}
+		} catch (error) {
+			setAlertConfig({
+				header: "Error",
+				message: error?.message || "Something went wrong. Please try again.",
+				buttons: [
+					{
+						text: "OK",
+						onPress: () => setAlertVisible(false),
+						style: "default"
+					}
+				]
+			});
+			setAlertVisible(true);
+			console.error('Error:', error.message);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const applyFilters = () => {
+		if (!searchQuery) {
+			setFilteredRecruiters(recruiters);
+			return;
+		}
+
+		const query = searchQuery.toLowerCase();
+		const filtered = recruiters.filter(recruiter => {
+			const companyNameMatch = recruiter.companyName.toLowerCase().includes(query);
+
+			// Check if any role name matches the query
+			const roleMatch = recruiter.roles.some(role =>
+				role.roleName.toLowerCase().includes(query)
+			);
+
+			return companyNameMatch || roleMatch;
+		});
+
+		setFilteredRecruiters(filtered);
+	};
+
+	const handleRecruiterPress = (recruiter) => {
+		router.push({
+			pathname: 'screens/RecruiterDetail',
+			params: { recruiterId: recruiter._id }
+		});
+	};
+
+	const getCompanyImage = (companyName) => {
+		const imageName = `${companyName}.png`;
+		return imageMap[imageName] || imageMap['Default.png'];
+	};
+
+	// Theme-based colors
+	const backgroundGradientColors = theme === 'light'
+		? ['#F5F5F5', '#E0E0E0']
+		: ['#2d0e3e', '#1a012c'];
+
+	const statusBarStyle = theme === 'light' ? 'dark-content' : 'light-content';
+	const statusBarBackgroundColor = theme === 'light' ? '#F5F5F5' : '#2d0e3e';
+	const searchBgColor = theme === 'light' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(50, 8, 74, 0.9)';
+	const searchTextColor = theme === 'light' ? '#333' : 'white';
+	const searchPlaceholderColor = theme === 'light' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.5)';
+
+	const renderRecruiterCard = (recruiter) => {
+		const cardBackgroundColors = theme === 'light'
+			? ['#FFFFFF', '#F0F0F0']
+			: ['rgba(138, 35, 135, 0.8)', 'rgba(26, 1, 44, 0.9)'];
+
+		const companyNameColor = theme === 'light' ? "#6A0DAD" : 'white';
+		const textColor = theme === 'light' ? '#333333' : 'white';
+		const subtextColor = theme === 'light' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.7)';
+
+		return (
+			<TouchableOpacity
+				key={recruiter._id}
+				style={styles.cardWrapper}
+				onPress={() => handleRecruiterPress(recruiter)}
+			>
+				<LinearGradient
+					colors={cardBackgroundColors}
+					start={{ x: 0, y: 0 }}
+					end={{ x: 1, y: 1 }}
+					style={[
+						styles.recruiterCard,
+						{
+							backgroundColor: theme === 'light'
+								? 'rgba(106, 13, 173, 0.05)'
+								: 'transparent'
+						}
+					]}
+				>
+					<View style={styles.cardHeader}>
+						<Image
+							source={getCompanyImage(recruiter.companyName)}
+							style={styles.companyLogo}
+						/>
+						<View style={styles.cardHeaderText}>
+							<Text style={[styles.companyCardName, { color: companyNameColor }]}>
+								{recruiter.companyName}
+							</Text>
+							<Text style={[styles.roleCount, { color: subtextColor }]}>
+								{recruiter.roles.length} {recruiter.roles.length === 1 ? 'Role' : 'Roles'}
+							</Text>
+						</View>
+					</View>
+
+					<View style={[
+						styles.cardDivider,
+						{
+							backgroundColor: theme === 'light'
+								? 'rgba(106, 13, 173, 0.2)'
+								: 'rgba(255, 255, 255, 0.15)'
+						}
+					]} />
+
+					<View style={styles.cardDetails}>
+						<View style={styles.detailRow}>
+							<View style={styles.detailItem}>
+								<FontAwesome
+									name="graduation-cap"
+									size={14}
+									color={theme === 'light' ? '#6A0DAD' : '#fff'}
+									style={styles.detailIcon}
+								/>
+								<Text style={[styles.detailText, { color: textColor }]}>
+									{recruiter.eligibleBranches ?
+										(recruiter.eligibleBranches.length > 2 ?
+											`${recruiter.eligibleBranches.slice(0, 2).join(', ')}...` :
+											recruiter.eligibleBranches.join(', ')
+										) :
+										"All Branches"
+									}
+								</Text>
+							</View>
+						</View>
+
+						<View style={styles.rolesContainer}>
+							{recruiter.roles.slice(0, 2).map((role, index) => (
+								<View key={role._id} style={styles.roleItem}>
+									<FontAwesome
+										name="briefcase"
+										size={14}
+										color={theme === 'light' ? '#6A0DAD' : '#fff'}
+										style={styles.detailIcon}
+									/>
+									<Text style={[styles.roleText, { color: textColor }]}>
+										{role.roleName} ({role.opportunityType})
+									</Text>
+								</View>
+							))}
+							{recruiter.roles.length > 2 && (
+								<Text style={[styles.moreRoles, { color: subtextColor }]}>
+									+ {recruiter.roles.length - 2} more roles
+								</Text>
+							)}
+						</View>
+					</View>
+
+					<View style={styles.cardFooter}>
+						<TouchableOpacity
+							style={[
+								styles.viewDetailsButton,
+								{
+									backgroundColor: theme === 'light'
+										? 'rgba(106, 13, 173, 0.7)'
+										: 'rgba(187, 57, 191, 0.8)'
+								}
+							]}
+							onPress={() => handleRecruiterPress(recruiter)}
+						>
+							<Text style={styles.viewDetailsText}>View Details</Text>
+						</TouchableOpacity>
+					</View>
+				</LinearGradient>
+			</TouchableOpacity>
+		);
+	};
+
+	const renderContent = () => {
+		if (isLoading) {
+			return (
+				<View style={styles.loadingContainer}>
+					<ActivityIndicator size="large" color="#6A0DAD" />
+					<Text style={[styles.loadingText, { color: theme === 'light' ? '#6A0DAD' : '#ffffff' }]}>
+						Loading recruiters...
+					</Text>
+				</View>
+			);
+		}
+
+		if (recruiters.length === 0) {
+			return (
+				<View style={styles.emptyContainer}>
+					<FontAwesome
+						name="building"
+						size={50}
+						color={theme === 'light' ? 'rgba(106, 13, 173, 0.5)' : 'rgba(187, 57, 191, 0.5)'}
+					/>
+					<Text style={[styles.emptyText, { color: theme === 'light' ? '#6A0DAD' : '#ffffff' }]}>
+						No past recruiters found
+					</Text>
+				</View>
+			);
+		}
+
+		if (filteredRecruiters.length === 0) {
+			return (
+				<View style={styles.noResultsContainer}>
+					<FontAwesome
+						name="search"
+						size={50}
+						color={theme === 'light' ? 'rgba(106, 13, 173, 0.5)' : 'rgba(187, 57, 191, 0.5)'}
+					/>
+					<Text style={[styles.noResultsText, { color: theme === 'light' ? '#6A0DAD' : '#ffffff' }]}>
+						No recruiters match your search
+					</Text>
+					<TouchableOpacity
+						style={[
+							styles.resetButton,
+							{
+								backgroundColor: theme === 'light'
+									? 'rgba(106, 13, 173, 0.7)'
+									: 'rgba(187, 57, 191, 0.8)'
+							}
+						]}
+						onPress={() => setSearchQuery('')}
+					>
+						<Text style={styles.resetButtonText}>Clear Search</Text>
+					</TouchableOpacity>
+				</View>
+			);
+		}
+
+		return (
+			<ScrollView
+				style={styles.recruiterListContainer}
+				contentContainerStyle={styles.recruiterListContent}
+				showsVerticalScrollIndicator={false}
+			>
+				{filteredRecruiters.map(recruiter => renderRecruiterCard(recruiter))}
+				<View style={styles.scrollPadding} />
+			</ScrollView>
+		);
+	};
+
+	return (
+		<SafeAreaView
+			style={[
+				styles.safeArea,
+				{
+					backgroundColor: theme === 'light' ? '#F5F5F5' : '#2d0e3e'
+				}
+			]}
+		>
+
+			<CustomAlert
+				visible={alertVisible}
+				header={alertConfig.header}
+				message={alertConfig.message}
+				buttons={alertConfig.buttons}
+				onClose={() => setAlertVisible(false)}
+			/>
+
+			<LinearGradient
+				colors={backgroundGradientColors}
+				style={styles.container}
+			>
+				<StatusBar
+					barStyle={statusBarStyle}
+					backgroundColor={statusBarBackgroundColor}
+				/>
+				{/* Header with Logo */}
+				<BlurView
+					intensity={theme === 'light' ? 10 : 30}
+					tint={theme === 'light' ? 'light' : 'dark'}
+					style={[
+						styles.headerBlur,
+						{
+							borderBottomColor: theme === 'light'
+								? 'rgba(0,0,0,0.1)'
+								: 'rgba(255, 255, 255, 0.1)'
+						}
+					]}
+				>
+				</BlurView>
+
+				{/* Search Bar */}
+				<View style={styles.searchContainer}>
+					<Pressable onPress={() => router.back()}>
+						<Ionicons name="arrow-back" size={24} color="#fff" />
+					</Pressable>
+					<View style={[styles.searchBar, { backgroundColor: searchBgColor }]}>
+						<FontAwesome name="search" size={16} color={theme === 'light' ? '#6A0DAD' : '#bb39bf'} />
+						<TextInput
+							style={[styles.searchInput, { color: searchTextColor }]}
+							placeholder="Search by company or role..."
+							placeholderTextColor={searchPlaceholderColor}
+							value={searchQuery}
+							onChangeText={setSearchQuery}
+						/>
+						{searchQuery !== '' && (
+							<TouchableOpacity onPress={() => setSearchQuery('')}>
+								<FontAwesome name="times-circle" size={16} color={theme === 'light' ? '#6A0DAD' : '#bb39bf'} />
+							</TouchableOpacity>
+						)}
+					</View>
+				</View>
+
+				{/* Results Count */}
+				{!isLoading && recruiters.length > 0 && (
+					<View style={styles.resultsCountContainer}>
+						<Text style={[
+							styles.resultsCount,
+							{ color: theme === 'light' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)' }
+						]}>
+							Showing {filteredRecruiters.length} of {recruiters.length} recruiters
+						</Text>
+					</View>
+				)}
+
+				{/* Main Content */}
+				{renderContent()}
+
+				{/* Footer */}
+				<BlurView
+					intensity={theme === 'light' ? 10 : 20}
+					tint={theme === 'light' ? 'light' : 'dark'}
+					style={[
+						styles.footerBlur,
+						{
+							borderTopColor: theme === 'light'
+								? 'rgba(0,0,0,0.1)'
+								: 'rgba(255, 255, 255, 0.1)'
+						}
+					]}
+				>
+					<View style={styles.footer}>
+						<Text style={[
+							styles.footerText,
+							{ color: theme === 'light' ? '#6A0DAD' : 'rgba(255, 255, 255, 0.7)' }
+						]}>
+							© 2025 Placement Plus
+						</Text>
+					</View>
+				</BlurView>
+			</LinearGradient>
+		</SafeAreaView>
+	);
+};
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#1a012c",
-  },
-  loaderContainer: {
-    flex: 1,
-    backgroundColor: "#1a012c",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  lottieLoader: {
-    width: 200,
-    height: 200,
-  },
-  loaderText: {
-    color: "#FFFFFF",
-    fontSize: 24,
-    fontWeight: "bold",
-    marginTop: 20,
-  },
-  header: {
-    width: "100%",
-    zIndex: 10,
-  },
-  blurContainer: {
-    width: "100%",
-    overflow: "hidden",
-  },
-  headerContent: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    width: "100%",
-    paddingVertical: 15,
-    paddingHorizontal: 20,
-    marginTop: 15
-  },
-  logoContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  logo: {
-    width: 30,
-    height: 30,
-    resizeMode: "contain",
-    marginRight: 10,
-  },
-  logoText: {
-    color: "white",
-    fontSize: 22,
-    fontFamily: "Poppins_700Bold",
-  },
-  profileButton: {
-    padding: 5,
-  },
-  content: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  searchContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.12)",
-    borderRadius: 12,
-    paddingHorizontal: 15,
-    marginBottom: 20,
-    height: 45,
-  },
-  searchIcon: {
-    marginRight: 10,
-  },
-  searchInput: {
-    flex: 1,
-    color: "#FFFFFF",
-    fontFamily: "Poppins_400Regular",
-    height: 45,
-  },
-  filterContainer: {
-    flexDirection: "row",
-    marginBottom: 25,
-  },
-  filterButton: {
-    paddingVertical: 8,
-    paddingHorizontal: 20,
-    marginRight: 12,
-    borderRadius: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.08)",
-    position: "relative",
-  },
-  filterButtonActive: {
-    backgroundColor: "rgba(201, 46, 255, 0.15)",
-  },
-  filterText: {
-    color: "#FFFFFF",
-    opacity: 0.7,
-    fontFamily: "Poppins_400Regular",
-    fontSize: 14,
-  },
-  filterTextActive: {
-    color: "#C92EFF",
-    opacity: 1,
-    fontFamily: "Poppins_600SemiBold",
-  },
-  filterIndicator: {
-    position: "absolute",
-    bottom: -5,
-    left: "50%",
-    marginLeft: -3,
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: "#C92EFF",
-  },
-  carouselContainer: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  listContainer: {
-    paddingVertical: height / 5,
-  },
-  companyItemContainer: {
-    height: ITEM_HEIGHT,
-    justifyContent: "center",
-    alignItems: "center",
-    marginVertical: 5,
-  },
-  companyItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.97)",
-    borderRadius: 18,
-    padding: 16,
-    width: width - 40,
-    shadowColor: "#C92EFF",
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.2,
-    shadowRadius: 15,
-    elevation: 10,
-  },
-  companyLogo: {
-    width: 55,
-    height: 55,
-    resizeMode: "contain",
-    marginRight: 15,
-    borderRadius: 12,
-  },
-  companyDetails: {
-    flex: 1,
-  },
-  companyText: {
-    color: "#1a012c",
-    fontSize: 17,
-    fontFamily: "Poppins_600SemiBold",
-    marginBottom: 3,
-  },
-  statsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  companyCount: {
-    color: "#666",
-    fontSize: 13,
-    fontFamily: "Poppins_400Regular",
-  },
-  trendContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginLeft: 12,
-    backgroundColor: "rgba(0, 0, 0, 0.05)",
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-  },
-  trendText: {
-    fontSize: 12,
-    fontFamily: "Poppins_600SemiBold",
-    marginLeft: 3,
-  },
-  iconContainer: {
-    padding: 8,
-    borderRadius: 12,
-  },
-  emptyContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  emptyAnimation: {
-    width: 150,
-    height: 150,
-  },
-  emptyText: {
-    color: "#FFFFFF",
-    fontSize: 18,
-    fontFamily: "Poppins_600SemiBold",
-    marginTop: 10,
-  },
-  emptySubtext: {
-    color: "rgba(255, 255, 255, 0.6)",
-    fontSize: 14,
-    fontFamily: "Poppins_400Regular",
-    marginTop: 5,
-  },
-  floatingButton: {
-    position: "absolute",
-    bottom: 30,
-    right: 30,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#C92EFF",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#C92EFF",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.5,
-    shadowRadius: 10,
-    elevation: 8,
-  },
+	safeArea: {
+		flex: 1,
+	},
+	container: {
+		flex: 1,
+		paddingHorizontal: 15,
+	},
+	headerBlur: {
+		borderBottomWidth: 1,
+		marginBottom: 15,
+	},
+	header: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		width: '100%',
+		paddingTop: 15,
+		paddingBottom: 15,
+		paddingHorizontal: 5,
+		marginTop: 15
+	},
+	logoContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	logo: {
+		width: 30,
+		height: 30,
+		resizeMode: 'contain',
+		marginRight: 10,
+	},
+	logoText: {
+		fontSize: 22,
+		fontWeight: 'bold',
+		fontFamily: 'System',
+	},
+	backButton: {
+		padding: 5,
+	},
+	searchContainer: {
+		flexDirection: 'row',
+		marginBottom: 15,
+		alignItems: 'center',
+		marginTop: 15
+	},
+	searchBar: {
+		flex: 1,
+		flexDirection: 'row',
+		alignItems: 'center',
+		paddingHorizontal: 15,
+		paddingVertical: 10,
+		borderRadius: 12,
+		marginLeft: 10
+	},
+	searchInput: {
+		flex: 1,
+		marginLeft: 10,
+		fontSize: 16,
+	},
+	resultsCountContainer: {
+		marginBottom: 15,
+	},
+	resultsCount: {
+		fontSize: 14,
+		fontWeight: '500',
+	},
+	loadingContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	loadingText: {
+		marginTop: 15,
+		fontSize: 16,
+		fontWeight: '500',
+	},
+	emptyContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		padding: 20,
+	},
+	emptyText: {
+		marginTop: 15,
+		fontSize: 18,
+		fontWeight: '600',
+		textAlign: 'center',
+	},
+	noResultsContainer: {
+		flex: 1,
+		justifyContent: 'center',
+		alignItems: 'center',
+		padding: 20,
+	},
+	noResultsText: {
+		marginTop: 15,
+		marginBottom: 20,
+		fontSize: 16,
+		fontWeight: '500',
+		textAlign: 'center',
+	},
+	resetButton: {
+		paddingHorizontal: 20,
+		paddingVertical: 12,
+		borderRadius: 8,
+	},
+	resetButtonText: {
+		color: 'white',
+		fontSize: 14,
+		fontWeight: '600',
+	},
+	recruiterListContainer: {
+		flex: 1,
+	},
+	recruiterListContent: {
+		paddingTop: 5,
+	},
+	cardWrapper: {
+		marginBottom: 15,
+	},
+	recruiterCard: {
+		borderRadius: 16,
+		padding: 16,
+		shadowColor: '#bb39bf',
+		shadowOffset: { width: 0, height: 4 },
+		shadowOpacity: 0.3,
+		shadowRadius: 6,
+		elevation: 5,
+	},
+	cardHeader: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: 12,
+	},
+	companyLogo: {
+		width: 50,
+		height: 50,
+		marginRight: 12,
+		borderRadius: 8,
+	},
+	cardHeaderText: {
+		flex: 1,
+	},
+	companyCardName: {
+		fontSize: 18,
+		fontWeight: 'bold',
+		marginBottom: 4,
+	},
+	roleCount: {
+		fontSize: 14,
+	},
+	cardDivider: {
+		height: 1,
+		marginVertical: 12,
+	},
+	cardDetails: {
+		marginBottom: 12,
+	},
+	detailRow: {
+		flexDirection: 'row',
+		marginBottom: 8,
+	},
+	detailItem: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		flex: 1,
+	},
+	detailIcon: {
+		marginRight: 8,
+	},
+	detailText: {
+		fontSize: 14,
+	},
+	rolesContainer: {
+		marginTop: 8,
+	},
+	roleItem: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		marginBottom: 6,
+	},
+	roleText: {
+		fontSize: 14,
+	},
+	moreRoles: {
+		fontSize: 12,
+		marginTop: 4,
+		marginLeft: 22,
+	},
+	cardFooter: {
+		flexDirection: 'row',
+		justifyContent: 'flex-end',
+		alignItems: 'center',
+	},
+	viewDetailsButton: {
+		paddingHorizontal: 16,
+		paddingVertical: 8,
+		borderRadius: 8,
+	},
+	viewDetailsText: {
+		color: 'white',
+		fontSize: 14,
+		fontWeight: '600',
+	},
+	footerBlur: {
+		borderTopWidth: 1,
+		marginTop: 10,
+	},
+	footer: {
+		justifyContent: 'center',
+		alignItems: 'center',
+		paddingVertical: 15,
+	},
+	footerText: {
+		fontSize: 14,
+		fontWeight: '500',
+	},
+	scrollPadding: {
+		height: 20,
+	},
 });
 
-export default CompaniesScreen;
+export default PastRecruiters;

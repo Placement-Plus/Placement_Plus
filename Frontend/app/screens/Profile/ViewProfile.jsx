@@ -5,11 +5,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useUser } from '../../../context/userContext.js';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage';
 import * as IntentLauncher from 'expo-intent-launcher';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import CustomAlert from '../../../components/CustomAlert.jsx';
 
 const ProfileView = () => {
     const navigation = useNavigation();
     const { user, theme } = useUser();
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     const profile = {
         name: user?.name || '-',
@@ -62,11 +68,35 @@ const ProfileView = () => {
                 throw new Error("Something went wrong");
 
             const result = await response.json();
-            await openPdf(result?.data);
-
+            if (result.statusCode === 200) {
+                await openPdf(result?.data);
+            } else {
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+            }
         } catch (error) {
             console.error('Error fetching resume:', error?.message);
-            Alert.alert('Error', 'Failed to fetch resume. Please try again.');
+            setAlertConfig({
+                header: "Failed to fetch resume",
+                message: result?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
         }
     };
 
@@ -123,6 +153,14 @@ const ProfileView = () => {
                 <Text style={[styles.headerTitle, { color: themeColors.text }]}>Profile</Text>
                 <View style={{ width: 60 }} />
             </View>
+
+            <CustomAlert
+                visible={alertVisible}
+                header={alertConfig.header}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={() => setAlertVisible(false)}
+            />
 
             <ScrollView style={styles.scrollView}>
                 <View style={styles.profileHeader}>

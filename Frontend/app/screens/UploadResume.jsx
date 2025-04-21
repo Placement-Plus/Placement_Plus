@@ -19,12 +19,18 @@ import * as DocumentPicker from 'expo-document-picker';
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import * as FileSystem from "expo-file-system";
 import { useUser } from '../../context/userContext.js';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import CustomAlert from '../../components/CustomAlert.jsx';
 
 const ResumeUploadScreen = () => {
     const { width, height } = useWindowDimensions();
     const [resumeFile, setResumeFile] = useState(null);
     const { theme } = useUser()
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     // Responsive sizing helper
     const getResponsiveSize = (size, dimension) => {
@@ -101,7 +107,7 @@ const ResumeUploadScreen = () => {
 
 
         try {
-    
+
             const response = await FileSystem.uploadAsync(
                 `http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/upload-resume`,
                 resume.uri,
@@ -120,17 +126,46 @@ const ResumeUploadScreen = () => {
             console.log(result);
 
             if (result.statusCode === 200) {
-                Alert.alert("Success", "Resume uploaded successfully!");
+                setAlertConfig({
+                    header: "Success",
+                    message: "Resume uploaded successfully!",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             } else {
-                Alert.alert('Error', result?.message || "Something went wrong. please try again later")
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again later",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
         } catch (error) {
-            Alert.alert(
-                "Error",
-                error.message || "Something went wrong. Please try again.",
-                [{ text: "OK" }]
-            );
-            console.error('Error:', error.message);
+            setAlertConfig({
+                header: "Upload error",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
+            console.error('Error:', error?.message);
         }
     };
 
@@ -265,6 +300,14 @@ const ResumeUploadScreen = () => {
                         </LinearGradient>
                     )}
                 </View>
+
+                <CustomAlert
+                    visible={alertVisible}
+                    header={alertConfig.header}
+                    message={alertConfig.message}
+                    buttons={alertConfig.buttons}
+                    onClose={() => setAlertVisible(false)}
+                />
 
             </ScrollView>
         </SafeAreaView>

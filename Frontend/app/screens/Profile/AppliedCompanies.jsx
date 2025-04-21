@@ -11,10 +11,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage';
 import { router } from 'expo-router';
 import { useUser } from '../../../context/userContext.js';
+import CustomAlert from '../../../components/CustomAlert.jsx';
 
 const CompanyCard = ({ company, theme }) => {
     const [isExpanded, setIsExpanded] = useState(false);
-
 
     // Get theme-specific colors
     const themeColor = theme === 'light' ? '#6A0DAD' : '#C92EFF';
@@ -164,6 +164,12 @@ const CompanyCard = ({ company, theme }) => {
 const AppliedCompaniesPage = () => {
     const [companies, setCompanies] = useState([]);
     const { theme } = useUser()
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     // Theme variables
     const backgroundColor = theme === 'light' ? '#F5F5F5' : '#1a012c';
@@ -189,11 +195,35 @@ const AppliedCompaniesPage = () => {
 
             if (result.statusCode === 200) {
                 setCompanies(result.data);
+            } else {
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
             }
 
         } catch (error) {
             console.error('Error: ', error?.message);
-            Alert.alert('Error', 'Failed to fetch applied companies. Please try again.');
+            setAlertConfig({
+                header: "Error",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true)
         }
     };
 
@@ -209,6 +239,14 @@ const AppliedCompaniesPage = () => {
                 </TouchableOpacity>
                 <Text style={[styles.headerTitle, { color: themeColor }]}>Applied Companies</Text>
             </View>
+
+            <CustomAlert
+                visible={alertVisible}
+                header={alertConfig.header}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={() => setAlertVisible(false)}
+            />
 
             <ScrollView
                 contentContainerStyle={styles.scrollViewContent}

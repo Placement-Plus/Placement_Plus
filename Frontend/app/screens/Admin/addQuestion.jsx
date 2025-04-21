@@ -22,8 +22,8 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import DropDownPicker from 'react-native-dropdown-picker';
 import { useUser } from "../../../context/userContext.js";
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
 import { getAccessToken, getRefreshToken } from "../../../utils/tokenStorage.js";
+import CustomAlert from "../../../components/CustomAlert.jsx";
 
 const InputField = ({
     icon,
@@ -78,7 +78,12 @@ const InputField = ({
 
 const AddPracticeQuestionScreen = () => {
     const { theme } = useUser()
-
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
     const [formData, setFormData] = useState({
         questionName: "",
         description: "",
@@ -179,31 +184,55 @@ const AddPracticeQuestionScreen = () => {
             })
 
             const result = await response.json()
-            console.log(result);
+            // console.log(result);
 
             if (result.statusCode === 200) {
-                Alert.alert(
-                    "Success",
-                    "Practice question added successfully!",
-                    [{
-                        text: "OK", onPress: () => setFormData({
-                            questionName: "",
-                            description: "",
-                            difficulty: "Easy",
-                            questionLink: "",
-                            companyName: "",
-                        })
-                    }]
-                );
+                setAlertConfig({
+                    header: "Success",
+                    message: "Uploaded successfully",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
+                setFormData({
+                    questionName: "",
+                    description: "",
+                    difficulty: "Easy",
+                    questionLink: "",
+                    companyName: "",
+                })
             } else {
-                Alert.alert(
-                    "Error",
-                    "Something went wrong. please try again later",
-                );
-                return;
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
             }
         } catch (error) {
-            Alert.alert("Error", "Failed to add question. Please try again.");
+            setAlertConfig({
+                header: "Error",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true)
             console.error(error);
         } finally {
             setIsSubmitting(false);
@@ -250,6 +279,14 @@ const AddPracticeQuestionScreen = () => {
                             ]}>Practice Question</Text>
                         </Text>
                     </View>
+
+                    <CustomAlert
+                        visible={alertVisible}
+                        header={alertConfig.header}
+                        message={alertConfig.message}
+                        buttons={alertConfig.buttons}
+                        onClose={() => setAlertVisible(false)}
+                    />
 
                     {/* Description Card */}
                     <LinearGradient

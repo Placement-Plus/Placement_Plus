@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -20,6 +20,7 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useUser } from "../../context/userContext.js";
 import { useFocusEffect } from "@react-navigation/native";
+import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js"
 
 import pastYearCompany from "@/assets/homepageImages/pastyearcompany-Photoroom.png";
 import placementStat from "@/assets/homepageImages/placementstat-Photoroom.png";
@@ -91,13 +92,13 @@ const menuItems = [
     route: "/screens/UploadResume",
     color: "#F97316",
   },
-  {
-    id: 8,
-    title: "AI Assistant",
-    icon: chatbot,
-    route: "/screens/ChatBot",
-    color: "#C92EFF",
-  },
+  // {
+  //   id: 8,
+  //   title: "AI Assistant",
+  //   icon: chatbot,
+  //   route: "/screens/ChatBot",
+  //   color: "#C92EFF",
+  // },
 ];
 
 const PlacementPlus = () => {
@@ -105,10 +106,8 @@ const PlacementPlus = () => {
   const scaleAnims = useRef(menuItems.map(() => new Animated.Value(1))).current;
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredItems, setFilteredItems] = useState(menuItems);
-  const { user, isLoggedIn, theme } = useUser()
-
-  console.log(theme);
-
+  const { user, theme } = useUser()
+  const [newNotifications, setNewNotifications] = useState(0)
 
   useFocusEffect(
     useCallback(() => {
@@ -133,6 +132,57 @@ const PlacementPlus = () => {
       return () => backHandler.remove();
     }, [])
   );
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      handleNotifications();
+    }, 1000);
+
+    return () => clearTimeout(timeout);
+  }, []);
+
+  const handleNotifications = async () => {
+    try {
+      const accessToken = await getAccessToken();
+      const refreshToken = await getRefreshToken();
+
+      const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/notifications/get-notifications`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'x-refresh-token': refreshToken
+        }
+      });
+
+      if (!response.ok) {
+        const error = await response.text()
+        console.log("Network error: ", error);
+        return;
+      }
+
+      const result = await response.json();
+
+      if (result.statusCode === 200) {
+        // setNotifications(result.data);
+        setTimeout(() => {
+          let unreadNotifications = 0;
+          result.data.forEach((notification) => {
+            if (user && user._id) {
+              if (!notification.readBy.includes(user._id))
+                unreadNotifications++;
+            }
+          });
+          setNewNotifications(unreadNotifications)
+        }, 1000)
+      } else {
+        // showAlert("Error", result?.message || "Failed to fetch notifications");
+        console.log("Error", result?.message || "Failed to fetch notifications");
+      }
+    } catch (error) {
+      console.error('Failed to fetch notifications:', error);
+      // showAlert("Error", "Something went wrong while fetching notifications");
+    }
+  };
 
   const handleSearch = (text) => {
     setSearchQuery(text);
@@ -168,9 +218,9 @@ const PlacementPlus = () => {
   };
 
   const handlePress = (route) => {
-    console.log(route);
-
-    router.push(route);
+    // console.log(route);
+    if (route)
+      router.push(route);
   };
 
   const getDynamicStyles = (currentTheme) => StyleSheet.create({
@@ -283,7 +333,7 @@ const PlacementPlus = () => {
     gridContainer: {
       flexDirection: "row",
       flexWrap: "wrap",
-      justifyContent: "space-between",
+      // justifyContent: "space-between",
     },
     gridItemWrapper: {
       width: "33%",
@@ -425,15 +475,20 @@ const PlacementPlus = () => {
           <Text style={dynamicStyles.logoText}>Placement Plus</Text>
         </View>
         <View style={dynamicStyles.headerRight}>
-          <Pressable style={dynamicStyles.notificationButton}>
+          <Pressable
+            style={dynamicStyles.notificationButton}
+            onPress={() => router.push("/screens/Notifications")}
+          >
             <Ionicons
               name="notifications-outline"
               size={24}
               color={theme === 'light' ? "#333" : "#fff"}
             />
-            <View style={dynamicStyles.notificationBadge}>
-              <Text style={dynamicStyles.badgeText}>3</Text>
-            </View>
+            {typeof newNotifications === 'number' && newNotifications > 0 && (
+              <View style={dynamicStyles.notificationBadge}>
+                <Text style={dynamicStyles.badgeText}>{newNotifications}</Text>
+              </View>
+            )}
           </Pressable>
           <Pressable
             style={dynamicStyles.profileButton}

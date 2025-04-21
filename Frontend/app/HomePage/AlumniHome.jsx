@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useEffect } from "react";
 import {
   View,
   Text,
@@ -20,75 +20,95 @@ import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { useUser } from "../../context/userContext.js";
 import { useFocusEffect } from "@react-navigation/native";
+import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js"
 
 import pastYearCompany from "@/assets/homepageImages/pastyearcompany-Photoroom.png";
 import placementStat from "@/assets/homepageImages/placementstat-Photoroom.png";
+import alumni from "@/assets/homepageImages/alumni-Photoroom.png";
 import interviewPreparation from "@/assets/homepageImages/questionaskbycompany-Photoroom.png";
 import upcomingCompany from "@/assets/homepageImages/upcomingcompany-Photoroom.png";
-import ExportData from "@/assets/homepageImages/import-export.png";
-import DownloadDatabase from "@/assets/homepageImages/download-folder.png";
+import branchStat from "@/assets/homepageImages/branchstat-Photoroom.png";
+import placementPolicies from "@/assets/homepageImages/placementpolicies-Photoroom.png";
+import uploadResume from "@/assets/homepageImages/uploadresume-Photoroom.png";
 
 const { width, height } = Dimensions.get("window");
 const CARD_WIDTH = width * 0.28;
 
-const menuItems = [
-  {
-    id: 0,
-    title: "Add Past Recruiter",
-    icon: pastYearCompany,
-    route: "/screens/Admin/addPastRecruiter",
-    color: "#4F46E5",
-  },
-  // {
-  //   id: 1,
-  //   title: "Add placement Data",
-  //   icon: placementStat,
-  //   // route: "/screens/BranchWisePlacement",
-  //   color: "#EC4899",
-  // },
-  {
-    id: 3,
-    title: " Add Material for Interview Preparation",
-    icon: placementStat,
-    route: "/screens/Admin/addStudyMaterial",
-    color: "#F59E0B",
-  },
-  {
-    id: 4,
-    title: " Add question asked by company",
-    icon: interviewPreparation,
-    route: "/screens/Admin/addQuestion",
-    color: "#F59E0B",
-  },
-  {
-    id: 5,
-    title: " Add Upcoming Companies",
-    icon: upcomingCompany,
-    route: "/screens/Admin/addCompany",
-    color: "#8B5CF6",
-  },
-  {
-    id: 6,
-    title: "Download Placement Data",
-    icon: ExportData,
-    route: "/screens/Admin/DownloadPlacementData",
-    color: "#8B5CF6",
-  },
-  {
-    id: 7,
-    title: "Download Student Data",
-    icon: DownloadDatabase,
-    route: "/screens/Admin/DownloadStudentData",
-    color: "#8B5CF6",
-  },
-];
+// const menuItems = [
+//   {
+//     id: 0,
+//     title: "Past Year Companies",
+//     icon: pastYearCompany,
+//     route: "/screens/PastYearCompanies",
+//     color: "#4F46E5",
+//   },
+//   {
+//     id: 1,
+//     title: "Placement Statistics",
+//     icon: placementStat,
+//     route: "/screens/BranchWisePlacement",
+//     color: "#EC4899",
+//   },
+//   {
+//     id: 2,
+//     title: "Connect with Alumni",
+//     icon: alumni,
+//     route: "/screens/ConnectWithAlumni",
+//     color: "#10B981",
+//   },
+//   {
+//     id: 3,
+//     title: "Interview Preparation",
+//     icon: interviewPreparation,
+//     route: "/screens/InterviewPrep",
+//     color: "#F59E0B",
+//   },
+//   {
+//     id: 4,
+//     title: "Upcoming Companies",
+//     icon: upcomingCompany,
+//     route: "/screens/UpcomingCompanies",
+//     color: "#8B5CF6",
+//   },
+//   {
+//     id: 5,
+//     title: "Student Placement",
+//     icon: branchStat,
+//     route: "/screens/StudentPlacements",
+//     color: "#EF4444",
+//   },
+//   {
+//     id: 6,
+//     title: "Placement Policies",
+//     icon: placementPolicies,
+//     route: "/screens/PlacementPolicies",
+//     color: "#06B6D4",
+//   },
+//   {
+//     id: 7,
+//     title: "Upload Resume",
+//     icon: uploadResume,
+//     route: "/screens/UploadResume",
+//     color: "#F97316",
+//   },
+//   // {
+//   //   id: 8,
+//   //   title: "AI Assistant",
+//   //   icon: chatbot,
+//   //   route: "/screens/ChatBot",
+//   //   color: "#C92EFF",
+//   // },
+// ];
+
+const menuItems = []
 
 const PlacementPlus = () => {
   const scrollViewRef = useRef(null);
   const scaleAnims = useRef(menuItems.map(() => new Animated.Value(1))).current;
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredItems, setFilteredItems] = useState(menuItems);
-  const { admin, isAdminLoggedIn, theme } = useUser()
+  const { alumni, theme } = useUser()
+  const [newNotifications, setNewNotifications] = useState(0)
 
   useFocusEffect(
     useCallback(() => {
@@ -148,9 +168,10 @@ const PlacementPlus = () => {
   };
 
   const handlePress = (route) => {
-    router.push(route);
+    // console.log(route);
+    if (route)
+      router.push(route);
   };
-
 
   const getDynamicStyles = (currentTheme) => StyleSheet.create({
     container: {
@@ -262,7 +283,7 @@ const PlacementPlus = () => {
     gridContainer: {
       flexDirection: "row",
       flexWrap: "wrap",
-      justifyContent: "space-between",
+      // justifyContent: "space-between",
     },
     gridItemWrapper: {
       width: "33%",
@@ -404,19 +425,24 @@ const PlacementPlus = () => {
           <Text style={dynamicStyles.logoText}>Placement Plus</Text>
         </View>
         <View style={dynamicStyles.headerRight}>
-          <Pressable style={dynamicStyles.notificationButton}>
+          <Pressable
+            style={dynamicStyles.notificationButton}
+            onPress={() => router.push("/screens/Notifications")}
+          >
             <Ionicons
               name="notifications-outline"
               size={24}
               color={theme === 'light' ? "#333" : "#fff"}
             />
-            <View style={dynamicStyles.notificationBadge}>
-              <Text style={dynamicStyles.badgeText}>3</Text>
-            </View>
+            {typeof newNotifications === 'number' && newNotifications > 0 && (
+              <View style={dynamicStyles.notificationBadge}>
+                <Text style={dynamicStyles.badgeText}>{newNotifications}</Text>
+              </View>
+            )}
           </Pressable>
           <Pressable
             style={dynamicStyles.profileButton}
-            onPress={() => router.push("/screens/Admin profile/Profile")}
+            onPress={() => router.push("/screens/Alumni Profile/Profile")}
           >
             <Ionicons
               name="person-circle"
@@ -428,7 +454,7 @@ const PlacementPlus = () => {
       </View>
 
       <View style={dynamicStyles.welcomeSection}>
-        <Text style={dynamicStyles.welcomeText}>{`Hello, ${admin?.username}`}</Text>
+        <Text style={dynamicStyles.welcomeText}>{`Hello, ${alumni?.name.split(" ")[0]}`}</Text>
         <Text style={dynamicStyles.welcomeSubtext}>What would you like to explore today?</Text>
       </View>
 
@@ -543,7 +569,7 @@ const PlacementPlus = () => {
               colors={['#C92EFF', '#9332FF']}
               style={styles.homeButtonGradient}
             >
-              <MaterialIcons name="home" size={30} color="#fff" />
+              <FontAwesome name="home" size={30} color="#fff" />
             </LinearGradient>
           </Pressable>
 

@@ -13,12 +13,14 @@ import {
 	ActivityIndicator,
 	Modal,
 	ScrollView,
+	Pressable
 } from 'react-native';
 import { FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import { useUser } from '../../context/userContext.js';
 import { useRouter } from 'expo-router';
 import { getFileFromAppwrite } from '../../utils/appwrite.js';
+import CustomAlert from '../../components/CustomAlert.jsx';
 
 const { width } = Dimensions.get('window');
 const CARD_WIDTH = width * 0.85; // Bigger cards, 1 per row
@@ -35,6 +37,13 @@ const AlumniPage = () => {
 	const [showFilters, setShowFilters] = useState(false);
 	const [showYearOptions, setShowYearOptions] = useState(false);
 	const [showCompanyOptions, setShowCompanyOptions] = useState(false);
+	const [alertVisible, setAlertVisible] = useState(false)
+	const [alertConfig, setAlertConfig] = useState({
+		header: "",
+		message: "",
+		buttons: []
+	})
+
 
 	// For filter options
 	const [uniqueBatchYears, setUniqueBatchYears] = useState([]);
@@ -104,11 +113,33 @@ const AlumniPage = () => {
 				setAlumniData(alumniWithImages);
 				setFilteredAlumni(alumniWithImages);
 			} else {
-				alert(result?.message);
+				setAlertConfig({
+					header: "Error",
+					message: result?.message || "Something went wrong. Please try again later",
+					buttons: [
+						{
+							text: "OK",
+							onPress: () => setAlertVisible(false),
+							style: "default"
+						}
+					]
+				});
+				setAlertVisible(true);
 			}
 		} catch (error) {
 			console.error('Failed to fetch alumni data:', error);
-			alert('Failed to fetch alumni data. Please try again later.');
+			setAlertConfig({
+				header: "Error",
+				message: error?.message || "Something went wrong. Please try again.",
+				buttons: [
+					{
+						text: "OK",
+						onPress: () => setAlertVisible(false),
+						style: "default"
+					}
+				]
+			});
+			setAlertVisible(true);
 		} finally {
 			setIsLoading(false);
 		}
@@ -255,6 +286,7 @@ const AlumniPage = () => {
 			color: currentTheme === 'light' ? '#6A0DAD' : 'white',
 			fontSize: 18,
 			fontWeight: '700',
+			marginLeft: 10
 		},
 		profileButton: {
 			padding: 4,
@@ -553,11 +585,21 @@ const AlumniPage = () => {
 		<SafeAreaView style={styles.container}>
 			<StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
 
+			<CustomAlert
+				visible={alertVisible}
+				header={alertConfig.header}
+				message={alertConfig.message}
+				buttons={alertConfig.buttons}
+				onClose={() => setAlertVisible(false)}
+			/>
+
 			{/* Header with Logo */}
 			<View style={styles.header}>
 				<View style={styles.logoContainer}>
-					<Image source={require('@/assets/images/logo.png')} style={styles.logo} />
-					<Text style={styles.logoText}>Placement Plus</Text>
+					<Pressable onPress={() => router.back()} style={styles.backButton}>
+						<Ionicons name="arrow-back" size={24} color="#fff" />
+					</Pressable>
+					<Text style={styles.logoText}>Connect with Alumni</Text>
 				</View>
 				<TouchableOpacity
 					style={styles.profileButton}

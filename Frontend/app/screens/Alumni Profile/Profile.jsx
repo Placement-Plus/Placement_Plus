@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Switch, Alert, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Image, ScrollView, Switch, BackHandler, ActivityIndicator } from 'react-native';
 import { FontAwesome, Ionicons, MaterialIcons, Feather } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useUser } from '../../../context/userContext.js';
 import { router } from 'expo-router';
 import { getAccessToken, getRefreshToken, removeAccessToken, removeRefreshToken } from '../../../utils/tokenStorage.js';
 import CustomAlert from '../../../components/CustomAlert.jsx';
+import { getFileFromAppwrite } from '../../../utils/appwrite.js';
 
 const ProfileSettings = () => {
     const navigation = useNavigation();
-    const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-    const { user: loggedInUser, logout, theme, toggleTheme } = useUser()
+    const { alumni: loggedInAlumni, alumniLogout, theme, toggleTheme } = useUser()
     const [darkModeEnabled, setDarkModeEnabled] = useState(theme === "dark");
     const [alertVisible, setAlertVisible] = useState(false)
     const [alertConfig, setAlertConfig] = useState({
@@ -18,33 +18,46 @@ const ProfileSettings = () => {
         message: "",
         buttons: []
     })
-
-    const [user, setUser] = useState({
+    const [alumni, setAlumni] = useState({
         name: '',
         email: '',
-        branch: '',
-        appliedCompanies: [],
-        savedProblems: []
+        batch: '',
+        profilePic: ''
     });
+    const [isLoading, setIsLoading] = useState(false)
 
     useEffect(() => {
         setDarkModeEnabled(theme === "dark")
     }, [])
 
     useEffect(() => {
-        setUser({
-            name: loggedInUser?.name || '-',
-            email: loggedInUser?.email || '-',
-            branch: loggedInUser?.branch || '-',
-            appliedCompanies: loggedInUser?.appliedCompanies || [],
-            savedProblems: loggedInUser?.savedProblems || []
-        })
-    }, [loggedInUser])
+        const fetchProfilePic = async () => {
+            try {
+                setIsLoading(true);
+                const profilePicFile = await getFileFromAppwrite(loggedInAlumni.profilePicId);
+
+                setAlumni({
+                    name: loggedInAlumni?.name || '-',
+                    email: loggedInAlumni?.email || '-',
+                    batch: loggedInAlumni?.batch || '-',
+                    profilePic: profilePicFile
+                });
+
+                // console.log(profilePicFile);
+            } catch (error) {
+                console.error('Error fetching profile pic:', error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        if (loggedInAlumni) {
+            fetchProfilePic();
+        }
+    }, [loggedInAlumni]);
 
     const handleLogout = async () => {
-
         try {
-
             const accessToken = await getAccessToken()
             const refreshToken = await getRefreshToken()
 
@@ -52,7 +65,7 @@ const ProfileSettings = () => {
                 throw new Error('Missing authentication tokens');
             }
 
-            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/users/logout`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/alumnis/logout`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -61,14 +74,15 @@ const ProfileSettings = () => {
                 }
             })
 
-            if (!response.ok)
-                throw new Error('Failed to log out')
+            if (!response.ok) {
+                const error = await response.text()
+                throw new Error('Failed to log out: ', error)
+            }
 
             const result = await response.json()
-            // console.log(result);
 
             if (result.statusCode === 200) {
-                await logout()
+                await alumniLogout()
                 await removeAccessToken()
                 await removeRefreshToken()
 
@@ -127,10 +141,6 @@ const ProfileSettings = () => {
             ]
         });
         setAlertVisible(true);
-    };
-
-    const handleToggleNotifications = () => {
-        setNotificationsEnabled(!notificationsEnabled);
     };
 
     const handleToggleDarkMode = () => {
@@ -239,6 +249,21 @@ const ProfileSettings = () => {
 
     const dynamicStyles = getDynamicStyles(theme);
 
+    if (isLoading) {
+        return (
+            <View style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+                backgroundColor: theme === 'light' ? '#F8F9FA' : '#120023',
+            }}>
+                <ActivityIndicator size="large" color={theme === 'light' ? '#6A0DAD' : '#f0c5f1'} />
+                <Text style={{ color: theme === 'light' ? '#6A0DAD' : '#f0c5f1', marginTop: 10 }}>
+                    Loading profile details...
+                </Text>
+            </View>
+        );
+    }
     return (
         <View style={dynamicStyles.container}>
             <View style={dynamicStyles.header}>
@@ -253,25 +278,19 @@ const ProfileSettings = () => {
                 {/* Profile Card */}
                 <View style={dynamicStyles.profileCard}>
                     <View style={styles.profileImageContainer}>
-                        <FontAwesome name="user" size={60} color={theme === 'light' ? "#6a0dad" : "#fff"} />
+                        {alumni.profilePic &&
+                            <Image source={{ uri: alumni.profilePic }} style={{
+                                width: 70,
+                                height: 70,
+                                borderRadius: 35,
+                                resizeMode: 'cover',
+                            }} />
+                        }
                     </View>
                     <View style={styles.profileInfo}>
-                        <Text style={dynamicStyles.profileName}>{user.name}</Text>
-                        <Text style={dynamicStyles.profileEmail}>{user.email}</Text>
-                        <Text style={dynamicStyles.profileEmail}>{user.branch}</Text>
-                    </View>
-                </View>
-
-                {/* Stats Section */}
-                <View style={dynamicStyles.statsContainer}>
-                    <View style={styles.statItem}>
-                        <Text style={dynamicStyles.statValue}>{user.appliedCompanies.length}</Text>
-                        <Text style={dynamicStyles.statLabel}>Applied</Text>
-                    </View>
-                    <View style={dynamicStyles.statDivider} />
-                    <View style={styles.statItem}>
-                        <Text style={dynamicStyles.statValue}>{user.savedProblems.length}</Text>
-                        <Text style={dynamicStyles.statLabel}>Saved Problems</Text>
+                        <Text style={dynamicStyles.profileName}>{alumni.name}</Text>
+                        <Text style={dynamicStyles.profileEmail}>{alumni.email}</Text>
+                        <Text style={dynamicStyles.profileEmail}>Batch - {alumni.batch}</Text>
                     </View>
                 </View>
 
@@ -281,7 +300,7 @@ const ProfileSettings = () => {
 
                     <TouchableOpacity
                         style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Profile/ViewProfile')}
+                        onPress={() => router.push('/screens/Alumni Profile/ViewProfile')}
                     >
                         <View style={styles.settingsIconContainer}>
                             <FontAwesome name="user" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
@@ -292,7 +311,7 @@ const ProfileSettings = () => {
 
                     <TouchableOpacity
                         style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Profile/EditProfile')}
+                        onPress={() => router.push('/screens/Alumni Profile/EditProfile')}
                     >
                         <View style={styles.settingsIconContainer}>
                             <FontAwesome name="edit" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
@@ -303,7 +322,7 @@ const ProfileSettings = () => {
 
                     <TouchableOpacity
                         style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Profile/ChangePassword')}
+                        onPress={() => router.push('/screens/Alumni Profile/ChangePassword')}
                     >
                         <View style={styles.settingsIconContainer}>
                             <FontAwesome name="lock" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
@@ -313,77 +332,9 @@ const ProfileSettings = () => {
                     </TouchableOpacity>
                 </View>
 
-                {/* Job Applications */}
-                <View style={styles.settingsGroup}>
-                    <Text style={dynamicStyles.settingsGroupTitle}>Job Applications</Text>
-
-                    {/* <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Profile/AppliedCompanies')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="building" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>View Applied Companies</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity> */}
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Profile/ApplicationStatus')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="list-alt" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>Application Status</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        // onPress={() => navigateTo('SavedJobs')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="bookmark" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>Saved Jobs</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
-                </View>
-
-                {/* Learning */}
-                <View style={styles.settingsGroup}>
-                    <Text style={dynamicStyles.settingsGroupTitle}>Learning</Text>
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        // onPress={() => navigateTo('SavedProblems')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="code" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>Saved Problems</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
-                </View>
-
                 {/* App Settings */}
                 <View style={styles.settingsGroup}>
                     <Text style={dynamicStyles.settingsGroupTitle}>App Settings</Text>
-
-                    <View style={dynamicStyles.settingsItem}>
-                        <View style={styles.settingsIconContainer}>
-                            <Ionicons name="notifications" size={22} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>Notifications</Text>
-                        <Switch
-                            trackColor={{ false: "#3e3e3e", true: "rgba(201, 46, 255, 0.4)" }}
-                            thumbColor={notificationsEnabled ? "#C92EFF" : "#f4f3f4"}
-                            ios_backgroundColor="#3e3e3e"
-                            onValueChange={handleToggleNotifications}
-                            value={notificationsEnabled}
-                        />
-                    </View>
 
                     <View style={dynamicStyles.settingsItem}>
                         <View style={styles.settingsIconContainer}>

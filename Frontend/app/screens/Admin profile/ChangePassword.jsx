@@ -12,7 +12,7 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../../utils/tokenStorage.js';
 import { router } from 'expo-router';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import CustomAlert from '../../../components/CustomAlert.jsx';
 
 const ChangePasswordPage = () => {
     const [newPassword, setNewPassword] = useState('');
@@ -21,6 +21,12 @@ const ChangePasswordPage = () => {
         new: false,
         confirm: false
     });
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     const togglePasswordVisibility = (field) => {
         setIsPasswordVisible(prev => ({
@@ -70,20 +76,52 @@ const ChangePasswordPage = () => {
 
             const result = await response.json()
             if (result.statusCode === 200) {
-                Alert.alert('Success', 'Password changed successfully', [
-                    { text: 'OK', onPress: () => router.replace('HomePage/AdminHome') }
-                ]);
+                setAlertConfig({
+                    header: "Success",
+                    message: "Password changed successfully",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
+                setNewPassword("")
+                setConfirmPassword("")
             } else {
-                Alert.alert('Error', result.message)
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true)
             }
 
         } catch (error) {
             console.error(error)
-            Alert.alert('Error', 'Something went wrong')
+            setAlertConfig({
+                header: "Error",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true)
         }
+    }
 
-        Alert.alert('Success', 'Password changed successfully');
-    };
 
     return (
         <KeyboardAvoidingView
@@ -92,12 +130,20 @@ const ChangePasswordPage = () => {
         >
             {/* Header */}
             <View style={styles.header}>
-                <TouchableOpacity style={styles.backButton}>
+                <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                     <Ionicons name="arrow-back" size={24} color="#C92EFF" />
                 </TouchableOpacity>
                 <Text style={styles.headerTitle}>Change Password</Text>
                 <View style={{ width: 24 }}>{/* Placeholder for symmetry */}</View>
             </View>
+
+            <CustomAlert
+                visible={alertVisible}
+                header={alertConfig.header}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={() => setAlertVisible(false)}
+            />
 
             {/* Password Form */}
             <View style={styles.formContainer}>
@@ -182,7 +228,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 15,
         borderBottomWidth: 1,
         borderBottomColor: '#390852',
-        marginTop: 15,
+        marginTop: 20,
     },
     backButton: {
         padding: 5,

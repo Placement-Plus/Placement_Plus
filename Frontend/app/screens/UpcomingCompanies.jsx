@@ -9,7 +9,8 @@ import {
 	ScrollView,
 	SafeAreaView,
 	Alert,
-	TextInput
+	TextInput,
+	Pressable
 } from 'react-native';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -17,6 +18,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import { useUser } from '../../context/userContext.js';
 import { router } from 'expo-router';
+import CustomAlert from '../../components/CustomAlert.jsx';
 
 const imageMap = {
 	'Apple.png': require('@/assets/companyImages/apple.png'),
@@ -37,6 +39,12 @@ const CompanyListings = () => {
 	const { user, theme } = useUser();
 	const [showFilters, setShowFilters] = useState(false);
 	const [searchQuery, setSearchQuery] = useState('');
+	const [alertVisible, setAlertVisible] = useState(false)
+	const [alertConfig, setAlertConfig] = useState({
+		header: "",
+		message: "",
+		buttons: []
+	})
 
 	// Filter states
 	const [filterBatch, setFilterBatch] = useState('');
@@ -186,19 +194,46 @@ const CompanyListings = () => {
 
 			if (result.statusCode === 200) {
 				const normalizedCompanies = normalizeDecimalFields(result.data);
-				setCompanies(normalizedCompanies);
-				setFilteredCompanies(normalizedCompanies);
+				const sortedCompanies = normalizedCompanies.sort((a, b) => {
+					if (!a.createdAt && b.createdAt) return -1;
+					if (a.createdAt && !b.createdAt) return 1;
+
+					return new Date(b.createdAt) - new Date(a.createdAt);
+				});
+				// console.log(sortedCompanies);
+
+
+				setCompanies(sortedCompanies.reverse());
+				setFilteredCompanies(sortedCompanies);
 				// console.log(normalizedCompanies);
 
 			} else {
-				Alert.alert('Error', result?.message || "Something went wrong. Please try again later");
+				setAlertConfig({
+					header: "Error",
+					message: result?.message || "Something went wrong. Please try again later",
+					buttons: [
+						{
+							text: "OK",
+							onPress: () => setAlertVisible(false),
+							style: "default"
+						}
+					]
+				});
+				setAlertVisible(true);
 			}
 		} catch (error) {
-			Alert.alert(
-				"Error",
-				error.message || "Something went wrong. Please try again.",
-				[{ text: "OK" }]
-			);
+			setAlertConfig({
+				header: "Fetch error",
+				message: error?.message || "Something went wrong. Please try again later",
+				buttons: [
+					{
+						text: "OK",
+						onPress: () => setAlertVisible(false),
+						style: "default"
+					}
+				]
+			});
+			setAlertVisible(true);
 			console.error('Error:', error.message);
 		}
 	};
@@ -485,6 +520,15 @@ const CompanyListings = () => {
 				backgroundColor: theme === 'light' ? '#F5F5F5' : '#2d0e3e'
 			}
 		]}>
+
+			<CustomAlert
+				visible={alertVisible}
+				header={alertConfig.header}
+				message={alertConfig.message}
+				buttons={alertConfig.buttons}
+				onClose={() => setAlertVisible(false)}
+			/>
+
 			<LinearGradient
 				colors={backgroundGradientColors}
 				style={styles.container}
@@ -509,15 +553,14 @@ const CompanyListings = () => {
 				>
 					<View style={styles.header}>
 						<View style={styles.logoContainer}>
-							<Image
-								source={require('@/assets/images/logo.png')}
-								style={styles.logo}
-							/>
+							<Pressable onPress={() => router.back()} style={styles.backButton}>
+								<Ionicons name="arrow-back" size={24} color="#fff" />
+							</Pressable>
 							<Text style={[
 								styles.logoText,
 								{ color: theme === 'light' ? '#6A0DAD' : '#ffffff' }
 							]}>
-								Placement Plus
+								Upcoming Companies
 							</Text>
 						</View>
 						<TouchableOpacity
@@ -818,6 +861,7 @@ const styles = StyleSheet.create({
 		fontSize: 22,
 		fontWeight: 'bold',
 		fontFamily: 'System',
+		marginLeft: 10
 	},
 	profileButton: {
 		// Empty styles for padding

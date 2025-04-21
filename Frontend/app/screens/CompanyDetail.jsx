@@ -15,6 +15,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js';
 import { FontAwesome } from '@expo/vector-icons';
 import { useUser } from '../../context/userContext.js';
+import CustomAlert from '../../components/CustomAlert.jsx';
 
 const dummyData = {
     "_id": "67efa2864b0becc2304464d5",
@@ -59,6 +60,12 @@ const CompanyDetails = () => {
     const { theme, user: userData, login } = useUser();
     const { companyId } = useLocalSearchParams();
     const router = useRouter();
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     const themeColor = theme === 'light' ? '#6A0DAD' : '#C92EFF';
     const backgroundColor = theme === 'light' ? '#F5F5F5' : '#0D021F';
@@ -104,11 +111,33 @@ const CompanyDetails = () => {
                 setCompanyData(result?.data);
             } else {
                 console.log(result.message);
-                Alert.alert("Error", result?.message);
+                setAlertConfig({
+                    header: "Error",
+                    message: error?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
         } catch (error) {
             console.log(error.message);
-            Alert.alert("Error", error?.message);
+            setAlertConfig({
+                header: "Failed to fetch company data",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
         } finally {
             setLoading(false);
         }
@@ -179,15 +208,48 @@ const CompanyDetails = () => {
             const result = await response.json();
 
             if (result?.statusCode === 200) {
-                Alert.alert("Success", "Application submitted successfully!");
+                setAlertConfig({
+                    header: "Success",
+                    message: "Applied successfully!",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
                 setApplicationStatus("Applied");
                 await login(result.data)
             } else {
-                Alert.alert("Error", result?.message || "Failed to submit application");
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
         } catch (error) {
             console.log(error.message);
-            Alert.alert("Error", error?.message);
+            setAlertConfig({
+                header: "Failed to apply",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
         } finally {
             setApplying(false);
         }
@@ -289,6 +351,14 @@ const CompanyDetails = () => {
                     </TouchableOpacity>
                     <View style={{ flex: 1 }} />
                 </View>
+
+                <CustomAlert
+                    visible={alertVisible}
+                    header={alertConfig.header}
+                    message={alertConfig.message}
+                    buttons={alertConfig.buttons}
+                    onClose={() => setAlertVisible(false)}
+                />
 
                 {/* Company Info Card */}
                 <View style={[styles.companyCard, {

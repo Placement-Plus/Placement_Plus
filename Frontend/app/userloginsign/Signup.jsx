@@ -19,7 +19,7 @@ import * as Yup from 'yup';
 import * as FileSystem from "expo-file-system";
 import { storeAccessToken, storeRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js"
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import CustomAlert from "../../components/CustomAlert.jsx";
 
 const SignupSchema = Yup.object().shape({
 	name: Yup.string().required('Name is required'),
@@ -76,6 +76,12 @@ const SignupScreen = () => {
 		semester: "",
 		course: "",
 	});
+	const [alertVisible, setAlertVisible] = useState(false)
+	const [alertConfig, setAlertConfig] = useState({
+		header: "",
+		message: "",
+		buttons: []
+	})
 
 	const [resume, setResume] = useState(null);
 	const [errors, setErrors] = useState({});
@@ -122,7 +128,6 @@ const SignupScreen = () => {
 			});
 			console.log(result);
 
-
 			if (result.type === 'cancel') {
 				console.log("User cancelled file picking");
 				return;
@@ -145,7 +150,6 @@ const SignupScreen = () => {
 			setErrors(prev => ({ ...prev, resume: "Failed to upload resume" }));
 		} finally {
 			console.log("Resume added successfully");
-
 		}
 	};
 
@@ -211,8 +215,18 @@ const SignupScreen = () => {
 
 				router.replace("/HomePage/Home")
 			} else {
-				Alert.alert('Error', result?.message || "Something went wrong. Please try again later")
-				return
+				setAlertConfig({
+					header: "Error",
+					message: result?.message || "Something went wrong. Please try again later",
+					buttons: [
+						{
+							text: "OK",
+							onPress: () => setAlertVisible(false),
+							style: "default"
+						}
+					]
+				});
+				setAlertVisible(true);
 			}
 
 		} catch (error) {
@@ -226,7 +240,18 @@ const SignupScreen = () => {
 				scrollViewRef.current?.scrollTo({ y: 0, animated: true });
 			} else {
 				console.error("Registration Error:", error);
-				Alert.alert("Registration Failed", error.message || "An unexpected error occurred");
+				setAlertConfig({
+					header: "Registration Error",
+					message: error?.message || "Something went wrong. Please try again later",
+					buttons: [
+						{
+							text: "OK",
+							onPress: () => setAlertVisible(false),
+							style: "default"
+						}
+					]
+				});
+				setAlertVisible(true);
 			}
 		} finally {
 			setLoading(false);
@@ -239,16 +264,25 @@ const SignupScreen = () => {
 			behavior={Platform.OS === "ios" ? "padding" : "height"}
 			style={{ flex: 1 }}
 		>
+
+			<CustomAlert
+				visible={alertVisible}
+				header={alertConfig.header}
+				message={alertConfig.message}
+				buttons={alertConfig.buttons}
+				onClose={() => setAlertVisible(false)}
+			/>
+
 			<ScrollView
 				ref={scrollViewRef}
 				contentContainerStyle={styles.scrollContainer}
 				keyboardShouldPersistTaps="handled"
 			>
 				<TouchableOpacity
-					onPress={() => router.push("userloginsign/login")}
+					onPress={() => router.back()}
 					style={styles.backButton}
 				>
-					<Feather name="arrow-left" size={24} color="white" />
+					<Feather name="arrow-left" size={24} color="white"/>
 				</TouchableOpacity>
 
 				<Text style={styles.welcomeTitle}>
@@ -426,7 +460,7 @@ const styles = StyleSheet.create({
 	},
 	backButton: {
 		alignSelf: "flex-start",
-		marginBottom: 20,
+		marginTop: 20,
 		padding: 8,
 	},
 	welcomeTitle: {

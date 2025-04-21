@@ -8,19 +8,30 @@ import {
   TouchableOpacity,
   Dimensions,
   Modal,
-  Alert
+  Alert,
+  StatusBar,
+  ActivityIndicator,
+  Pressable
 } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
-import { Feather } from '@expo/vector-icons';
+import { Feather, Ionicons } from '@expo/vector-icons';
 import { getAccessToken, getRefreshToken } from '../../utils/tokenStorage.js'
 import { useUser } from '../../context/userContext.js';
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import CustomAlert from '../../components/CustomAlert.jsx';
+import { router } from 'expo-router';
 
 const PlacementDashboard = () => {
   const [selectedBranch, setSelectedBranch] = useState('All Branches');
   const [branchModalVisible, setBranchModalVisible] = useState(false);
   const [placementData, setPlacementData] = useState([])
   const { theme } = useUser()
+  const [alertVisible, setAlertVisible] = useState(false)
+  const [alertConfig, setAlertConfig] = useState({
+    header: "",
+    message: "",
+    buttons: []
+  })
+  const [isLoading, setIsLoading] = useState(false)
 
   const themeColors = {
     primary: theme === 'light' ? '#6A0DAD' : '#C92EFF',
@@ -43,6 +54,7 @@ const PlacementDashboard = () => {
   }, [])
 
   const getPlacementData = async () => {
+    setIsLoading(true)
     try {
       const accessToken = await getAccessToken();
       const refreshToken = await getRefreshToken();
@@ -73,11 +85,35 @@ const PlacementDashboard = () => {
       if (result?.statusCode === 200 && result?.data) {
         setPlacementData(result.data);
       } else {
-        Alert.alert("Error", result?.message || "Unknown error occurred");
+        setAlertConfig({
+          header: "Error",
+          message: result?.message || "Something went wrong. Please try again.",
+          buttons: [
+            {
+              text: "OK",
+              onPress: () => setAlertVisible(false),
+              style: "default"
+            }
+          ]
+        });
+        setAlertVisible(true);
       }
     } catch (error) {
-      console.error("Fetch Error:", error);
-      Alert.alert("Error", "Something went wrong. Please try again.");
+      setAlertConfig({
+        header: "Failed to fetch data",
+        message: error?.message || "Something went wrong. Please try again.",
+        buttons: [
+          {
+            text: "OK",
+            onPress: () => setAlertVisible(false),
+            style: "default"
+          }
+        ]
+      });
+      setAlertVisible(true);
+      console.log(error.message);
+    } finally {
+      setIsLoading(false)
     }
   };
 
@@ -265,15 +301,44 @@ const PlacementDashboard = () => {
 
   if (!currentBranchData) return null;
 
+  if (isLoading) {
+    return (
+      // <View style={[styles.container, styles.loaderContainer]}>
+      <View style={{
+        flex: 1,
+        backgroundColor: theme === 'light' ? '#F5F5F5' : '#120023',
+        justifyContent: 'center',
+        alignItems: 'center',
+      }}>
+        <StatusBar barStyle={theme === 'light' ? 'dark-content' : 'light-content'} />
+        <ActivityIndicator size="large" color="#6A0DAD" />
+        <Text style={{ color: theme === 'light' ? '#333' : '#fff', marginTop: 12 }}>
+          Loading Placement Statistics...
+        </Text>
+      </View>
+    );
+  }
+
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
       <ScrollView>
         <View style={styles.header}>
+          <Pressable onPress={() => router.back()}>
+            <Ionicons name="arrow-back" size={24} color="#fff" />
+          </Pressable>
           <View>
             <Text style={[styles.title, { color: themeColors.text }]}>Placement Dashboard</Text>
             <Text style={[styles.subtitle, { color: themeColors.textSecondary }]}>Academic Year 2024-2025</Text>
           </View>
         </View>
+
+        <CustomAlert
+          visible={alertVisible}
+          header={alertConfig.header}
+          message={alertConfig.message}
+          buttons={alertConfig.buttons}
+          onClose={() => setAlertVisible(false)}
+        />
 
         {/* Branch Selector */}
         <TouchableOpacity
@@ -389,7 +454,7 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-start',
     alignItems: 'center',
     padding: 20,
     marginTop: 10
@@ -397,10 +462,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    marginLeft: 15
   },
   subtitle: {
     fontSize: 14,
     marginTop: 4,
+    marginLeft: 15
   },
   themeToggle: {
     flexDirection: 'row',

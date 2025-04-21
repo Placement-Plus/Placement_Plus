@@ -22,16 +22,16 @@ const WelcomeScreen = () => {
 
       {/* Title */}
       <Text style={styles.title}>
-        Student <Text style={styles.highlight}>Login</Text>
+        Alumni <Text style={styles.highlight}>Login</Text>
       </Text>
 
       {/* Navigate to Login */}
-      <Pressable style={styles.button} onPress={() => router.push("userloginsign/login")}>
+      <Pressable style={styles.button} onPress={() => router.push("Alumni/login")}>
         <Text style={styles.buttonText}>SIGN IN</Text>
       </Pressable>
 
       {/* Navigate to Signup */}
-      <Pressable style={styles.button} onPress={() => router.push("userloginsign/Signup")}>
+      <Pressable style={styles.button} onPress={() => router.push("Alumni/signup")}>
         <Text style={styles.buttonText}>SIGN UP</Text>
       </Pressable>
     </View>

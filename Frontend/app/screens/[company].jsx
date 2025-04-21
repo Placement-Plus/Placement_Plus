@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, Ale
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js";
-import { useLocalSearchParams } from 'expo-router'
-// import { EXPO_PUBLIC_IP_ADDRESS } from "@env"
+import { router, useLocalSearchParams } from 'expo-router'
+import CustomAlert from "../../components/CustomAlert.jsx";
 
 import microsoftLogo from "@/assets/companyImages/Microsoft_Logo_512px.png";
 import appleLogo from "@/assets/companyImages/apple-white.png";
@@ -144,6 +144,12 @@ const CodingProblems = () => {
     const [difficultyFilter, setDifficultyFilter] = useState("All");
     const { theme } = useUser()
     const { company } = useLocalSearchParams()
+    const [alertVisible, setAlertVisible] = useState(false)
+    const [alertConfig, setAlertConfig] = useState({
+        header: "",
+        message: "",
+        buttons: []
+    })
 
     const themeColors = {
         darkBackground: "#1a012c",
@@ -261,15 +267,33 @@ const CodingProblems = () => {
                 setProblems(result.data);
                 setFilteredProblems(result.data);
             } else {
-                Alert.alert('Error', result?.message || "Something went worng. Please try again later.")
+                setAlertConfig({
+                    header: "Error",
+                    message: result?.message || "Something went wrong. Please try again.",
+                    buttons: [
+                        {
+                            text: "OK",
+                            onPress: () => setAlertVisible(false),
+                            style: "default"
+                        }
+                    ]
+                });
+                setAlertVisible(true);
             }
 
         } catch (error) {
-            Alert.alert(
-                "Error",
-                error.message || "Something went wrong. Please try again.",
-                [{ text: "OK" }]
-            );
+            setAlertConfig({
+                header: "Failed to fetch questions",
+                message: error?.message || "Something went wrong. Please try again.",
+                buttons: [
+                    {
+                        text: "OK",
+                        onPress: () => setAlertVisible(false),
+                        style: "default"
+                    }
+                ]
+            });
+            setAlertVisible(true);
             console.error('Error:', error.message);
         } finally {
             setIsLoading(false);
@@ -294,7 +318,15 @@ const CodingProblems = () => {
             styles.container,
             { backgroundColor: getThemeColor(themeColors.darkBackground, themeColors.lightBackground) }
         ]}>
+            <CustomAlert
+                visible={alertVisible}
+                header={alertConfig.header}
+                message={alertConfig.message}
+                buttons={alertConfig.buttons}
+                onClose={() => setAlertVisible(false)}
+            />
             <View style={styles.headerContainer}>
+                <Ionicons name="arrow-back" size={24} color={themeColors.darkPurple} style={{ marginTop: 15 }} onPress={() => router.back()} />
                 <Text style={[
                     styles.header,
                     { color: getThemeColor(themeColors.darkPurple, themeColors.lightPurple) }

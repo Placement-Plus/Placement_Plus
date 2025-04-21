@@ -47,10 +47,10 @@ const RoleSelectionScreen = () => {
 
       if (userType === "admin") {
         router.replace("HomePage/AdminHome");
-      } else if (userType === "alumni") {
-        router.replace("Alumni/Home");
       } else if (userType === "student") {
         router.replace("HomePage/Home");
+      } else if (userType === "alumni") {
+        router.replace("HomePage/AlumniHome");
       }
     };
 
@@ -117,7 +117,7 @@ const RoleSelectionScreen = () => {
 
       <Pressable
         style={styles.buttonContainer}
-        onPress={() => router.push("Alumni/signup")}
+        onPress={() => router.push("screens/Roles/Alumni")}
       >
         <LinearGradient
           colors={['#C92EFF', '#8428B2']}

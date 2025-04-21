@@ -9,31 +9,31 @@ import { useUser } from "../../context/userContext.js"
 import CustomAlert from "../../components/CustomAlert.jsx";
 
 const LoginSchema = Yup.object().shape({
-    username: Yup.string()
-        .matches(/^[a-zA-Z0-9\s]+$/, "Only letters, numbers, and spaces are allowed") // Allows letters, numbers, and spaces
-        .required("Username is required"),
+    email: Yup.string()
+        .email("Please enter a valid email")
+        .required("Email is required"),
     password: Yup.string()
+        .min(8, "Password must be at least 8 characters")
         .required("Password is required"),
 });
-
 
 const LoginScreen = () => {
     const router = useRouter();
     const [formData, setFormData] = useState({
-        username: "",
-        password: ""
+        email: "",
+        password: "",
     });
     const [errors, setErrors] = useState({});
     const [showPassword, setShowPassword] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
     const [touchedFields, setTouchedFields] = useState({});
-    const { adminLogin } = useUser()
+    const { alumniLogin } = useUser()
+    const [alertVisible, setAlertVisible] = useState(false)
     const [alertConfig, setAlertConfig] = useState({
         header: "",
         message: "",
         buttons: []
     })
-    const [alertVisible, setAlertVisible] = useState(false)
 
     const handleChange = (field, value) => {
         setFormData({
@@ -97,10 +97,11 @@ const LoginScreen = () => {
         if (!isValid) return;
 
         setIsLoading(true);
+        // console.log(formData);
 
 
         try {
-            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/login`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/alumnis/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -108,16 +109,20 @@ const LoginScreen = () => {
                 body: JSON.stringify(formData)
             });
 
+            if (!response.ok) {
+                const error = await response.text()
+                console.log("Network Error: ", error)
+                return
+            }
+
             const result = await response.json();
             console.log(result);
 
             if (result.statusCode === 200) {
-
                 await storeAccessToken(result?.data?.accessToken)
                 await storeRefreshToken(result?.data?.refreshToken)
-                await adminLogin(result?.data?.admin)
-
-                router.replace("/HomePage/AdminHome")
+                await alumniLogin(result?.data?.alumni)
+                router.replace("/HomePage/AlumniHome")
             } else {
                 setAlertConfig({
                     header: "Error",
@@ -132,10 +137,9 @@ const LoginScreen = () => {
                 });
                 setAlertVisible(true);
             }
-
         } catch (error) {
             setAlertConfig({
-                header: "Login Error",
+                header: "Error",
                 message: result?.message || "Something went wrong. Please try again later",
                 buttons: [
                     {
@@ -158,26 +162,25 @@ const LoginScreen = () => {
                 colors={['#0D021F', '#1E0442']}
                 style={styles.container}
             >
-
-                <CustomAlert
-                    visible={alertVisible}
-                    header={alertConfig.header}
-                    message={alertConfig.message}
-                    buttons={alertConfig.buttons}
-                    onClose={() => setAlertVisible(false)}
-                />
-
                 <KeyboardAvoidingView
                     behavior={Platform.OS === "ios" ? "padding" : "height"}
                     style={styles.keyboardView}
                 >
                     <Pressable
                         style={styles.backButton}
-                        onPress={() => router.push("/")}
+                        onPress={() => router.back()}
                         hitSlop={20}
                     >
                         <Feather name="arrow-left" size={24} color="white" />
                     </Pressable>
+
+                    <CustomAlert
+                        visible={alertVisible}
+                        header={alertConfig.header}
+                        message={alertConfig.message}
+                        buttons={alertConfig.buttons}
+                        onClose={() => setAlertVisible(false)}
+                    />
 
                     <View style={styles.contentContainer}>
                         <Text style={styles.title}>
@@ -186,26 +189,26 @@ const LoginScreen = () => {
 
                         <View style={[
                             styles.inputContainer,
-                            touchedFields.username && errors.username ? styles.inputError : null
+                            touchedFields.email && errors.email ? styles.inputError : null
                         ]}>
-                            <SimpleLineIcons name="envelope" size={20} color={touchedFields.username && errors.username ? "#FF6B6B" : "#9D8ACE"} style={styles.inputIcon} />
+                            <SimpleLineIcons name="envelope" size={20} color={touchedFields.email && errors.email ? "#FF6B6B" : "#9D8ACE"} style={styles.inputIcon} />
                             <TextInput
                                 style={styles.input}
-                                placeholder="Username"
+                                placeholder="Email Address"
                                 placeholderTextColor="#9D8ACE"
-                                value={formData.username}
-                                onChangeText={(text) => handleChange("username", text)}
-                                onBlur={() => handleBlur("username")}
-                                keyboardType="username-address"
+                                value={formData.email}
+                                onChangeText={(text) => handleChange("email", text)}
+                                onBlur={() => handleBlur("email")}
+                                keyboardType="email-address"
                                 autoCapitalize="none"
                                 autoCorrect={false}
                             />
-                            {touchedFields.username && !errors.username && (
+                            {touchedFields.email && !errors.email && (
                                 <MaterialIcons name="check-circle" size={20} color="#4CD964" />
                             )}
                         </View>
-                        {touchedFields.username && errors.username && (
-                            <Text style={styles.errorText}>{errors.username}</Text>
+                        {touchedFields.email && errors.email && (
+                            <Text style={styles.errorText}>{errors.email}</Text>
                         )}
 
                         <View style={[
@@ -260,11 +263,9 @@ const LoginScreen = () => {
                             </LinearGradient>
                         </Pressable>
 
-                        <Link href="/forgot-password" asChild>
-                            <Pressable style={styles.forgotContainer}>
-                                <Text style={styles.forgotText}>Forgot Password?</Text>
-                            </Pressable>
-                        </Link>
+                        <Pressable style={styles.forgotContainer} onPress={() => router.push("/screens/ForgotPassword")}>
+                            <Text style={styles.forgotText}>Forgot Password?</Text>
+                        </Pressable>
 
                         <Text style={styles.signupText}>
                             Don't have an account?
