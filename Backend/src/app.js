@@ -27,7 +27,8 @@ import resumeRouter from './Routes/resume.routes.js'
 import hrQuestionRouter from './Routes/hrQuestion.routes.js'
 import CSFundamentalsRouter from "./Routes/csFundamentals.routes.js"
 import ApplicationStatusRouter from "./Routes/applicationStatus.routes.js"
-
+import PastRecruiterRouter from "./Routes/pastRecruiter.routes.js"
+import NotificationRouter from "./Routes/notifications.routes.js"
 
 app.use("/api/v1/users", userRouter)
 app.use("/api/v1/admins", adminRouter)
@@ -42,5 +43,7 @@ app.use("/api/v1/resume", resumeRouter)
 app.use("/api/v1/hr-questions", hrQuestionRouter)
 app.use("/api/v1/cs-fundamentals", CSFundamentalsRouter)
 app.use("/api/v1/application-status", ApplicationStatusRouter)
+app.use("/api/v1/past-recruiter", PastRecruiterRouter)
+app.use("/api/v1/notifications", NotificationRouter)
 
 export { app }

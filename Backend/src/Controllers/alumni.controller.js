@@ -25,10 +25,16 @@ const generateAccesandRefreshToken = async (alumniId) => {
 
 const registerAlumni = asyncHandler(async (req, res) => {
     const { name, email, password, linkedInId, previousCompany, currentCompany, batch } = req.body;
-    if (!name || !email || !password || !linkedInId || !previousCompany || !currentCompany || !batch)
+
+    if (!name || !email || !password || !linkedInId || !currentCompany || !batch)
         throw new ApiError(400, "All details are required");
 
-    if (currentCompany.length === 0)
+    const paresdCurrentCompany = JSON.parse(currentCompany) || {}
+    const parsedPreviousCompany = JSON.parse(previousCompany) || []
+
+    console.log(parsedPreviousCompany);    
+
+    if (!paresdCurrentCompany || !paresdCurrentCompany.name || !paresdCurrentCompany.position)
         throw new ApiError(400, "Current company details are required");
 
     const existedAlumni = await Alumni.findOne({ email }).select("-password -refreshToken")
@@ -39,7 +45,7 @@ const registerAlumni = asyncHandler(async (req, res) => {
     // console.log("Files:", req.files);
     if (!profilePicLocalPath)
         throw new ApiError(400, "Profile pic is required")
-    console.log(profilePicLocalPath);
+    // console.log(profilePicLocalPath);
 
 
     const profilePic = await uploadImageonAppwrite(profilePicLocalPath, `${name}.png`)
@@ -47,9 +53,16 @@ const registerAlumni = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Something went wrong while uploading profile pic")
 
 
-    const alumni = await Alumni.create(
-        [{ name, email, password, linkedInId, currentCompany, previousCompany, batch, profilePicId: profilePic.$id }],
-    );
+    const alumni = await Alumni.create([{
+        name,
+        email,
+        password,
+        linkedInId,
+        currentCompany: paresdCurrentCompany,
+        previousCompany: parsedPreviousCompany,
+        batch,
+        profilePicId: profilePic.$id
+    }]);
     if (!alumni)
         throw new ApiError(500, "Failed to create alumni. Please try again later");
 
@@ -75,9 +88,9 @@ const loginAlumni = asyncHandler(async (req, res) => {
     if (!email || !password)
         throw new ApiError(400, "Email and password is required")
 
-    const alumni = await Alumni.find({ email })
+    const alumni = await Alumni.findOne({ email })
     if (!alumni)
-        throw new ApiError(400, "Alumni not found")
+        throw new ApiError(400, "Alumni not found")    
 
     const isPasswordValid = await alumni.isPasswordCorrect(password)
     if (!isPasswordValid)
@@ -178,6 +191,7 @@ const getAlumniById = asyncHandler(async (req, res) => {
     const alumni = await Alumni.findById(alumniId).select("-password -refreshToken")
     if (!alumni)
         throw new ApiError(404, "Alumni not found")
+    
     return res.status(200).json(
         new ApiResponse(
             200,

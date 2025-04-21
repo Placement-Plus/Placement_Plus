@@ -88,6 +88,6 @@ const upcomingCompanySchema = new mongoose.Schema({
             default: Date.now
         }
     }]
-});
+}, { timestamps: true });
 
 export const UpcomingCompany = mongoose.model("UpcomingCompany", upcomingCompanySchema);

@@ -168,7 +168,7 @@ const verifyAlumni = asyncHandler(async (req, res, next) => {
         }
 
         const alumni = await Alumni.findById(decodedToken._id).select("-password -refreshToken");
-        if (!admin) throw new ApiError(401, "Invalid access token");
+        if (!alumni) throw new ApiError(401, "Invalid access token");
 
         req.alumni = alumni;
         next();

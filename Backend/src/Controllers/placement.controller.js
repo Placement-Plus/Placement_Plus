@@ -1,3 +1,4 @@
+import { Notifications } from "../Models/notifications.model.js";
 import { PlacedStudent } from "../Models/placedStudent.model.js";
 import { PlacementStatistics } from "../Models/placementStatistics.model.js";
 import { User } from "../Models/user.model.js";
@@ -112,6 +113,12 @@ const addPlacedStudent = asyncHandler(async (req, res) => {
                 { session }
             )
         }
+
+        const newNotification = await Notifications.create({
+            type: 'placement_stats',
+            content: 'Placement statistics have been updated! Explore the latest data on average, median, and highest packages across all branches.',
+            createdAt: Date.now()
+        })
 
         await session.commitTransaction();
         session.endSession();

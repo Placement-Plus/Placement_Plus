@@ -14,5 +14,6 @@ router.route("/add-previos-company").patch(verifyAlumni, addPreviousCompany)
 router.route("/change-current-company").patch(verifyAlumni, changeCurrentCompanyDetails)
 router.route("/get-details").get(verifyJWT, getAllAlumniDetails)
 router.route("/get-details/c/:alumniId").get(verifyJWT, getAlumniById)
+router.route("/get-alumni-details/c/:alumniId").get(verifyAlumni, getAlumniById)
 
 export default router

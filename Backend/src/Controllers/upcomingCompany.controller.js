@@ -5,6 +5,7 @@ import asyncHandler from '../Utils/AsyncHandler.js'
 import { UpcomingCompany } from '../Models/upcomingCompany.model.js'
 import mongoose from 'mongoose'
 import { ApplicationStatus } from '../Models/applicationStatus.model.js'
+import { Notifications } from '../Models/notifications.model.js'
 
 const getSlab = (lpa) => {
     if (lpa <= 8)
@@ -42,22 +43,34 @@ const checkEligibility = async (companyId, user) => {
 }
 
 const addCompany = asyncHandler(async (req, res) => {
-    const { companyName, eligibleBranches, eligibleBatch, ctc, stipend, role, hiringProcess, cgpaCriteria, jobLocation, schedule, mode, opportunityType, extraDetails, pocName, pocContactNo } = req.body
+    const session = await mongoose.startSession()
+    session.startTransaction()
 
-    if (!companyName || !eligibleBranches || !eligibleBatch || !(ctc || stipend) || !role || !hiringProcess || !cgpaCriteria || !jobLocation || !schedule || !mode || !opportunityType || !pocContactNo || !pocName)
-        throw new ApiError(400, "All details are required")
+    try {
+        const {
+            companyName, eligibleBranches, eligibleBatch, ctc, stipend,
+            role, hiringProcess, cgpaCriteria, jobLocation, schedule,
+            mode, opportunityType, extraDetails, pocName, pocContactNo
+        } = req.body
 
-    if (String(pocContactNo).trim().length !== 10) {
-        throw new ApiError(400, "Contact No must be of 10 digits");
-    }
+        if (
+            !companyName || !eligibleBranches || !eligibleBatch || !(ctc || stipend) ||
+            !role || !hiringProcess || !cgpaCriteria || !jobLocation ||
+            !schedule || !mode || !opportunityType || !pocContactNo || !pocName
+        ) {
+            throw new ApiError(400, "All details are required")
+        }
 
-    const pocDetails = {
-        name: pocName,
-        contactNo: pocContactNo
-    }
+        if (String(pocContactNo).trim().length !== 10) {
+            throw new ApiError(400, "Contact No must be of 10 digits")
+        }
 
-    const company = await UpcomingCompany.create(
-        {
+        const pocDetails = {
+            name: pocName,
+            contactNo: pocContactNo
+        }
+
+        const company = await UpcomingCompany.create([{
             companyName,
             eligibleBatch,
             eligibleBranches,
@@ -72,20 +85,31 @@ const addCompany = asyncHandler(async (req, res) => {
             extraDetails,
             opportunityType,
             pocDetails
+        }], { session })
+
+        const addedCompany = await UpcomingCompany.findById(company[0]._id).session(session)
+        if (!addedCompany) {
+            throw new ApiError(500, "Something went wrong while adding new company")
         }
-    )
 
-    const addedCompany = await UpcomingCompany.findById(company._id)
-    if (!addedCompany)
-        throw new ApiError(500, "Something went wrong while adding new company")
+        await Notifications.create([{
+            type: "new_company",
+            content: `🚨 ${addedCompany.companyName} added for ${addedCompany.role} – Apply now!`,
+            createdAt: Date.now()
+        }], { session })
 
-    return res.status(200).json(
-        new ApiResponse(
-            200,
-            addedCompany,
-            "Company added successfully"
+        await session.commitTransaction()
+        session.endSession()
+
+        return res.status(200).json(
+            new ApiResponse(200, addedCompany, "Company added successfully")
         )
-    )
+
+    } catch (error) {
+        await session.abortTransaction()
+        session.endSession()
+        throw error
+    }
 })
 
 const listAllCompany = asyncHandler(async (req, res) => {
