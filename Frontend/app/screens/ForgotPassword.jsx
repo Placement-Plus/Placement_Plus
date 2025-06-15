@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator, Alert, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { View, Text, TextInput, Pressable, StyleSheet, ActivityIndicator, KeyboardAvoidingView, Platform, TouchableWithoutFeedback, Keyboard } from "react-native";
 import { useRouter } from "expo-router";
 import { SimpleLineIcons, Feather, MaterialIcons } from "@expo/vector-icons";
 import * as Yup from "yup";
@@ -462,7 +462,7 @@ const ForgotPasswordScreen = () => {
                         )}
 
                         {!isSuccess && (
-                            <Pressable style={styles.loginContainer} onPress={() => router.push("userloginsign/Login")}>
+                            <Pressable style={styles.loginContainer} onPress={() => router.replace("userloginsign/login")}>
                                 <Text style={styles.loginText}>
                                     Remember your password? <Text style={styles.highlight}>Log In</Text>
                                 </Text>

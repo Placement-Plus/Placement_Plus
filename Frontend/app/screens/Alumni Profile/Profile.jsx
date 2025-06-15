@@ -308,28 +308,6 @@ const ProfileSettings = () => {
                         <Text style={dynamicStyles.settingsItemText}>View Profile</Text>
                         <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
                     </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Alumni Profile/EditProfile')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="edit" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>Edit Profile</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={dynamicStyles.settingsItem}
-                        onPress={() => router.push('/screens/Alumni Profile/ChangePassword')}
-                    >
-                        <View style={styles.settingsIconContainer}>
-                            <FontAwesome name="lock" size={20} color={theme === 'light' ? "#6a0dad" : "#fff"} />
-                        </View>
-                        <Text style={dynamicStyles.settingsItemText}>Change Password</Text>
-                        <MaterialIcons name="keyboard-arrow-right" size={24} color={theme === 'light' ? "#666" : "#777"} />
-                    </TouchableOpacity>
                 </View>
 
                 {/* App Settings */}

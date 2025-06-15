@@ -84,7 +84,7 @@ export default function ExportPage() {
                 return;
             }
 
-            const response = await fetch(`http://${EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/export-to-excel`, {
+            const response = await fetch(`http://${process.env.EXPO_PUBLIC_IP_ADDRESS}:5000/api/v1/admins/export-to-excel`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${accessToken}`,

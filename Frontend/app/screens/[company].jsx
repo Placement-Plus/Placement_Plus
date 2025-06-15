@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, Alert, TextInput } from "react-native";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { View, Text, StyleSheet, FlatList, Image, TouchableOpacity, Linking, TextInput, ScrollView } from "react-native";
+import { FontAwesome, Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { getAccessToken, getRefreshToken } from "../../utils/tokenStorage.js";
 import { useUser } from "../../context/userContext.js";
 import { router, useLocalSearchParams } from 'expo-router'
@@ -25,114 +25,63 @@ import techMahindraLogo from "@/assets/companyImages/tech-mahindra-new.png"
 const companies = [
     {
         name: "Microsoft",
-        dark: {
-            logo: microsoftLogo
-        },
-        light: {
-            logo: microsoftLogo
-        }
+        dark: { logo: microsoftLogo },
+        light: { logo: microsoftLogo }
     },
     {
         name: "Apple",
-        dark: {
-            logo: appleLogo
-        },
-        light: {
-            logo: appleLogoBlack
-        }
+        dark: { logo: appleLogo },
+        light: { logo: appleLogoBlack }
     },
     {
         name: "Google",
-        dark: {
-            logo: googleLogo
-        },
-        light: {
-            logo: googleLogo
-        }
+        dark: { logo: googleLogo },
+        light: { logo: googleLogo }
     },
     {
         name: "Amazon",
-        dark: {
-            logo: amazonLogo
-        },
-        light: {
-            logo: amazonLogo
-        }
+        dark: { logo: amazonLogo },
+        light: { logo: amazonLogo }
     },
     {
         name: "Flipkart",
-        dark: {
-            logo: flipkartLogo
-        },
-        light: {
-            logo: flipkartLogo
-        }
+        dark: { logo: flipkartLogo },
+        light: { logo: flipkartLogo }
     },
     {
         name: "Netflix",
-        dark: {
-            logo: netflixLogo
-        },
-        light: {
-            logo: netflixLogo
-        }
+        dark: { logo: netflixLogo },
+        light: { logo: netflixLogo }
     },
     {
         name: "Meta",
-        dark: {
-            logo: metaLogo
-        },
-        light: {
-            logo: metaLogo
-        }
+        dark: { logo: metaLogo },
+        light: { logo: metaLogo }
     },
     {
         name: "Uber",
-        dark: {
-            logo: uberLogo
-        },
-        light: {
-            logo: uberLogoBlack
-        }
+        dark: { logo: uberLogo },
+        light: { logo: uberLogoBlack }
     },
     {
         name: "Nvidia",
-        dark: {
-            logo: nvidiaLogo
-        },
-        light: {
-            logo: nvidiaLogoBlack
-        }
+        dark: { logo: nvidiaLogo },
+        light: { logo: nvidiaLogoBlack }
     },
     {
-
         name: "Gameskraft",
-        dark: {
-            logo: gameskraftLogo
-        },
-        light: {
-            logo: gameskraftLogo
-        }
+        dark: { logo: gameskraftLogo },
+        light: { logo: gameskraftLogo }
     },
     {
-
         name: "Morgan Stanley",
-        dark: {
-            logo: morganStanleyLogo
-        },
-        light: {
-            logo: morganStanleyLogo
-        }
+        dark: { logo: morganStanleyLogo },
+        light: { logo: morganStanleyLogo }
     },
     {
-
         name: "Tech Mahindra",
-        dark: {
-            logo: techMahindraLogo
-        },
-        light: {
-            logo: techMahindraLogo
-        }
+        dark: { logo: techMahindraLogo },
+        light: { logo: techMahindraLogo }
     }
 ];
 
@@ -142,73 +91,14 @@ const CodingProblems = () => {
     const [searchQuery, setSearchQuery] = useState("");
     const [isLoading, setIsLoading] = useState(true);
     const [difficultyFilter, setDifficultyFilter] = useState("All");
-    const { theme } = useUser()
-    const { company } = useLocalSearchParams()
-    const [alertVisible, setAlertVisible] = useState(false)
+    const { theme } = useUser();
+    const { company } = useLocalSearchParams();
+    const [alertVisible, setAlertVisible] = useState(false);
     const [alertConfig, setAlertConfig] = useState({
         header: "",
         message: "",
         buttons: []
-    })
-
-    const themeColors = {
-        darkBackground: "#1a012c",
-        lightBackground: "#F5F5F5",
-        darkText: "#fff",
-        lightText: "#333333",
-        darkSubtitleText: "#d8b8e8",
-        lightSubtitleText: "#666666",
-        darkPurple: "#C92EFF",
-        lightPurple: "#6A0DAD",
-    };
-
-    const getThemeColor = (darkValue, lightValue) => theme === 'dark' ? darkValue : lightValue;
-
-    const getDifficultyStyle = (difficulty) => {
-        const baseStyles = {
-            Easy: {
-                dark: {
-                    backgroundColor: "#0f5132",
-                    color: "#d1e7dd",
-                },
-                light: {
-                    backgroundColor: "#d1e7dd",
-                    color: "#0f5132",
-                }
-            },
-            Medium: {
-                dark: {
-                    backgroundColor: "#664d03",
-                    color: "#f8d775",
-                },
-                light: {
-                    backgroundColor: "#fff3cd",
-                    color: "#664d03",
-                }
-            },
-            Hard: {
-                dark: {
-                    backgroundColor: "#58151c",
-                    color: "#f5c2c7",
-                },
-                light: {
-                    backgroundColor: "#f8d7da",
-                    color: "#58151c",
-                }
-            },
-        };
-
-        const diffStyle = baseStyles[difficulty] ? baseStyles[difficulty][theme] : {};
-
-        return {
-            backgroundColor: diffStyle.backgroundColor,
-            color: diffStyle.color,
-        };
-    };
-
-    const handleOpenLink = (url) => {
-        Linking.openURL(url).catch((err) => console.error("Error opening link:", err));
-    };
+    });
 
     useEffect(() => {
         if (company)
@@ -242,7 +132,7 @@ const CodingProblems = () => {
 
     const getProblem = async (companyName) => {
         if (companyName === 'Tech Mahindra')
-            companyName = "TechMahindra"
+            companyName = "TechMahindra";
 
         setIsLoading(true);
         try {
@@ -313,11 +203,252 @@ const CodingProblems = () => {
         setDifficultyFilter("All");
     };
 
+    const handleOpenLink = (url) => {
+        Linking.openURL(url).catch((err) => console.error("Error opening link:", err));
+    };
+
+    const getDifficultyStyles = (difficulty) => {
+        const baseStyles = {
+            Easy: {
+                dark: {
+                    text: "#d1e7dd",
+                    background: "rgba(15, 81, 50, 0.8)",
+                    icon: "check-circle"
+                },
+                light: {
+                    text: "#0f5132",
+                    background: "#d1e7dd",
+                    icon: "check-circle"
+                }
+            },
+            Medium: {
+                dark: {
+                    text: "#f8d775",
+                    background: "rgba(102, 77, 3, 0.8)",
+                    icon: "dot-circle-o"
+                },
+                light: {
+                    text: "#664d03",
+                    background: "#fff3cd",
+                    icon: "dot-circle-o"
+                }
+            },
+            Hard: {
+                dark: {
+                    text: "#f5c2c7",
+                    background: "rgba(88, 21, 28, 0.8)",
+                    icon: "exclamation-circle"
+                },
+                light: {
+                    text: "#58151c",
+                    background: "#f8d7da",
+                    icon: "exclamation-circle"
+                }
+            }
+        };
+
+        return baseStyles[difficulty] ? baseStyles[difficulty][theme] : null;
+    };
+
+    // Dynamic styles based on theme
+    const getDynamicStyles = () => StyleSheet.create({
+        container: {
+            flex: 1,
+            backgroundColor: theme === 'light' ? "#f0f0f0" : "#1a012c",
+            paddingBottom: 20
+        },
+        headerContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            paddingVertical: 15,
+            paddingHorizontal: 15,
+            borderBottomWidth: 1,
+            borderBottomColor: theme === 'light' ? "#e0e0e0" : '#390852',
+            marginTop: 15
+        },
+        header: {
+            color: theme === 'light' ? "#6a0dad" : '#C92EFF',
+            fontSize: 20,
+            fontWeight: 'bold',
+        },
+        searchContainer: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme === 'light' ? "#ffffff" : '#2d0a41',
+            marginHorizontal: 15,
+            marginTop: 15,
+            padding: 10,
+            borderRadius: 10,
+            shadowColor: "#000",
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+            elevation: 3,
+        },
+        searchInput: {
+            flex: 1,
+            height: 40,
+            fontSize: 16,
+            color: theme === 'light' ? "#333" : '#fff',
+            paddingLeft: 5
+        },
+        filterContainer: {
+            marginHorizontal: 15,
+            marginTop: 15,
+        },
+        filterLabel: {
+            fontSize: 16,
+            fontWeight: "bold",
+            marginBottom: 8,
+            color: theme === 'light' ? "#6a0dad" : '#C92EFF',
+            paddingLeft: 5,
+        },
+        activeFiltersContainer: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginHorizontal: 15,
+            marginTop: 10,
+            padding: 10,
+            borderRadius: 8,
+            backgroundColor: theme === 'light' ? "rgba(106, 13, 173, 0.1)" : "rgba(201, 46, 255, 0.1)",
+        },
+        activeFiltersText: {
+            fontSize: 14,
+            color: theme === 'light' ? "#666" : '#b388e9',
+        },
+        resetFiltersButton: {
+            paddingVertical: 5,
+            paddingHorizontal: 10,
+            borderRadius: 5,
+            backgroundColor: theme === 'light' ? "rgba(106, 13, 173, 0.3)" : "rgba(201, 46, 255, 0.3)",
+        },
+        resetFiltersText: {
+            fontSize: 12,
+            color: theme === 'light' ? "#333" : '#fff',
+        },
+        emptyContainer: {
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            padding: 20,
+            borderRadius: 15,
+            marginTop: 20,
+            backgroundColor: theme === 'light' ? "#ffffff" : '#2d0a41',
+            marginHorizontal: 15,
+        },
+        emptyTitle: {
+            fontSize: 24,
+            fontWeight: 'bold',
+            marginBottom: 10,
+            textAlign: 'center',
+            color: theme === 'light' ? "#333" : '#fff',
+        },
+        emptyMessage: {
+            fontSize: 16,
+            textAlign: 'center',
+            lineHeight: 24,
+            marginBottom: 30,
+            paddingHorizontal: 20,
+            color: theme === 'light' ? "#666" : '#b388e9',
+        },
+        refreshButton: {
+            paddingVertical: 12,
+            paddingHorizontal: 30,
+            borderRadius: 25,
+            backgroundColor: theme === 'light' ? "#6a0dad" : '#C92EFF',
+            elevation: 5,
+        },
+        refreshButtonText: {
+            color: '#fff',
+            fontSize: 16,
+            fontWeight: 'bold',
+        },
+        problemCard: {
+            backgroundColor: theme === 'light' ? "#ffffff" : '#2d0a41',
+            marginHorizontal: 15,
+            marginTop: 10,
+            padding: 15,
+            borderRadius: 10,
+            shadowColor: "#000",
+            shadowOffset: {
+                width: 0,
+                height: 2,
+            },
+            shadowOpacity: 0.1,
+            shadowRadius: 3,
+            elevation: 3,
+        },
+        problemNumber: {
+            fontSize: 14,
+            fontWeight: 'bold',
+            marginBottom: 8,
+            paddingBottom: 8,
+            borderBottomWidth: 1,
+            borderBottomColor: theme === 'light' ? "rgba(106, 13, 173, 0.2)" : "rgba(201, 46, 255, 0.2)",
+            color: theme === 'light' ? "#6a0dad" : '#C92EFF',
+        },
+        problemName: {
+            fontSize: 18,
+            fontWeight: 'bold',
+            marginBottom: 8,
+            color: theme === 'light' ? "#333" : '#fff',
+        },
+        problemFooter: {
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginTop: 10,
+        },
+        difficultyTag: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingVertical: 5,
+            paddingHorizontal: 10,
+            borderRadius: 20,
+        },
+        difficultyText: {
+            fontSize: 14,
+            fontWeight: 'bold',
+            marginLeft: 5,
+        },
+        practiceButton: {
+            flexDirection: 'row',
+            alignItems: 'center',
+            backgroundColor: theme === 'light' ? "rgba(106, 13, 173, 0.1)" : "rgba(201, 46, 255, 0.1)",
+            paddingVertical: 8,
+            paddingHorizontal: 15,
+            borderRadius: 20,
+        },
+        practiceButtonText: {
+            fontSize: 14,
+            fontWeight: 'bold',
+            marginLeft: 5,
+            color: theme === 'light' ? "#6a0dad" : '#C92EFF',
+        },
+        filterButton: {
+            paddingVertical: 10,
+            paddingHorizontal: 18,
+            borderRadius: 20,
+            marginRight: 10,
+            borderWidth: 1,
+        },
+        filterText: {
+            fontWeight: 'bold',
+        },
+        filterRow: {
+            flexDirection: 'row',
+        }
+    });
+
+    const dynamicStyles = getDynamicStyles();
+
     return (
-        <View style={[
-            styles.container,
-            { backgroundColor: getThemeColor(themeColors.darkBackground, themeColors.lightBackground) }
-        ]}>
+        <View style={dynamicStyles.container}>
             <CustomAlert
                 visible={alertVisible}
                 header={alertConfig.header}
@@ -325,13 +456,12 @@ const CodingProblems = () => {
                 buttons={alertConfig.buttons}
                 onClose={() => setAlertVisible(false)}
             />
-            <View style={styles.headerContainer}>
-                <Ionicons name="arrow-back" size={24} color={themeColors.darkPurple} style={{ marginTop: 15 }} onPress={() => router.back()} />
-                <Text style={[
-                    styles.header,
-                    { color: getThemeColor(themeColors.darkPurple, themeColors.lightPurple) }
-                ]}>Coding Problems</Text>
-                <View style={styles.headerRight}>
+            <View style={dynamicStyles.headerContainer}>
+                <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+                    <Ionicons name="arrow-back" size={24} color={theme === 'light' ? "#6a0dad" : "#C92EFF"} />
+                </TouchableOpacity>
+                <Text style={dynamicStyles.header}>Coding Problems</Text>
+                <View style={{ width: 50, height: 50 }}>
                     {company && companies.some(c => c.name === company) && (
                         <Image
                             source={companies.find(c => c.name === company)[theme].logo}
@@ -341,26 +471,17 @@ const CodingProblems = () => {
                 </View>
             </View>
 
-            <View style={[
-                styles.searchContainer,
-                {
-                    backgroundColor: getThemeColor("rgba(255, 255, 255, 0.08)", "rgba(106, 13, 173, 0.08)"),
-                    borderColor: getThemeColor("rgba(201, 46, 255, 0.3)", "rgba(106, 13, 173, 0.3)")
-                }
-            ]}>
+            <View style={dynamicStyles.searchContainer}>
                 <FontAwesome
                     name="search"
                     size={20}
-                    color={getThemeColor(themeColors.darkPurple, themeColors.lightPurple)}
+                    color={theme === 'light' ? "#6a0dad" : '#C92EFF'}
                     style={styles.searchIcon}
                 />
                 <TextInput
-                    style={[
-                        styles.searchInput,
-                        { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                    ]}
+                    style={dynamicStyles.searchInput}
                     placeholder="Search problems..."
-                    placeholderTextColor={getThemeColor("#8a8a8a", "#999")}
+                    placeholderTextColor={theme === 'light' ? "#999" : "#8a8a8a"}
                     value={searchQuery}
                     onChangeText={setSearchQuery}
                 />
@@ -369,180 +490,154 @@ const CodingProblems = () => {
                         <FontAwesome
                             name="times-circle"
                             size={20}
-                            color={getThemeColor(themeColors.darkPurple, themeColors.lightPurple)}
+                            color={theme === 'light' ? "#6a0dad" : '#C92EFF'}
                         />
                     </TouchableOpacity>
                 )}
             </View>
 
-            <View style={styles.filterContainer}>
-                <Text style={[
-                    styles.filterLabel,
-                    { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                ]}>Difficulty:</Text>
-                <ScrollableFilterButtons
-                    difficultyFilter={difficultyFilter}
-                    handleFilterChange={handleFilterChange}
-                    theme={theme}
-                    themeColors={themeColors}
-                />
+            <View style={dynamicStyles.filterContainer}>
+                <Text style={dynamicStyles.filterLabel}>Difficulty</Text>
+                <ScrollView 
+                    horizontal 
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={dynamicStyles.filterRow}
+                >
+                    {["All", "Easy", "Medium", "Hard"].map((difficulty) => {
+                        const isActive = difficultyFilter === difficulty;
+                        let buttonStyle, textStyle;
+                        
+                        if (difficulty === "All") {
+                            buttonStyle = {
+                                backgroundColor: isActive 
+                                    ? (theme === 'light' ? "#6a0dad" : '#C92EFF') 
+                                    : (theme === 'light' ? "rgba(106, 13, 173, 0.1)" : "rgba(201, 46, 255, 0.1)"),
+                                borderColor: isActive 
+                                    ? (theme === 'light' ? "#6a0dad" : '#C92EFF') 
+                                    : (theme === 'light' ? "rgba(106, 13, 173, 0.3)" : "rgba(201, 46, 255, 0.3)")
+                            };
+                            textStyle = {
+                                color: isActive 
+                                    ? "#fff" 
+                                    : (theme === 'light' ? "#6a0dad" : '#C92EFF')
+                            };
+                        } else {
+                            const diffStyles = getDifficultyStyles(difficulty);
+                            buttonStyle = {
+                                backgroundColor: isActive 
+                                    ? diffStyles.background
+                                    : theme === 'light' 
+                                        ? "rgba(106, 13, 173, 0.05)" 
+                                        : "rgba(201, 46, 255, 0.05)",
+                                borderColor: diffStyles.text
+                            };
+                            textStyle = {
+                                color: isActive ? (theme === 'light' ? "#fff" : diffStyles.text) : diffStyles.text
+                            };
+                        }
+                        
+                        return (
+                            <TouchableOpacity
+                                key={difficulty}
+                                style={[dynamicStyles.filterButton, buttonStyle]}
+                                onPress={() => handleFilterChange(difficulty)}
+                            >
+                                <Text style={[dynamicStyles.filterText, textStyle]}>
+                                    {difficulty}
+                                </Text>
+                            </TouchableOpacity>
+                        );
+                    })}
+                </ScrollView>
             </View>
 
             {(searchQuery.length > 0 || difficultyFilter !== "All") && (
-                <View style={[
-                    styles.activeFiltersContainer,
-                    {
-                        backgroundColor: getThemeColor(
-                            "rgba(201, 46, 255, 0.1)",
-                            "rgba(106, 13, 173, 0.1)"
-                        )
-                    }
-                ]}>
-                    <Text style={[
-                        styles.activeFiltersText,
-                        { color: getThemeColor(themeColors.darkSubtitleText, themeColors.lightSubtitleText) }
-                    ]}>
+                <View style={dynamicStyles.activeFiltersContainer}>
+                    <Text style={dynamicStyles.activeFiltersText}>
                         Active filters: {difficultyFilter !== "All" ? difficultyFilter : ""}
                         {searchQuery.length > 0 ? (difficultyFilter !== "All" ? ", " : "") + `"${searchQuery}"` : ""}
                     </Text>
                     <TouchableOpacity
-                        style={[
-                            styles.resetFiltersButton,
-                            {
-                                backgroundColor: getThemeColor(
-                                    "rgba(201, 46, 255, 0.3)",
-                                    "rgba(106, 13, 173, 0.3)"
-                                )
-                            }
-                        ]}
+                        style={dynamicStyles.resetFiltersButton}
                         onPress={resetFilters}
                     >
-                        <Text style={[
-                            styles.resetFiltersText,
-                            { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                        ]}>Reset Filters</Text>
+                        <Text style={dynamicStyles.resetFiltersText}>Reset Filters</Text>
                     </TouchableOpacity>
                 </View>
             )}
 
             {isLoading ? (
-                <View style={[
-                    styles.emptyContainer,
-                    {
-                        backgroundColor: getThemeColor(
-                            "rgba(255, 255, 255, 0.03)",
-                            "rgba(106, 13, 173, 0.03)"
-                        )
-                    }
-                ]}>
-                    <Text style={[
-                        styles.emptyTitle,
-                        { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                    ]}>Loading...</Text>
+                <View style={dynamicStyles.emptyContainer}>
+                    <Text style={dynamicStyles.emptyTitle}>Loading...</Text>
                 </View>
             ) : filteredProblems && filteredProblems.length > 0 ? (
                 <FlatList
                     data={filteredProblems}
                     keyExtractor={(item) => item._id}
-                    ListHeaderComponent={() => (
-                        <View style={[
-                            styles.tableHeader,
-                            { borderBottomColor: getThemeColor("#ddd", "#ddd") }
-                        ]}>
-                            <Text style={[
-                                styles.headerText,
-                                styles.col1,
-                                { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                            ]}>No.</Text>
-                            <Text style={[
-                                styles.headerText,
-                                styles.col2,
-                                { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                            ]}>Problem</Text>
-                            <Text style={[
-                                styles.headerText,
-                                styles.col3,
-                                { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                            ]}>Practice</Text>
-                            <Text style={[
-                                styles.headerText,
-                                styles.col4,
-                                { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                            ]}>Difficulty</Text>
-                        </View>
-                    )}
-                    renderItem={({ item, index }) => (
-                        <View style={[
-                            styles.row,
-                            { borderBottomColor: getThemeColor("#444", "#ddd") }
-                        ]}>
-                            <Text style={[
-                                styles.cell,
-                                styles.col1,
-                                { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                            ]}>{index + 1}.</Text>
-                            <Text style={[
-                                styles.cell,
-                                styles.col2,
-                                { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                            ]}>{item.name}</Text>
-                            <TouchableOpacity onPress={() => handleOpenLink(item?.link)}>
-                                <FontAwesome
-                                    name="code"
-                                    size={22}
-                                    style={[
-                                        styles.icon,
-                                        { color: getThemeColor(themeColors.darkPurple, themeColors.lightPurple) }
-                                    ]}
-                                />
-                            </TouchableOpacity>
-                            <Text
-                                style={[
-                                    styles.difficulty,
-                                    styles.col4,
-                                    getDifficultyStyle(item.difficulty)
-                                ]}
-                            >
-                                {item.difficulty}
-                            </Text>
-                        </View>
-                    )}
+                    renderItem={({ item, index }) => {
+                        const difficultyStyle = getDifficultyStyles(item.difficulty);
+                        
+                        return (
+                            <View style={dynamicStyles.problemCard}>
+                                <Text style={dynamicStyles.problemNumber}>Problem #{index + 1}</Text>
+                                <Text style={dynamicStyles.problemName}>{item.name}</Text>
+                                
+                                <View style={dynamicStyles.problemFooter}>
+                                    <View 
+                                        style={[
+                                            dynamicStyles.difficultyTag, 
+                                            { backgroundColor: difficultyStyle.background }
+                                        ]}
+                                    >
+                                        <FontAwesome 
+                                            name={difficultyStyle.icon} 
+                                            size={14} 
+                                            color={difficultyStyle.text} 
+                                        />
+                                        <Text 
+                                            style={[
+                                                dynamicStyles.difficultyText, 
+                                                { color: difficultyStyle.text }
+                                            ]}
+                                        >
+                                            {item.difficulty}
+                                        </Text>
+                                    </View>
+                                    
+                                    <TouchableOpacity 
+                                        style={dynamicStyles.practiceButton}
+                                        onPress={() => handleOpenLink(item?.link)}
+                                    >
+                                        <FontAwesome 
+                                            name="code" 
+                                            size={18} 
+                                            color={theme === 'light' ? "#6a0dad" : '#C92EFF'} 
+                                        />
+                                        <Text style={dynamicStyles.practiceButtonText}>Practice</Text>
+                                    </TouchableOpacity>
+                                </View>
+                            </View>
+                        );
+                    }}
                 />
             ) : (
-                <View style={[
-                    styles.emptyContainer,
-                    {
-                        backgroundColor: getThemeColor(
-                            "rgba(255, 255, 255, 0.03)",
-                            "rgba(106, 13, 173, 0.03)"
-                        )
-                    }
-                ]}>
+                <View style={dynamicStyles.emptyContainer}>
                     <FontAwesome
                         name="search"
                         size={60}
-                        color={getThemeColor(themeColors.darkPurple, themeColors.lightPurple)}
+                        color={theme === 'light' ? "#6a0dad" : '#C92EFF'}
                         style={styles.emptyIcon}
                     />
-                    <Text style={[
-                        styles.emptyTitle,
-                        { color: getThemeColor(themeColors.darkText, themeColors.lightText) }
-                    ]}>No Matching Problems</Text>
-                    <Text style={[
-                        styles.emptyMessage,
-                        { color: getThemeColor(themeColors.darkSubtitleText, themeColors.lightSubtitleText) }
-                    ]}>
+                    <Text style={dynamicStyles.emptyTitle}>No Matching Problems</Text>
+                    <Text style={dynamicStyles.emptyMessage}>
                         We couldn't find any problems matching your filters.
                         Try different search terms or filter settings.
                     </Text>
                     <TouchableOpacity
-                        style={[
-                            styles.refreshButton,
-                            { backgroundColor: getThemeColor(themeColors.darkPurple, themeColors.lightPurple) }
-                        ]}
+                        style={dynamicStyles.refreshButton}
                         onPress={resetFilters}
                     >
-                        <Text style={styles.refreshButtonText}>Reset Filters</Text>
+                        <Text style={dynamicStyles.refreshButtonText}>Reset Filters</Text>
                     </TouchableOpacity>
                 </View>
             )}
@@ -550,278 +645,25 @@ const CodingProblems = () => {
     );
 };
 
-// Separate component for filter buttons with horizontal scrolling
-const ScrollableFilterButtons = ({ difficultyFilter, handleFilterChange, theme, themeColors }) => {
-    const getThemeColor = (darkValue, lightValue) => theme === 'dark' ? darkValue : lightValue;
-
-    const getButtonStyle = (difficulty) => {
-        const baseStyles = {
-            All: {
-                normal: {
-                    backgroundColor: getThemeColor("rgba(255, 255, 255, 0.1)", "rgba(106, 13, 173, 0.1)"),
-                    borderColor: getThemeColor("rgba(255, 255, 255, 0.2)", "rgba(106, 13, 173, 0.2)"),
-                },
-                active: {
-                    backgroundColor: getThemeColor("#C92EFF", "#6A0DAD"),
-                    borderColor: getThemeColor("#C92EFF", "#6A0DAD"),
-                },
-                text: {
-                    normal: getThemeColor("#fff", "#333"),
-                    active: "#fff",
-                }
-            },
-            Easy: {
-                normal: {
-                    backgroundColor: getThemeColor("rgba(15, 81, 50, 0.3)", "rgba(209, 231, 221, 0.5)"),
-                    borderColor: getThemeColor("#0f5132", "#0f5132"),
-                },
-                active: {
-                    backgroundColor: getThemeColor("#0f5132", "#198754"),
-                    borderColor: getThemeColor("#0f5132", "#198754"),
-                },
-                text: {
-                    normal: getThemeColor("#d1e7dd", "#0f5132"),
-                    active: "#d1e7dd",
-                }
-            },
-            Medium: {
-                normal: {
-                    backgroundColor: getThemeColor("rgba(102, 77, 3, 0.3)", "rgba(255, 243, 205, 0.5)"),
-                    borderColor: getThemeColor("#664d03", "#664d03"),
-                },
-                active: {
-                    backgroundColor: getThemeColor("#664d03", "#ffc107"),
-                    borderColor: getThemeColor("#664d03", "#ffc107"),
-                },
-                text: {
-                    normal: getThemeColor("#f8d775", "#664d03"),
-                    active: "#f8d775",
-                }
-            },
-            Hard: {
-                normal: {
-                    backgroundColor: getThemeColor("rgba(88, 21, 28, 0.3)", "rgba(248, 215, 218, 0.5)"),
-                    borderColor: getThemeColor("#58151c", "#58151c"),
-                },
-                active: {
-                    backgroundColor: getThemeColor("#58151c", "#dc3545"),
-                    borderColor: getThemeColor("#58151c", "#dc3545"),
-                },
-                text: {
-                    normal: getThemeColor("#f5c2c7", "#58151c"),
-                    active: "#f5c2c7",
-                }
-            }
-        };
-
-        const isActive = difficultyFilter === difficulty;
-        const styles = baseStyles[difficulty] || baseStyles.All;
-
-        return {
-            button: isActive ? styles.active : styles.normal,
-            text: { color: isActive ? styles.text.active : styles.text.normal }
-        };
-    };
-
-    return (
-        <FlatList
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            data={["All", "Easy", "Medium", "Hard"]}
-            keyExtractor={(item) => item}
-            renderItem={({ item }) => {
-                const buttonStyle = getButtonStyle(item);
-
-                return (
-                    <TouchableOpacity
-                        style={[
-                            styles.filterButton,
-                            buttonStyle.button
-                        ]}
-                        onPress={() => handleFilterChange(item)}
-                    >
-                        <Text style={[styles.filterText, buttonStyle.text]}>
-                            {item}
-                        </Text>
-                    </TouchableOpacity>
-                );
-            }}
-            contentContainerStyle={styles.filterButtonsContainer}
-        />
-    );
-};
-
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 15,
-    },
-    headerContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        width: "100%",
-        marginBottom: 15,
-    },
-    headerRight: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    themeToggle: {
-        marginRight: 15,
+    backButton: {
         padding: 5,
-    },
-    header: {
-        fontSize: 30,
-        fontWeight: "bold",
-        fontFamily: "sans-serif",
-        marginTop: 15
     },
     logo: {
         width: 50,
         height: 50,
         resizeMode: "contain",
-        marginTop: 20,
-    },
-    searchContainer: {
-        flexDirection: "row",
-        alignItems: "center",
-        borderRadius: 10,
-        paddingHorizontal: 10,
-        marginBottom: 15,
-        borderWidth: 1,
     },
     searchIcon: {
         marginRight: 10,
-    },
-    searchInput: {
-        flex: 1,
-        height: 46,
-        fontSize: 16,
-        paddingVertical: 10,
+        paddingLeft: 5,
     },
     clearButton: {
         padding: 8,
     },
-    filterContainer: {
-        marginBottom: 15,
-    },
-    filterLabel: {
-        fontSize: 16,
-        marginBottom: 8,
-        fontWeight: "bold",
-    },
-    filterButtonsContainer: {
-        paddingRight: 20,
-    },
-    filterButton: {
-        paddingVertical: 8,
-        paddingHorizontal: 16,
-        borderRadius: 20,
-        marginRight: 10,
-        borderWidth: 1,
-    },
-    filterText: {
-        fontWeight: "bold",
-    },
-    activeFiltersContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 15,
-        borderRadius: 8,
-        padding: 8,
-    },
-    activeFiltersText: {
-        fontSize: 14,
-    },
-    resetFiltersButton: {
-        paddingVertical: 5,
-        paddingHorizontal: 10,
-        borderRadius: 5,
-    },
-    resetFiltersText: {
-        fontSize: 12,
-    },
-    tableHeader: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingVertical: 10,
-        paddingHorizontal: 5,
-        borderBottomWidth: 1,
-        marginHorizontal: 3,
-    },
-    headerText: {
-        fontSize: 18,
-        fontWeight: "bold",
-        textAlign: "center",
-    },
-    row: {
-        flexDirection: "row",
-        alignItems: "center",
-        paddingVertical: 12,
-        borderBottomWidth: 1,
-    },
-    cell: {
-        fontSize: 16,
-        textAlign: "center",
-        paddingHorizontal: 0,
-        marginLeft: 0,
-    },
-    icon: {
-        textAlign: "center",
-        paddingHorizontal: 10,
-    },
-    difficulty: {
-        fontSize: 14,
-        fontWeight: "bold",
-        paddingVertical: 5,
-        borderRadius: 5,
-        textAlign: "center",
-        marginLeft: 5
-    },
-    col1: { flex: 0.5, alignItems: "center", justifyContent: "center" },
-    col2: { flex: 2, alignItems: "flex-start", paddingLeft: 10 },
-    col3: { flex: 1, alignItems: "center", paddingRight: 15 },
-    col4: { flex: 1.2, alignItems: "center", justifyContent: "center" },
-
-    // Empty state styles
-    emptyContainer: {
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        padding: 20,
-        borderRadius: 15,
-        marginTop: 20,
-    },
     emptyIcon: {
         marginBottom: 20,
         opacity: 0.8,
-    },
-    emptyTitle: {
-        fontSize: 24,
-        fontWeight: "bold",
-        marginBottom: 10,
-        textAlign: "center",
-    },
-    emptyMessage: {
-        fontSize: 16,
-        textAlign: "center",
-        lineHeight: 24,
-        marginBottom: 30,
-        paddingHorizontal: 20,
-    },
-    refreshButton: {
-        paddingVertical: 12,
-        paddingHorizontal: 30,
-        borderRadius: 25,
-        elevation: 5,
-    },
-    refreshButtonText: {
-        color: "#fff",
-        fontSize: 16,
-        fontWeight: "bold",
     },
 });
 

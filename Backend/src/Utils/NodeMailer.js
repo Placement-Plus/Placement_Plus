@@ -2,16 +2,15 @@ import nodemailer from "nodemailer"
 
 const sendEmail = async (to, subject, html) => {
     const transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
+        service: 'gmail',
         auth: {
-            user: 'jarret.kessler95@ethereal.email',
-            pass: 'KGm5xUAQMeFBMVXBjE'
+            user: process.env.EMAIL_ID,
+            pass: process.env.EMAIL_PASSWORD
         }
     });
 
     await transporter.sendMail({
-        from: `"Your App" <jarret.kessler95@ethereal.email>`,
+        from: `"Placement Plus" ${process.env.EMAIL_ID}`,
         to,
         subject,
         html,
