@@ -5,12 +5,10 @@ import {
 	Image,
 	TouchableOpacity,
 	StyleSheet,
-	StatusBar,
 	ScrollView,
-	SafeAreaView,
 	Alert,
 	TextInput,
-	Pressable
+	ActivityIndicator
 } from 'react-native';
 import { FontAwesome, Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
@@ -291,31 +289,17 @@ const CompanyListings = () => {
 		const isEligible = checkEligibility(company);
 		const hasApplied = user?.appliedCompanies?.some(c => c.companyId === company._id);
 
-		// Theme-based colors
-		const cardBackgroundColors = theme === 'light'
-			? ['#FFFFFF', '#F0F0F0']
-			: ['rgba(138, 35, 135, 0.8)', 'rgba(26, 1, 44, 0.9)'];
-
-		const companyNameColor = theme === 'light' ? "#6A0DAD" : 'white';
-		const textColor = theme === 'light' ? '#333333' : 'white';
-		const subtextColor = theme === 'light' ? 'rgba(0, 0, 0, 0.6)' : 'rgba(255, 255, 255, 0.7)';
-
 		return (
 			<TouchableOpacity
 				key={company._id}
 				style={styles.cardWrapper}
 				onPress={() => navigateToCompanyDetail(company)}
 			>
-				<LinearGradient
-					colors={cardBackgroundColors}
-					start={{ x: 0, y: 0 }}
-					end={{ x: 1, y: 1 }}
+				<View
 					style={[
 						styles.companyCard,
 						{
-							backgroundColor: theme === 'light'
-								? 'rgba(106, 13, 173, 0.05)'
-								: 'transparent'
+							backgroundColor: theme === 'light' ? '#ffffff' : '#2d0a41',
 						}
 					]}
 				>
@@ -326,10 +310,10 @@ const CompanyListings = () => {
 							onError={() => console.log('Image failed to load')}
 						/>
 						<View style={styles.cardHeaderText}>
-							<Text style={[styles.companyCardName, { color: companyNameColor }]}>
+							<Text style={[styles.companyCardName, { color: theme === 'light' ? "#6a0dad" : '#fff' }]}>
 								{company?.companyName}
 							</Text>
-							<Text style={[styles.companyRole, { color: subtextColor }]}>
+							<Text style={[styles.companyRole, { color: theme === 'light' ? "#666" : '#b388e9' }]}>
 								{company?.role || "No Role Specified"}
 							</Text>
 						</View>
@@ -343,9 +327,7 @@ const CompanyListings = () => {
 					<View style={[
 						styles.cardDivider,
 						{
-							backgroundColor: theme === 'light'
-								? 'rgba(106, 13, 173, 0.2)'
-								: 'rgba(255, 255, 255, 0.15)'
+							backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.2)' : '#390852'
 						}
 					]} />
 
@@ -355,10 +337,10 @@ const CompanyListings = () => {
 								<FontAwesome
 									name="graduation-cap"
 									size={14}
-									color={theme === 'light' ? '#6A0DAD' : '#fff'}
+									color={theme === 'light' ? '#6a0dad' : '#fff'}
 									style={styles.detailIcon}
 								/>
-								<Text style={[styles.detailText, { color: textColor }]}>
+								<Text style={[styles.detailText, { color: theme === 'light' ? "#333" : '#fff' }]}>
 									{company?.eligibleBranches ?
 										(company.eligibleBranches.length > 2 ?
 											`${company.eligibleBranches.slice(0, 2).join(', ')}...` :
@@ -373,10 +355,10 @@ const CompanyListings = () => {
 								<FontAwesome
 									name="star"
 									size={14}
-									color={theme === 'light' ? '#6A0DAD' : '#fff'}
+									color={theme === 'light' ? '#6a0dad' : '#fff'}
 									style={styles.detailIcon}
 								/>
-								<Text style={[styles.detailText, { color: textColor }]}>
+								<Text style={[styles.detailText, { color: theme === 'light' ? "#333" : '#fff' }]}>
 									CGPA: {company?.cgpaCriteria || "N/A"}
 								</Text>
 							</View>
@@ -387,10 +369,10 @@ const CompanyListings = () => {
 								<FontAwesome
 									name="users"
 									size={14}
-									color={theme === 'light' ? '#6A0DAD' : '#fff'}
+									color={theme === 'light' ? '#6a0dad' : '#fff'}
 									style={styles.detailIcon}
 								/>
-								<Text style={[styles.detailText, { color: textColor }]}>
+								<Text style={[styles.detailText, { color: theme === 'light' ? "#333" : '#fff' }]}>
 									{company?.eligibleBatches ?
 										company.eligibleBatches.join(', ') :
 										"All Batches"
@@ -402,10 +384,10 @@ const CompanyListings = () => {
 								<FontAwesome
 									name="building"
 									size={14}
-									color={theme === 'light' ? '#6A0DAD' : '#fff'}
+									color={theme === 'light' ? '#6a0dad' : '#fff'}
 									style={styles.detailIcon}
 								/>
-								<Text style={[styles.detailText, { color: textColor }]}>
+								<Text style={[styles.detailText, { color: theme === 'light' ? "#333" : '#fff' }]}>
 									{company?.opportunityType || "N/A"}
 								</Text>
 							</View>
@@ -430,9 +412,7 @@ const CompanyListings = () => {
 							style={[
 								styles.viewDetailsButton,
 								{
-									backgroundColor: theme === 'light'
-										? 'rgba(106, 13, 173, 0.7)'
-										: 'rgba(187, 57, 191, 0.8)'
+									backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.7)' : 'rgba(201, 46, 255, 0.8)'
 								}
 							]}
 							onPress={() => navigateToCompanyDetail(company)}
@@ -440,7 +420,7 @@ const CompanyListings = () => {
 							<Text style={styles.viewDetailsText}>View Details</Text>
 						</TouchableOpacity>
 					</View>
-				</LinearGradient>
+				</View>
 			</TouchableOpacity>
 		);
 	};
@@ -489,37 +469,212 @@ const CompanyListings = () => {
 		);
 	};
 
-	// Background and theme styling
-	const backgroundGradientColors = theme === 'light'
-		? ['#F5F5F5', '#E0E0E0']
-		: ['#2d0e3e', '#1a012c'];
-
-	const statusBarStyle = theme === 'light' ? 'dark-content' : 'light-content';
-	const statusBarBackgroundColor = theme === 'light' ? '#F5F5F5' : '#2d0e3e';
-	const searchBgColor = theme === 'light' ? 'rgba(255, 255, 255, 0.9)' : 'rgba(50, 8, 74, 0.9)';
-	const searchTextColor = theme === 'light' ? '#333' : 'white';
-	const searchPlaceholderColor = theme === 'light' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.5)';
-
 	if (companies.length === 0) {
 		return (
 			<View style={styles.loadingContainer}>
-				<LinearGradient
-					colors={['rgba(138, 35, 135, 0.8)', 'rgba(26, 1, 44, 0.9)']}
-					style={styles.loadingGradient}
-				>
-					<Text style={styles.loadingText}>Loading...</Text>
-				</LinearGradient>
+				<ActivityIndicator size="large" color={theme === 'light' ? '#6A0DAD' : '#f0c5f1'} />
+				<Text style={{ color: theme === 'light' ? '#6A0DAD' : '#f0c5f1', marginTop: 10 }}>
+					Loading Companies details...
+				</Text>
 			</View>
 		);
 	}
 
+	// Add this getDynamicStyles function to your component
+	const getDynamicStyles = (currentTheme) => StyleSheet.create({
+		container: {
+			flex: 1,
+			backgroundColor: currentTheme === 'light' ? "#f0f0f0" : "#1a012c",
+		},
+		header: {
+			flexDirection: 'row',
+			justifyContent: 'space-between',
+			alignItems: 'center',
+			paddingHorizontal: 15,
+			borderBottomWidth: 1,
+			borderBottomColor: currentTheme === 'light' ? "#e0e0e0" : '#390852',
+			marginTop: 25,
+			paddingBottom: 5
+		},
+		headerTitle: {
+			color: currentTheme === 'light' ? "#6a0dad" : '#C92EFF',
+			fontSize: 20,
+			fontWeight: 'bold',
+		},
+		searchBar: {
+			flex: 1,
+			flexDirection: 'row',
+			alignItems: 'center',
+			paddingHorizontal: 15,
+			paddingVertical: 10,
+			borderRadius: 12,
+			marginRight: 10,
+			backgroundColor: currentTheme === 'light' ? "#ffffff" : '#2d0a41',
+		},
+		filterButton: {
+			width: 45,
+			height: 45,
+			borderRadius: 12,
+			justifyContent: 'center',
+			alignItems: 'center',
+			backgroundColor: currentTheme === 'light' ? 'rgba(106, 13, 173, 0.7)' : 'rgba(201, 46, 255, 0.8)',
+		},
+		filterPanel: {
+			borderRadius: 12,
+			marginHorizontal: 15,
+			marginBottom: 15,
+			padding: 15,
+			borderWidth: 1,
+			backgroundColor: currentTheme === 'light' ? "#ffffff" : '#2d0a41',
+			borderColor: currentTheme === 'light' ? "rgba(106, 13, 173, 0.2)" : 'rgba(201, 46, 255, 0.3)',
+		},
+		filterInput: {
+			paddingHorizontal: 12,
+			paddingVertical: 10,
+			borderRadius: 8,
+			borderWidth: 1,
+			fontSize: 14,
+			backgroundColor: currentTheme === 'light' ? "rgba(106, 13, 173, 0.1)" : 'rgba(201, 46, 255, 0.2)',
+			borderColor: currentTheme === 'light' ? "rgba(106, 13, 173, 0.3)" : 'rgba(201, 46, 255, 0.3)',
+			color: currentTheme === 'light' ? "#6a0dad" : '#fff',
+		},
+		companyListContainer: {
+			flex: 1,
+			paddingHorizontal: 15,
+			gap: 10
+		},
+		settingsGroupTitle: {
+			color: currentTheme === 'light' ? "#6a0dad" : '#C92EFF',
+			fontSize: 16,
+			fontWeight: 'bold',
+			marginBottom: 10,
+			paddingLeft: 5,
+		},
+		resetButton: {
+			paddingHorizontal: 20,
+			paddingVertical: 12,
+			borderRadius: 8,
+			backgroundColor: currentTheme === 'light' ? 'rgba(106, 13, 173, 0.7)' : 'rgba(201, 46, 255, 0.8)',
+		},
+	});
+
+	const dynamicStyles = getDynamicStyles(theme)
+
 	return (
-		<SafeAreaView style={[
-			styles.safeArea,
-			{
-				backgroundColor: theme === 'light' ? '#F5F5F5' : '#2d0e3e'
-			}
-		]}>
+		<View style={dynamicStyles.container}>
+			<View style={dynamicStyles.header}>
+				<TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+					<Ionicons name="arrow-back" size={30} color={theme === 'light' ? "#6a0dad" : "#C92EFF"} />
+				</TouchableOpacity>
+				<Text style={dynamicStyles.headerTitle}>Upcoming Companies</Text>
+				<TouchableOpacity
+					style={{ width: 45, height: 45, marginTop: 10 }}
+					onPress={() => router.push('screens/Profile/Profile')}
+				>
+					<Ionicons name="person-circle" size={40} color={theme === 'light' ? "#6a0dad" : "#C92EFF"} />
+				</TouchableOpacity>
+			</View>
+
+			{/* Search Bar */}
+			<View style={styles.searchContainer}>
+				<View style={[dynamicStyles.searchBar]}>
+					<FontAwesome name="search" size={16} color={theme === 'light' ? "#6a0dad" : "#C92EFF"} />
+					<TextInput
+						style={[styles.searchInput, { color: theme === 'light' ? '#333' : '#fff' }]}
+						placeholder="Search companies or roles..."
+						placeholderTextColor={theme === 'light' ? 'rgba(0, 0, 0, 0.5)' : 'rgba(255, 255, 255, 0.5)'}
+						value={searchQuery}
+						onChangeText={setSearchQuery}
+					/>
+					{searchQuery !== '' && (
+						<TouchableOpacity onPress={() => setSearchQuery('')}>
+							<FontAwesome name="times-circle" size={16} color={theme === 'light' ? "#6a0dad" : "#C92EFF"} />
+						</TouchableOpacity>
+					)}
+				</View>
+
+				<TouchableOpacity
+					style={dynamicStyles.filterButton}
+					onPress={() => setShowFilters(!showFilters)}
+				>
+					<FontAwesome name="filter" size={16} color={theme === 'light' ? "#fff" : "#fff"} />
+				</TouchableOpacity>
+			</View>
+
+			{/* Filter Panel */}
+			{showFilters && (
+				<View style={dynamicStyles.filterPanel}>
+					<View style={styles.filterHeader}>
+						<Text style={dynamicStyles.settingsGroupTitle}>Filters</Text>
+						<TouchableOpacity
+							style={styles.clearFiltersButton}
+							onPress={clearFilters}
+						>
+							<Text style={[styles.clearFiltersText, { color: theme === 'light' ? "#6a0dad" : "#C92EFF" }]}>
+								Clear All
+							</Text>
+						</TouchableOpacity>
+					</View>
+
+					<View style={styles.filterContent}>
+						{renderFilterItem('Batch', filterBatch, setFilterBatch, uniqueBatches)}
+						{renderFilterItem('Role', filterRole, setFilterRole, uniqueRoles)}
+
+						<View style={styles.filterItem}>
+							<Text style={[styles.filterLabel, { color: theme === 'light' ? "#6a0dad" : "#fff" }]}>
+								Min CGPA
+							</Text>
+							<TextInput
+								style={dynamicStyles.filterInput}
+								placeholder="Enter CGPA"
+								placeholderTextColor={theme === 'light' ? 'rgba(106, 13, 173, 0.5)' : 'rgba(255, 255, 255, 0.5)'}
+								value={filterCGPA}
+								onChangeText={setFilterCGPA}
+								keyboardType="numeric"
+							/>
+						</View>
+
+						{renderFilterItem('Branch', filterBranch, setFilterBranch, uniqueBranches)}
+						{renderFilterItem('Type', filterOpportunityType, setFilterOpportunityType, uniqueOpportunityTypes)}
+					</View>
+				</View>
+			)}
+
+			{/* Results Count */}
+			<View style={styles.resultsCountContainer}>
+				<Text style={[styles.resultsCount, { color: theme === 'light' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)' }]}>
+					Showing {filteredCompanies.length} of {companies.length} companies
+				</Text>
+			</View>
+
+			{/* Company Cards */}
+			<ScrollView
+				style={dynamicStyles.companyListContainer}
+				contentContainerStyle={styles.companyListContent}
+				showsVerticalScrollIndicator={false}
+			>
+				{filteredCompanies.length > 0 ? (
+					filteredCompanies.map(company => renderCompanyCard(company))
+				) : (
+					<View style={styles.noResultsContainer}>
+						<FontAwesome
+							name="search"
+							size={50}
+							color={theme === 'light' ? 'rgba(106, 13, 173, 0.5)' : '#C92EFF'}
+						/>
+						<Text style={[styles.noResultsText, { color: theme === 'light' ? '#6a0dad' : '#fff' }]}>
+							No companies match your filters
+						</Text>
+						<TouchableOpacity
+							style={dynamicStyles.resetButton}
+							onPress={clearFilters}
+						>
+							<Text style={styles.resetButtonText}>Reset Filters</Text>
+						</TouchableOpacity>
+					</View>
+				)}
+				<View style={styles.scrollPadding} />
+			</ScrollView>
 
 			<CustomAlert
 				visible={alertVisible}
@@ -528,283 +683,7 @@ const CompanyListings = () => {
 				buttons={alertConfig.buttons}
 				onClose={() => setAlertVisible(false)}
 			/>
-
-			<LinearGradient
-				colors={backgroundGradientColors}
-				style={styles.container}
-			>
-				<StatusBar
-					barStyle={statusBarStyle}
-					backgroundColor={statusBarBackgroundColor}
-				/>
-
-				{/* Header with Logo */}
-				<BlurView
-					intensity={theme === 'light' ? 10 : 30}
-					tint={theme === 'light' ? 'light' : 'dark'}
-					style={[
-						styles.headerBlur,
-						{
-							borderBottomColor: theme === 'light'
-								? 'rgba(0,0,0,0.1)'
-								: 'rgba(255, 255, 255, 0.1)'
-						}
-					]}
-				>
-					<View style={styles.header}>
-						<View style={styles.logoContainer}>
-							<Pressable onPress={() => router.back()} style={styles.backButton}>
-								<Ionicons name="arrow-back" size={24} color="#fff" />
-							</Pressable>
-							<Text style={[
-								styles.logoText,
-								{ color: theme === 'light' ? '#6A0DAD' : '#ffffff' }
-							]}>
-								Upcoming Companies
-							</Text>
-						</View>
-						<TouchableOpacity
-							style={styles.profileButton}
-							onPress={() => router.push('screens/Profile/Profile')}
-						>
-							<Ionicons
-								name="person-circle"
-								size={45}
-								color={'#6A0DAD'}
-							/>
-						</TouchableOpacity>
-					</View>
-				</BlurView>
-
-				{/* Search Bar */}
-				<View style={styles.searchContainer}>
-					<View style={[styles.searchBar, { backgroundColor: searchBgColor }]}>
-						<FontAwesome name="search" size={16} color={theme === 'light' ? '#6A0DAD' : '#bb39bf'} />
-						<TextInput
-							style={[styles.searchInput, { color: searchTextColor }]}
-							placeholder="Search companies or roles..."
-							placeholderTextColor={searchPlaceholderColor}
-							value={searchQuery}
-							onChangeText={setSearchQuery}
-						/>
-						{searchQuery !== '' && (
-							<TouchableOpacity onPress={() => setSearchQuery('')}>
-								<FontAwesome name="times-circle" size={16} color={theme === 'light' ? '#6A0DAD' : '#bb39bf'} />
-							</TouchableOpacity>
-						)}
-					</View>
-
-					<TouchableOpacity
-						style={[
-							styles.filterButton,
-							{
-								backgroundColor: theme === 'light'
-									? 'rgba(106, 13, 173, 0.7)'
-									: 'rgba(187, 57, 191, 0.8)'
-							}
-						]}
-						onPress={() => setShowFilters(!showFilters)}
-					>
-						<FontAwesome name="filter" size={16} color="white" />
-					</TouchableOpacity>
-				</View>
-
-				{/* Filter Panel */}
-				{showFilters && (
-					<BlurView
-						intensity={theme === 'light' ? 10 : 20}
-						tint={theme === 'light' ? 'light' : 'dark'}
-						style={[
-							styles.filterPanel,
-							{
-								borderColor: theme === 'light'
-									? 'rgba(106, 13, 173, 0.2)'
-									: 'rgba(187, 57, 191, 0.3)'
-							}
-						]}
-					>
-						<View style={styles.filterHeader}>
-							<Text style={[
-								styles.filterTitle,
-								{ color: theme === 'light' ? '#6A0DAD' : 'white' }
-							]}>
-								Filters
-							</Text>
-							<TouchableOpacity
-								style={styles.clearFiltersButton}
-								onPress={clearFilters}
-							>
-								<Text style={[
-									styles.clearFiltersText,
-									{ color: theme === 'light' ? '#6A0DAD' : '#bb39bf' }
-								]}>
-									Clear All
-								</Text>
-							</TouchableOpacity>
-						</View>
-
-						<View style={styles.filterContent}>
-							{renderFilterItem('Batch', filterBatch, setFilterBatch, uniqueBatches)}
-							{renderFilterItem('Role', filterRole, setFilterRole, uniqueRoles)}
-
-							<View style={styles.filterItem}>
-								<Text style={[styles.filterLabel, { color: theme === 'light' ? '#6A0DAD' : 'white' }]}>
-									Min CGPA
-								</Text>
-								<TextInput
-									style={[
-										styles.filterInput,
-										{
-											backgroundColor: theme === 'light' ? 'rgba(106, 13, 173, 0.1)' : 'rgba(187, 57, 191, 0.2)',
-											borderColor: theme === 'light' ? 'rgba(106, 13, 173, 0.3)' : 'rgba(187, 57, 191, 0.5)',
-											color: theme === 'light' ? '#6A0DAD' : 'white'
-										}
-									]}
-									placeholder="Enter CGPA"
-									placeholderTextColor={theme === 'light' ? 'rgba(106, 13, 173, 0.5)' : 'rgba(255, 255, 255, 0.5)'}
-									value={filterCGPA}
-									onChangeText={setFilterCGPA}
-									keyboardType="numeric"
-								/>
-							</View>
-
-							{renderFilterItem('Branch', filterBranch, setFilterBranch, uniqueBranches)}
-							{renderFilterItem('Type', filterOpportunityType, setFilterOpportunityType, uniqueOpportunityTypes)}
-						</View>
-					</BlurView>
-				)}
-
-				{/* Results Count */}
-				<View style={styles.resultsCountContainer}>
-					<Text style={[
-						styles.resultsCount,
-						{ color: theme === 'light' ? 'rgba(0, 0, 0, 0.7)' : 'rgba(255, 255, 255, 0.7)' }
-					]}>
-						Showing {filteredCompanies.length} of {companies.length} companies
-					</Text>
-				</View>
-
-				{/* Company Cards */}
-				<ScrollView
-					style={styles.companyListContainer}
-					contentContainerStyle={styles.companyListContent}
-					showsVerticalScrollIndicator={false}
-				>
-					{filteredCompanies.length > 0 ? (
-						filteredCompanies.map(company => renderCompanyCard(company))
-					) : (
-						<View style={styles.noResultsContainer}>
-							<FontAwesome
-								name="search"
-								size={50}
-								color={theme === 'light' ? 'rgba(106, 13, 173, 0.5)' : 'rgba(187, 57, 191, 0.5)'}
-							/>
-							<Text style={[
-								styles.noResultsText,
-								{ color: theme === 'light' ? '#6A0DAD' : 'white' }
-							]}>
-								No companies match your filters
-							</Text>
-							<TouchableOpacity
-								style={[
-									styles.resetButton,
-									{
-										backgroundColor: theme === 'light'
-											? 'rgba(106, 13, 173, 0.7)'
-											: 'rgba(187, 57, 191, 0.8)'
-									}
-								]}
-								onPress={clearFilters}
-							>
-								<Text style={styles.resetButtonText}>Reset Filters</Text>
-							</TouchableOpacity>
-						</View>
-					)}
-					<View style={styles.scrollPadding} />
-				</ScrollView>
-
-				{/* Footer with Social Media Icons */}
-				<BlurView
-					intensity={theme === 'light' ? 10 : 20}
-					tint={theme === 'light' ? 'light' : 'dark'}
-					style={[
-						styles.footerBlur,
-						{
-							borderTopColor: theme === 'light'
-								? 'rgba(0,0,0,0.1)'
-								: 'rgba(255, 255, 255, 0.1)'
-						}
-					]}
-				>
-					<View style={styles.footer}>
-						<TouchableOpacity
-							style={[
-								styles.socialButton,
-								{
-									backgroundColor: theme === 'light'
-										? 'rgba(106, 13, 173, 0.2)'
-										: 'rgba(187, 57, 191, 0.3)'
-								}
-							]}
-						>
-							<FontAwesome
-								name="facebook"
-								size={20}
-								color={theme === 'light' ? '#6A0DAD' : '#fff'}
-							/>
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={[
-								styles.socialButton,
-								{
-									backgroundColor: theme === 'light'
-										? 'rgba(106, 13, 173, 0.2)'
-										: 'rgba(187, 57, 191, 0.3)'
-								}
-							]}
-						>
-							<FontAwesome
-								name="twitter"
-								size={20}
-								color={theme === 'light' ? '#6A0DAD' : '#fff'}
-							/>
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={[
-								styles.socialButton,
-								{
-									backgroundColor: theme === 'light'
-										? 'rgba(106, 13, 173, 0.2)'
-										: 'rgba(187, 57, 191, 0.3)'
-								}
-							]}
-						>
-							<FontAwesome
-								name="instagram"
-								size={20}
-								color={theme === 'light' ? '#6A0DAD' : '#fff'}
-							/>
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={[
-								styles.socialButton,
-								{
-									backgroundColor: theme === 'light'
-										? 'rgba(106, 13, 173, 0.2)'
-										: 'rgba(187, 57, 191, 0.3)'
-								}
-							]}
-						>
-							<FontAwesome
-								name="linkedin"
-								size={20}
-								color={theme === 'light' ? '#6A0DAD' : '#fff'}
-							/>
-						</TouchableOpacity>
-					</View>
-				</BlurView>
-			</LinearGradient>
-		</SafeAreaView>
+		</View>
 	);
 };
 
@@ -864,12 +743,24 @@ const styles = StyleSheet.create({
 		marginLeft: 10
 	},
 	profileButton: {
-		// Empty styles for padding
+		width: 45,
+		height: 45,
+		borderRadius: 12,
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	backButton: {
+		width: 45,
+		height: 45,
+		borderRadius: 12,
+		justifyContent: 'center',
+		alignItems: 'center',
 	},
 	searchContainer: {
 		flexDirection: 'row',
 		marginBottom: 15,
 		alignItems: 'center',
+		padding: 10
 	},
 	searchBar: {
 		flex: 1,
@@ -949,6 +840,7 @@ const styles = StyleSheet.create({
 	},
 	resultsCountContainer: {
 		marginBottom: 15,
+		marginLeft: 15
 	},
 	resultsCount: {
 		fontSize: 14,

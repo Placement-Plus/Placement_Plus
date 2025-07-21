@@ -24,7 +24,7 @@ const generateAccesandRefreshToken = async (userId) => {
 }
 
 const registerUser = asyncHandler(async (req, res) => {
-    const { name, email, rollNo, password, mobileNo, branch, semester, CGPA, batch, course, pushToken } = req.body
+    const { name, email, rollNo, password, mobileNo, branch, semester, CGPA, batch, course, pushToken } = req.body    
 
     if ([name, email, rollNo, password, mobileNo, branch, semester, CGPA, batch, course].some((field) => !field))
         throw new ApiError(400, "All fields are required")
@@ -53,7 +53,7 @@ const registerUser = asyncHandler(async (req, res) => {
     if (!resumeLocalPath)
         throw new ApiError(400, "Resume is required")
 
-    const resume = await uploadResumeOnAppwrite(resumeLocalPath, req.user.name)
+    const resume = await uploadResumeOnAppwrite(resumeLocalPath, req?.user?.name)
     if (!resume)
         throw new ApiError(500, "Something went wrong while uploading resume")
 
@@ -70,7 +70,7 @@ const registerUser = asyncHandler(async (req, res) => {
         batch,
         course,
         notificationPushToken: pushToken
-    })
+    })    
 
     const { refreshToken, accessToken } = await generateAccesandRefreshToken(user._id)
 
@@ -250,7 +250,7 @@ const loginUser = asyncHandler(async (req, res) => {
     </div>
 </div>`
 
-    sendEmail(user.email, "Ready to ace your placements? Welcome to Placement Plus!", message)
+    // await sendEmail(user.email, "Ready to ace your placements? Welcome to Placement Plus!", message)
 
     return res.status(200).json(
         new ApiResponse(
@@ -403,11 +403,12 @@ const sendOtpForReset = asyncHandler(async (req, res) => {
     const message = `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: auto; border: none; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
     <!-- Header Section -->
-    <div style="background: linear-gradient(135deg, #4a90e2, #5f6caf); padding: 25px 20px; text-align: center;">
-        <img src="https://img.icons8.com/fluency/64/000000/password-reset.png" alt="Password Reset" style="background: white; padding: 12px; border-radius: 50%; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
+    <div style="background: linear-gradient(135deg, #4a90e2, #5f6caf); padding: 25px 20px; text-align: center; border-radius: 12px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/6195/6195696.png" alt="Password Reset" style="width: 90px; height: 90px; object-fit: contain;">        
         <h1 style="color: white; margin: 15px 0 5px; font-weight: 600; font-size: 24px;">Password Reset</h1>
-        <p style="color: rgba(255,255,255,0.9); margin: 0; font-size: 16px;">Placement Plus Security</p>
+        <p style="color: rgba(255, 255, 255, 0.85); margin: 0; font-size: 16px;">Placement Plus Security</p>
     </div>
+
     
     <!-- Content Section -->
     <div style="background-color: white; padding: 30px; text-align: center;">

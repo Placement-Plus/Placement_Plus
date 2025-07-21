@@ -92,13 +92,13 @@ const menuItems = [
     route: "/screens/UploadResume",
     color: "#F97316",
   },
-  // {
-  //   id: 8,
-  //   title: "AI Assistant",
-  //   icon: chatbot,
-  //   route: "/screens/ChatBot",
-  //   color: "#C92EFF",
-  // },
+  {
+    id: 8,
+    title: "AI Assistant",
+    icon: chatbot,
+    route: "/screens/ChatBot",
+    color: "#C92EFF",
+  },
 ];
 
 const PlacementPlus = () => {
